@@ -1182,7 +1182,7 @@ async function renderEntries() {
         ? `<div style="font-size:0.88rem;font-weight:600;padding:9px 0;">${p.name}</div>`
         : `<select class="form-select" onchange="setParticipant(${ei},${pi},'userId',this.value)" style="font-size:0.85rem;">
             <option value="">회원 선택</option>
-            ${users.map(u=>`<option value="${u.id}" ${p.userId===u.id?'selected':''}>${u.name} (${u.email})</option>`).join('')}
+            ${users.map(u=>`<option value="${u.id}" ${p.userId===u.id?'selected':''}>${u.name}</option>`).join('')}
            </select>`;
       return `<div class="participant-block">
         <div class="participant-header">
@@ -1254,7 +1254,7 @@ function setParticipant(eIdx, pIdx, field, val) {
     entries[eIdx].participants[pIdx].userId = val;
     // name will be set from select option text
     const sel = document.querySelector(`#app-entries .entry-card:nth-child(${eIdx+1}) select`);
-    if (sel) entries[eIdx].participants[pIdx].name = sel.options[sel.selectedIndex]?.text?.split(' (')[0] || '';
+    if (sel) entries[eIdx].participants[pIdx].name = sel.options[sel.selectedIndex]?.text || '';
   } else {
     entries[eIdx].participants[pIdx][field] = val;
   }
@@ -1783,10 +1783,8 @@ async function renderAdminMembers() {
       </div>
       <div class="btn-row">
         ${u.status==='pending'?`<button class="btn btn-success btn-sm" onclick="approveUser('${u.id}')">✅ 승인</button>`:''}
-        ${u.status==='approved'&&u.role!=='admin'?`<button class="btn btn-info btn-sm" onclick="setAdminRole('${u.id}','admin','${u.name}')">🛡️ 관리자</button>`:''}
-        ${u.status==='approved'&&u.role==='admin'&&u.id!=='${ME?.id}'?`<button class="btn btn-ghost btn-sm" onclick="setAdminRole('${u.id}','user','${u.name}')">👤 일반회원</button>`:''}
         <button class="btn btn-outline btn-sm" onclick="openCreditEdit('${u.id}')">💰 크레딧</button>
-        ${u.status!=='rejected'&&u.id!=='${ME?.id}'?`<button class="btn btn-danger btn-sm" onclick="confirmRejectUser('${u.id}','${u.name}')">거절</button>`:''}
+        ${u.status!=='rejected'&&u.id!=='${ME?.id}'?`<button class="btn btn-danger btn-sm" onclick="confirmRejectUser('${u.id}','${u.name}')">🚫 강퇴</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -1825,7 +1823,7 @@ async function setAdminRole(uid, newRole, name) {
 }
 
 function confirmRejectUser(uid, name) {
-  showConfirm({ icon:'🚫', title:'회원을 거절하시겠습니까?', msg:`${name}의 가입 신청을 거절합니다.`, okLabel:'거절', okClass:'btn-danger', onOk:()=>rejectUser(uid,name) });
+  showConfirm({ icon:'🚫', title:`${name}을(를) 강퇴하시겠습니까?`, msg:'강퇴된 회원은 서비스를 이용할 수 없게 됩니다.', okLabel:'강퇴', okClass:'btn-danger', onOk:()=>rejectUser(uid,name) });
 }
 async function rejectUser(uid, name) {
   await sb.from('profiles').update({status:'rejected'}).eq('id',uid);
@@ -1871,24 +1869,38 @@ async function createUser() {
   if (!name || !email) { toast('이름과 이메일을 입력하세요','error'); return; }
   if (!pw || pw.length < 4) { toast('비밀번호는 4자 이상이어야 합니다','error'); return; }
 
-  // Supabase Auth에 계정 생성
+  // ★ signUp 대신 Supabase SQL로 직접 생성 (현재 세션 유지)
+  // profiles에 바로 insert (auth.users는 관리자가 Supabase UI에서 따로 생성)
+  // → 여기서는 profiles만 미리 생성해두고, 실제 Auth 계정은 초대 방식 사용
+  // 실제로는 Supabase Admin API가 필요하므로 signUp 후 즉시 세션 복구
+  const savedSession = await sb.auth.getSession();
+
   const { data: authData, error: authErr } = await sb.auth.signUp({
     email, password: pw,
     options: { data: { name }, emailRedirectTo: APP_URL }
   });
+
+  // ★ 관리자 세션 즉시 복구 (signUp이 세션을 덮어쓰므로)
+  if (savedSession.data.session) {
+    await sb.auth.setSession({
+      access_token:  savedSession.data.session.access_token,
+      refresh_token: savedSession.data.session.refresh_token,
+    });
+  }
+
   if (authErr) { toast('계정 생성 실패: ' + authErr.message, 'error'); return; }
 
   const uid = authData?.user?.id;
   if (!uid) { toast('계정 생성 실패: ID를 받지 못했습니다','error'); return; }
 
-  // profiles 업서트 (트리거가 이미 만들었을 수 있으므로 upsert)
+  // profiles upsert
   const { error: profErr } = await sb.from('profiles').upsert({
-    id: uid, email, name, role, status: 'approved',
+    id: uid, email, name, role: 'user', status: 'approved',
     provider: 'email', credit_total: credit, credit_used: 0, credit_pending: 0
   });
   if (profErr) { toast('프로필 저장 실패: ' + profErr.message, 'error'); return; }
 
-  addLog(`계정 생성: ${email} (${role})`, ME.id);
+  addLog(`계정 생성: ${email}`, ME.id);
   toast(`✅ ${name} 계정 생성 완료`, 'success');
   closeModal('modal-create-user');
   renderAdminMembers();
