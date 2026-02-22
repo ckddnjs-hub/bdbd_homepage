@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 보동보동 갓생지원금 신청 사이트</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #2D6A4F;
+  --primary-light: #52B788;
+  --primary-dark: #1B4332;
+  --accent: #F77F00;
+  --accent2: #FCBF49;
+  --bg: #F0F4F0;
+  --surface: #FFFFFF;
+  --surface2: #F8FAF8;
+  --text: #1A2E1A;
+  --text-muted: #6B7C6B;
+  --border: #D4E4D4;
+  --danger: #E63946;
+  --success: #52B788;
+  --warning: #F77F00;
+  --info: #4895EF;
+  --shadow: 0 2px 16px rgba(45,106,79,0.10);
+  --radius: 16px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── LOADING ── */
+#loading-screen {
+  position: fixed; inset: 0; background: var(--primary-dark);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 9999; transition: opacity 0.5s;
+}
+#loading-screen .logo-big { font-family: 'Gmarket Sans', sans-serif; font-size: 2.5rem; color: var(--accent2); font-weight: 700; margin-bottom: 8px; }
+#loading-screen .sub { color: #B7E4C7; font-size: 1rem; margin-bottom: 32px; }
+.spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--accent2); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── HEADER ── */
+header {
+  background: var(--primary-dark);
+  color: #fff;
+  padding: 0 24px;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.header-logo { font-family: 'Gmarket Sans', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--accent2); cursor: pointer; }
+.header-logo span { color: #B7E4C7; font-weight: 300; font-size: 0.85rem; display: block; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.user-chip { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
+.credit-badge { background: var(--accent); color: #fff; border-radius: 12px; padding: 3px 10px; font-size: 0.8rem; font-weight: 700; }
+.btn-logout { background: rgba(255,255,255,0.15); border: none; color: #fff; border-radius: 8px; padding: 6px 14px; cursor: pointer; font-size: 0.85rem; font-family: inherit; }
+.btn-logout:hover { background: rgba(255,255,255,0.25); }
+
+/* ── SIDEBAR ── */
+.layout { display: flex; min-height: calc(100vh - 64px); }
+nav.sidebar {
+  width: 220px; min-width: 220px; background: var(--primary-dark);
+  padding: 20px 0; display: flex; flex-direction: column; gap: 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 24px; color: #B7E4C7; cursor: pointer;
+  font-size: 0.9rem; border-left: 3px solid transparent;
+  transition: all 0.2s; white-space: nowrap;
+}
+.nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.nav-item.active { background: rgba(82,183,136,0.15); border-left-color: var(--primary-light); color: #fff; font-weight: 500; }
+.nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+.nav-section { font-size: 0.7rem; color: #52B788; letter-spacing: 1px; padding: 14px 24px 4px; text-transform: uppercase; }
+
+/* ── MAIN ── */
+.main-content { flex: 1; padding: 28px; overflow-x: hidden; }
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.25s; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 24px; margin-bottom: 20px;
+  border: 1px solid var(--border);
+}
+.card-title { font-size: 1.1rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+/* ── STATS ── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--surface); border-radius: var(--radius); padding: 20px;
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.stat-label { font-size: 0.78rem; color: var(--text-muted); }
+.stat-value { font-size: 1.6rem; font-weight: 700; font-family: 'Gmarket Sans', sans-serif; color: var(--primary-dark); }
+.stat-value.accent { color: var(--accent); }
+.stat-value.green { color: var(--primary); }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: none; border-radius: 10px; padding: 10px 20px;
+  font-family: inherit; font-size: 0.9rem; font-weight: 500;
+  cursor: pointer; transition: all 0.18s; white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-accent:hover { background: #d4690a; }
+.btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: #c0303b; }
+.btn-sm { padding: 6px 12px; font-size: 0.82rem; border-radius: 7px; }
+.btn-xs { padding: 4px 8px; font-size: 0.76rem; border-radius: 5px; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-info { background: var(--info); color: #fff; }
+.btn-warning { background: var(--warning); color: #fff; }
+
+/* ── FORMS ── */
+.form-group { margin-bottom: 16px; }
+label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+input, select, textarea {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 10px 14px; font-family: inherit; font-size: 0.92rem;
+  background: var(--surface2); color: var(--text); transition: border-color 0.2s;
+  outline: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--primary-light); background: #fff; }
+textarea { resize: vertical; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+.form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+/* ── TABLES ── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+th { background: var(--primary-dark); color: #fff; padding: 10px 14px; text-align: left; font-weight: 500; white-space: nowrap; }
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+tr:hover td { background: var(--surface2); }
+.badge {
+  display: inline-flex; align-items: center; padding: 3px 10px;
+  border-radius: 12px; font-size: 0.78rem; font-weight: 600; white-space: nowrap;
+}
+.badge-pending { background: #FFF3CD; color: #856404; }
+.badge-approved { background: #D1E7DD; color: #155724; }
+.badge-rejected { background: #F8D7DA; color: #842029; }
+.badge-cancelled { background: #E2E3E5; color: #41464B; }
+.badge-mod-approved { background: #CCE5FF; color: #004085; }
+
+/* ── LOGIN PAGE ── */
+.login-page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #1a4a2e 60%, #0f2d1a 100%);
+  position: fixed; inset: 0; z-index: 200;
+}
+.login-box {
+  background: #fff; border-radius: 24px; padding: 48px 40px; max-width: 420px; width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: center;
+}
+.login-logo { font-family: 'Gmarket Sans', sans-serif; font-size: 1.5rem; color: var(--primary); font-weight: 700; margin-bottom: 6px; }
+.login-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 32px; }
+.sso-btn {
+  width: 100%; padding: 14px; border: none; border-radius: 12px;
+  font-family: inherit; font-size: 1rem; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px;
+  font-weight: 500; transition: all 0.2s;
+}
+.sso-naver { background: #03C75A; color: #fff; }
+.sso-naver:hover { background: #02a84a; }
+.sso-google { background: #fff; color: #333; border: 2px solid #ddd; }
+.sso-google:hover { border-color: #aaa; background: #f5f5f5; }
+.login-divider { margin: 20px 0; color: var(--text-muted); font-size: 0.85rem; position: relative; }
+.login-divider::before, .login-divider::after { content:''; position:absolute; top:50%; width:35%; height:1px; background: var(--border); }
+.login-divider::before { left:0; } .login-divider::after { right:0; }
+.admin-login-link { font-size: 0.82rem; color: var(--text-muted); cursor: pointer; margin-top: 12px; }
+.admin-login-link:hover { color: var(--primary); }
+
+/* ── APPLICATION ENTRY ── */
+.app-entry {
+  background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 20px; margin-bottom: 16px; position: relative;
+}
+.app-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.app-entry-title { font-weight: 700; color: var(--primary-dark); font-size: 1rem; }
+
+.participant-row {
+  display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 8px;
+}
+.participant-total { text-align: right; font-weight: 700; color: var(--primary); font-size: 0.95rem; margin-top: 8px; }
+
+/* ── OCR ZONE ── */
+.ocr-zone {
+  border: 2px dashed var(--primary-light); border-radius: var(--radius);
+  padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s;
+  background: rgba(82,183,136,0.04);
+}
+.ocr-zone:hover { border-color: var(--primary); background: rgba(82,183,136,0.08); }
+.ocr-zone img { max-height: 120px; border-radius: 8px; margin-top: 12px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 500; align-items: center; justify-content: center;
+  backdrop-filter: blur(3px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 20px; padding: 32px; max-width: 560px; width: 92%;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.modal-title { font-size: 1.15rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 20px; }
+
+/* ── TOAST ── */
+#toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: var(--primary-dark); color: #fff; border-radius: 12px; padding: 12px 20px;
+  font-size: 0.9rem; min-width: 220px; max-width: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  animation: slideIn 0.3s ease; display: flex; align-items: center; gap: 10px;
+}
+.toast.success { background: var(--primary); }
+.toast.error { background: var(--danger); }
+.toast.warning { background: var(--warning); }
+@keyframes slideIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
+
+/* ── STATUS ── */
+.pending-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 4px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
+
+/* ── CREDIT METER ── */
+.credit-bar-wrap { margin: 8px 0; }
+.credit-bar-bg { background: var(--border); border-radius: 6px; height: 10px; overflow: hidden; }
+.credit-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--primary-light), var(--primary)); transition: width 0.4s; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  nav.sidebar { display: none; }
+  .form-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .participant-row { grid-template-columns: 1fr 1fr; }
+  .participant-row .btn-xs { grid-column: 1/-1; justify-self: end; }
+}
+
+/* ── MISC ── */
+.empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+.empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.page-title { font-family: 'Gmarket Sans', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--primary-dark); }
+.text-muted { color: var(--text-muted); font-size: 0.85rem; }
+.text-right { text-align: right; }
+hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.highlight-box { background: linear-gradient(135deg, rgba(247,127,0,0.08), rgba(252,191,73,0.08)); border: 1px solid rgba(247,127,0,0.2); border-radius: var(--radius-sm); padding: 12px 16px; }
+.flex { display: flex; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.gap-2 { gap: 8px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 16px; }
+.mb-3 { margin-bottom: 16px; }
+.w-full { width: 100%; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="logo-big">🎲 보동보동</div>
+  <div class="sub">갓생지원금 신청 시스템 로딩 중...</div>
+  <div class="spinner"></div>
+</div>
+
+<!-- LOGIN PAGE -->
+<div class="login-page" id="login-page" style="display:none;">
+  <div class="login-box">
+    <div style="font-size:3rem;margin-bottom:12px;">🎲</div>
+    <div class="login-logo">2026 보동보동<br>갓생지원금</div>
+    <div class="login-subtitle">보드게임 & 방탈출 지원금 신청 플랫폼</div>
+
+    <button class="sso-btn sso-naver" onclick="loginSSO('naver')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z"/></svg>
+      네이버로 로그인 / 가입
+    </button>
+    <button class="sso-btn sso-google" onclick="loginSSO('google')">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Google로 로그인 / 가입
+    </button>
+
+    <div class="login-divider">또는</div>
+    <div class="admin-login-link" onclick="showAdminLogin()">🔐 관리자 로그인</div>
+
+    <div id="admin-login-form" style="display:none; margin-top:16px; text-align:left;">
+      <div class="form-group">
+        <label>관리자 아이디</label>
+        <input type="text" id="admin-id" placeholder="admin" value="admin">
+      </div>
+      <div class="form-group">
+        <label>비밀번호</label>
+        <input type="password" id="admin-pw" placeholder="비밀번호" value="4321">
+      </div>
+      <button class="btn btn-primary w-full" onclick="adminLogin()">관리자 로그인</button>
+    </div>
+
+    <div id="sso-simulator" style="display:none; margin-top:16px; text-align:left;">
+      <div style="background:#f0f4f0; border-radius:10px; padding:14px; margin-bottom:12px; font-size:0.83rem; color:#666;">
+        🧪 <b>테스트 모드</b> — 실제 SSO 연동 시 API 키 필요<br>
+        아래에서 계정을 선택하세요
+      </div>
+      <div id="sso-provider-label" style="font-size:0.85rem; color:#888; margin-bottom:8px;"></div>
+      <div id="sso-accounts"></div>
+      <button class="btn btn-outline btn-sm mt-2" onclick="hideSSOSim()">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none;">
+  <header>
+    <div class="header-logo" onclick="navigateTo('dashboard')">
+      🎲 보동보동 갓생지원금
+      <span>2026 보드게임 지원금 신청 시스템</span>
+    </div>
+    <div class="header-right">
+      <div class="user-chip" id="header-user">
+        <span id="header-username">-</span>
+        <span class="credit-badge" id="header-credit">₩0</span>
+      </div>
+      <button class="btn-logout" onclick="logout()">로그아웃</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebar">
+      <!-- dynamically filled -->
+    </nav>
+    <div class="main-content">
+      <!-- DASHBOARD -->
+      <div class="page" id="page-dashboard">
+        <div class="section-header">
+          <div class="page-title">📊 대시보드</div>
+        </div>
+        <div class="stats-grid" id="dash-stats"></div>
+        <div class="card">
+          <div class="card-title">📋 최근 신청 내역</div>
+          <div id="dash-recent"></div>
+        </div>
+      </div>
+
+      <!-- APPLY -->
+      <div class="page" id="page-apply">
+        <div class="section-header">
+          <div class="page-title">✍️ 지원금 신청</div>
+          <button class="btn btn-accent" onclick="addAppEntry()">+ 신청 항목 추가</button>
+        </div>
+        <div class="card">
+          <div class="card-title">💰 내 크레딧 현황</div>
+          <div id="apply-credit-info"></div>
+        </div>
+        <div id="app-entries"></div>
+        <div class="card">
+          <div class="card-title">🏦 환급 계좌 정보</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>예금주</label>
+              <input type="text" id="apply-account-name" placeholder="예금주 성함">
+            </div>
+            <div class="form-group">
+              <label>은행명</label>
+              <select id="apply-bank">
+                <option value="">선택</option>
+                <option>국민은행</option><option>신한은행</option><option>우리은행</option>
+                <option>하나은행</option><option>농협은행</option><option>기업은행</option>
+                <option>카카오뱅크</option><option>토스뱅크</option><option>케이뱅크</option>
+                <option>SC제일은행</option><option>씨티은행</option><option>기타</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>계좌번호</label>
+              <input type="text" id="apply-account-num" placeholder="- 없이 입력">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>비고</label>
+            <textarea id="apply-note" placeholder="기타 전달사항"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <div id="apply-total-display" style="font-size:1rem; font-weight:700; color:var(--primary-dark); align-self:center;">총 신청금액: ₩0</div>
+          <button class="btn btn-outline" onclick="clearApply()">초기화</button>
+          <button class="btn btn-primary" onclick="submitApplication()">📨 신청서 제출</button>
+        </div>
+      </div>
+
+      <!-- MY APPLICATIONS -->
+      <div class="page" id="page-my-apps">
+        <div class="section-header">
+          <div class="page-title">📋 내 신청 내역</div>
+          <button class="btn btn-primary btn-sm" onclick="refreshMyApps()">🔄 새로고침</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap" id="my-apps-table"></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: DASHBOARD -->
+      <div class="page" id="page-admin-dash">
+        <div class="section-header"><div class="page-title">🛡️ 관리자 대시보드</div></div>
+        <div class="stats-grid" id="admin-stats"></div>
+        <div class="card">
+          <div class="card-title">⏳ 대기 중인 신청 <span class="pending-indicator"></span></div>
+          <div id="admin-pending-list"></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: ALL APPLICATIONS -->
+      <div class="page" id="page-admin-apps">
+        <div class="section-header">
+          <div class="page-title">📂 전체 신청 내역 취합</div>
+          <div class="flex gap-2">
+            <input type="text" id="admin-search" placeholder="검색..." style="width:200px" oninput="renderAdminApps()">
+            <select id="admin-filter-status" onchange="renderAdminApps()" style="width:130px">
+              <option value="">전체 상태</option>
+              <option value="pending">대기</option>
+              <option value="approved">승인</option>
+              <option value="rejected">반려</option>
+              <option value="cancelled">취소</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV 내보내기</button>
+          </div>
+        </div>
+        <div class="card"><div class="table-wrap" id="admin-apps-table"></div></div>
+      </div>
+
+      <!-- ADMIN: MEMBERS -->
+      <div class="page" id="page-admin-members">
+        <div class="section-header">
+          <div class="page-title">👥 회원 관리</div>
+          <button class="btn btn-accent" onclick="openCreateUserModal()">+ 계정 생성</button>
+        </div>
+        <div class="card"><div class="table-wrap" id="admin-members-table"></div></div>
+      </div>
+
+      <!-- ADMIN: LOGS -->
+      <div class="page" id="page-admin-logs">
+        <div class="section-header">
+          <div class="page-title">📜 시스템 로그</div>
+          <button class="btn btn-outline btn-sm" onclick="clearLogs()">🗑️ 로그 초기화</button>
+        </div>
+        <div class="card"><div id="logs-list"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- Application Detail Modal -->
+<div class="modal-overlay" id="modal-app-detail">
+  <div class="modal">
+    <div class="modal-title" id="modal-app-title">신청 상세</div>
+    <div id="modal-app-content"></div>
+    <div class="form-actions" id="modal-app-actions"></div>
+  </div>
+</div>
+
+<!-- Admin Edit Modal -->
+<div class="modal-overlay" id="modal-admin-edit">
+  <div class="modal">
+    <div class="modal-title">✏️ 신청 내역 수정 (관리자)</div>
+    <div id="modal-admin-edit-content"></div>
+    <div class="form-actions" id="modal-admin-edit-actions"></div>
+  </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal-overlay" id="modal-create-user">
+  <div class="modal">
+    <div class="modal-title">➕ 계정 생성</div>
+    <div class="form-group">
+      <label>이름</label>
+      <input type="text" id="new-user-name" placeholder="홍길동">
+    </div>
+    <div class="form-group">
+      <label>이메일 (아이디)</label>
+      <input type="email" id="new-user-email" placeholder="user@example.com">
+    </div>
+    <div class="form-group">
+      <label>비밀번호</label>
+      <input type="password" id="new-user-pw" placeholder="비밀번호" value="4321">
+    </div>
+    <div class="form-group">
+      <label>초기 크레딧 (원)</label>
+      <input type="number" id="new-user-credit" value="30000">
+    </div>
+    <div class="form-group">
+      <label>역할</label>
+      <select id="new-user-role">
+        <option value="user">일반 회원</option>
+        <option value="admin">관리자</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-create-user')">취소</button>
+      <button class="btn btn-primary" onclick="createUser()">계정 생성</button>
+    </div>
+  </div>
+</div>
+
+<!-- Credit Edit Modal -->
+<div class="modal-overlay" id="modal-credit-edit">
+  <div class="modal">
+    <div class="modal-title">💰 크레딧 수정</div>
+    <div id="credit-edit-content"></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-credit-edit')">취소</button>
+      <button class="btn btn-primary" onclick="saveCreditEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DATA STORE (localStorage-based)
+// ═══════════════════════════════════════════════════════════
+
+const DB = {
+  get(key) { try { return JSON.parse(localStorage.getItem('bgapp_'+key)) || null; } catch { return null; } },
+  set(key, val) { localStorage.setItem('bgapp_'+key, JSON.stringify(val)); },
+  getUsers() { return this.get('users') || []; },
+  getApps() { return this.get('applications') || []; },
+  getLogs() { return this.get('logs') || []; },
+  saveUsers(u) { this.set('users', u); },
+  saveApps(a) { this.set('applications', a); },
+  addLog(msg, userId) {
+    const logs = this.getLogs();
+    logs.unshift({ id: Date.now(), ts: new Date().toISOString(), msg, userId: userId||'system' });
+    if (logs.length > 500) logs.pop();
+    this.set('logs', logs);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+//  INITIAL SEED DATA
+// ═══════════════════════════════════════════════════════════
+
+function seedData() {
+  if (DB.get('seeded')) return;
+
+  const users = [
+    {
+      id: 'admin',
+      email: 'admin',
+      name: '관리자',
+      role: 'admin',
+      status: 'approved',
+      provider: 'local',
+      password: '4321',
+      creditTotal: 0,
+      creditUsed: 0,
+      creditPending: 0,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'u_test1',
+      email: '__sso@naver.com',
+      name: '테스트유저1',
+      role: 'user',
+      status: 'approved',
+      provider: 'naver',
+      password: '4321',
+      creditTotal: 30000,
+      creditUsed: 0,
+      creditPending: 0,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'u_test2',
+      email: '__sso1@naver.com',
+      name: '테스트유저2',
+      role: 'user',
+      status: 'approved',
+      provider: 'naver',
+      password: '4321',
+      creditTotal: 30000,
+      creditUsed: 0,
+      creditPending: 0,
+      createdAt: new Date().toISOString()
+    }
+  ];
+  DB.saveUsers(users);
+  DB.set('seeded', true);
+  DB.addLog('시스템 초기화 완료 — 기본 계정 생성됨');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════════════════
+
+let currentUser = null;
+
+function loginSSO(provider) {
+  // Show SSO simulator
+  const label = provider === 'naver' ? '네이버 계정' : 'Google 계정';
+  document.getElementById('sso-provider-label').textContent = `${label} 선택:`;
+  const users = DB.getUsers().filter(u => u.provider === provider || u.email.includes('@'));
+  const div = document.getElementById('sso-accounts');
+  div.innerHTML = '';
+
+  // Build account list for this provider
+  const accounts = [];
+  if (provider === 'naver') {
+    accounts.push({ email: '__sso@naver.com', name: '테스트유저1' });
+    accounts.push({ email: '__sso1@naver.com', name: '테스트유저2' });
+    // any approved user with naver
+    DB.getUsers().filter(u=>u.provider==='naver' && !['__sso@naver.com','__sso1@naver.com'].includes(u.email)).forEach(u=>accounts.push({email:u.email,name:u.name}));
+  } else {
+    // google — show existing google users or allow new registration
+    DB.getUsers().filter(u=>u.provider==='google').forEach(u=>accounts.push({email:u.email,name:u.name}));
+    accounts.push({ email: 'new_google@gmail.com', name: '새 구글 계정으로 가입' });
+  }
+
+  // show input + accounts
+  div.innerHTML = `<div style="margin-bottom:8px;">
+    <input type="email" id="sso-email-input" placeholder="이메일 직접 입력" style="margin-bottom:6px;">
+    <input type="password" id="sso-pw-input" placeholder="비밀번호 (기본: 4321)" value="4321" style="margin-bottom:8px;">
+    <button class="btn btn-primary w-full btn-sm" onclick="doSSOLogin('${provider}')">로그인 / 가입</button>
+  </div>
+  <div style="font-size:0.8rem;color:#999;margin:8px 0;">—— 또는 기존 계정 선택 ——</div>`;
+
+  accounts.forEach(a => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-outline w-full btn-sm';
+    btn.style.marginBottom = '6px';
+    btn.textContent = `${a.name} (${a.email})`;
+    btn.onclick = () => {
+      document.getElementById('sso-email-input').value = a.email;
+    };
+    div.appendChild(btn);
+  });
+
+  document.getElementById('sso-simulator').style.display = 'block';
+  document.getElementById('admin-login-form').style.display = 'none';
+}
+
+function doSSOLogin(provider) {
+  const email = document.getElementById('sso-email-input').value.trim();
+  const pw = document.getElementById('sso-pw-input').value;
+  if (!email) { showToast('이메일을 입력하세요', 'error'); return; }
+
+  let users = DB.getUsers();
+  let user = users.find(u => u.email === email);
+
+  if (user) {
+    // existing — check password
+    if (user.password && user.password !== pw) { showToast('비밀번호가 틀렸습니다', 'error'); return; }
+    if (user.status === 'pending') { showToast('관리자 승인 대기 중입니다', 'warning'); return; }
+    if (user.status === 'rejected') { showToast('가입이 거절된 계정입니다', 'error'); return; }
+    doLogin(user);
+  } else {
+    // register new
+    const newUser = {
+      id: 'u_' + Date.now(),
+      email,
+      name: email.split('@')[0],
+      role: 'user',
+      status: 'pending',
+      provider,
+      password: pw || '4321',
+      creditTotal: 0,
+      creditUsed: 0,
+      creditPending: 0,
+      createdAt: new Date().toISOString()
+    };
+    users.push(newUser);
+    DB.saveUsers(users);
+    DB.addLog(`신규 가입 신청: ${email}`, newUser.id);
+    showToast('가입 신청이 완료되었습니다. 관리자 승인을 기다려주세요.', 'warning');
+    hideSSOSim();
+  }
+}
+
+function showAdminLogin() {
+  document.getElementById('admin-login-form').style.display = 'block';
+  document.getElementById('sso-simulator').style.display = 'none';
+}
+
+function hideSSOSim() {
+  document.getElementById('sso-simulator').style.display = 'none';
+}
+
+function adminLogin() {
+  const id = document.getElementById('admin-id').value;
+  const pw = document.getElementById('admin-pw').value;
+  const users = DB.getUsers();
+  const user = users.find(u => (u.email === id || u.id === id) && u.password === pw && u.role === 'admin');
+  if (user) { doLogin(user); }
+  else { showToast('관리자 정보가 틀렸습니다', 'error'); }
+}
+
+function doLogin(user) {
+  currentUser = user;
+  DB.set('session', user.id);
+  DB.addLog(`로그인: ${user.name} (${user.email})`, user.id);
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  initApp();
+  showToast(`안녕하세요, ${user.name}님! 🎲`, 'success');
+}
+
+function logout() {
+  if (currentUser) DB.addLog(`로그아웃: ${currentUser.name}`, currentUser.id);
+  currentUser = null;
+  DB.set('session', null);
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+  hideSSOSim();
+  document.getElementById('admin-login-form').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  APP INIT
+// ═══════════════════════════════════════════════════════════
+
+function initApp() {
+  refreshCurrentUser();
+  buildSidebar();
+  navigateTo(currentUser.role === 'admin' ? 'admin-dash' : 'dashboard');
+}
+
+function refreshCurrentUser() {
+  const users = DB.getUsers();
+  const u = users.find(u => u.id === currentUser.id);
+  if (u) currentUser = u;
+  document.getElementById('header-username').textContent = currentUser.name;
+  const avail = currentUser.creditTotal - currentUser.creditUsed - currentUser.creditPending;
+  document.getElementById('header-credit').textContent = '₩' + fmt(Math.max(0, avail));
+}
+
+function buildSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const isAdmin = currentUser.role === 'admin';
+  const items = isAdmin ? [
+    { id: 'admin-dash', icon: '📊', label: '관리자 대시보드' },
+    { id: 'admin-apps', icon: '📂', label: '전체 신청 취합' },
+    { id: 'admin-members', icon: '👥', label: '회원 관리' },
+    { id: 'admin-logs', icon: '📜', label: '시스템 로그' },
+  ] : [
+    { id: 'dashboard', icon: '🏠', label: '대시보드' },
+    { id: 'apply', icon: '✍️', label: '지원금 신청' },
+    { id: 'my-apps', icon: '📋', label: '내 신청 내역' },
+  ];
+
+  sidebar.innerHTML = items.map(i => `
+    <div class="nav-item" id="nav-${i.id}" onclick="navigateTo('${i.id}')">
+      <span class="icon">${i.icon}</span>${i.label}
+    </div>
+  `).join('');
+}
+
+function navigateTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const p = document.getElementById('page-'+page);
+  if (p) p.classList.add('active');
+  const n = document.getElementById('nav-'+page);
+  if (n) n.classList.add('active');
+
+  // Render page content
+  switch (page) {
+    case 'dashboard': renderDashboard(); break;
+    case 'apply': initApply(); break;
+    case 'my-apps': renderMyApps(); break;
+    case 'admin-dash': renderAdminDash(); break;
+    case 'admin-apps': renderAdminApps(); break;
+    case 'admin-members': renderAdminMembers(); break;
+    case 'admin-logs': renderLogs(); break;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════════════
+
+function renderDashboard() {
+  refreshCurrentUser();
+  const u = currentUser;
+  const avail = Math.max(0, u.creditTotal - u.creditUsed - u.creditPending);
+  const pct = u.creditTotal > 0 ? ((u.creditUsed + u.creditPending) / u.creditTotal * 100).toFixed(0) : 0;
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">총 보유 크레딧</div>
+      <div class="stat-value green">₩${fmt(u.creditTotal)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">사용 가능 크레딧</div>
+      <div class="stat-value accent">₩${fmt(avail)}</div>
+      <div class="credit-bar-wrap">
+        <div class="credit-bar-bg"><div class="credit-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="text-muted">사용+대기: ₩${fmt(u.creditUsed+u.creditPending)} / ${pct}%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">승인 완료</div>
+      <div class="stat-value">₩${fmt(u.creditUsed)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">승인 대기 중</div>
+      <div class="stat-value" style="color:var(--warning)">₩${fmt(u.creditPending)}</div>
+    </div>
+  `;
+
+  const myApps = DB.getApps().filter(a => a.applicantId === u.id).slice(0, 5);
+  if (myApps.length === 0) {
+    document.getElementById('dash-recent').innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>신청 내역이 없습니다</p><button class="btn btn-accent mt-2" onclick="navigateTo('apply')">지금 신청하기</button></div>`;
+  } else {
+    document.getElementById('dash-recent').innerHTML = `<div class="table-wrap">${buildAppsTable(myApps, false)}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  APPLICATION FORM
+// ═══════════════════════════════════════════════════════════
+
+let appEntries = [];
+
+function initApply() {
+  refreshCurrentUser();
+  const u = currentUser;
+  const avail = Math.max(0, u.creditTotal - u.creditUsed - u.creditPending);
+  document.getElementById('apply-credit-info').innerHTML = `
+    <div class="flex-between mb-3">
+      <div>
+        <div class="stat-label">사용 가능 크레딧</div>
+        <div style="font-size:1.6rem;font-weight:700;color:var(--accent);">₩${fmt(avail)}</div>
+      </div>
+      <div class="text-muted">총 ₩${fmt(u.creditTotal)} 중 ₩${fmt(u.creditUsed+u.creditPending)} 사용/대기</div>
+    </div>
+    <div class="credit-bar-wrap"><div class="credit-bar-bg"><div class="credit-bar-fill" style="width:${Math.min(100,(u.creditUsed+u.creditPending)/Math.max(1,u.creditTotal)*100)}%"></div></div></div>
+  `;
+
+  if (appEntries.length === 0) addAppEntry();
+  renderAppEntries();
+}
+
+function addAppEntry() {
+  const users = DB.getUsers().filter(u => u.role === 'user' && u.status === 'approved');
+  appEntries.push({
+    id: Date.now(),
+    date: new Date().toISOString().split('T')[0],
+    category: '',
+    description: '',
+    receipt: null,
+    receiptDataUrl: null,
+    participants: [
+      { userId: currentUser.id, name: currentUser.name, amount: '' }
+    ]
+  });
+  renderAppEntries();
+}
+
+function removeAppEntry(idx) {
+  appEntries.splice(idx, 1);
+  if (appEntries.length === 0) addAppEntry();
+  else renderAppEntries();
+}
+
+function addParticipant(entryIdx) {
+  const users = DB.getUsers().filter(u => u.role === 'user' && u.status === 'approved' && u.id !== currentUser.id);
+  appEntries[entryIdx].participants.push({ userId: '', name: '', amount: '' });
+  renderAppEntries();
+}
+
+function removeParticipant(entryIdx, partIdx) {
+  appEntries[entryIdx].participants.splice(partIdx, 1);
+  renderAppEntries();
+}
+
+function renderAppEntries() {
+  const users = DB.getUsers().filter(u => u.role === 'user' && u.status === 'approved');
+  const container = document.getElementById('app-entries');
+  container.innerHTML = '';
+
+  appEntries.forEach((entry, idx) => {
+    const total = entry.participants.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+    const div = document.createElement('div');
+    div.className = 'app-entry';
+
+    const participantRows = entry.participants.map((p, pi) => {
+      const isSelf = pi === 0;
+      const userSelect = isSelf
+        ? `<input type="text" value="${p.name}" disabled style="background:#eee;">`
+        : `<select onchange="updateParticipant(${idx},${pi},'userId',this.value)">
+            <option value="">회원 선택</option>
+            ${users.filter(u=>u.id!==currentUser.id).map(u=>`<option value="${u.id}" ${p.userId===u.id?'selected':''}>${u.name} (${u.email})</option>`).join('')}
+           </select>`;
+
+      return `<div class="participant-row">
+        <div>
+          <label>${isSelf ? '본인' : '공동이용자'}</label>
+          ${userSelect}
+        </div>
+        <div>
+          <label>신청금액 (원)</label>
+          <input type="number" value="${p.amount}" placeholder="0" onchange="updateParticipant(${idx},${pi},'amount',this.value)" oninput="updateParticipant(${idx},${pi},'amount',this.value)">
+        </div>
+        <div>
+          ${!isSelf ? `<button class="btn btn-danger btn-xs" onclick="removeParticipant(${idx},${pi})">✕</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    div.innerHTML = `
+      <div class="app-entry-header">
+        <div class="app-entry-title">📄 신청 #${idx+1}</div>
+        <div class="flex gap-2">
+          <button class="btn btn-outline btn-sm" onclick="addParticipant(${idx})">👥 공동이용자 추가</button>
+          ${appEntries.length > 1 ? `<button class="btn btn-danger btn-sm" onclick="removeAppEntry(${idx})">삭제</button>` : ''}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>일자</label>
+          <input type="date" value="${entry.date}" onchange="updateEntry(${idx},'date',this.value)">
+        </div>
+        <div class="form-group">
+          <label>신청구분</label>
+          <select onchange="updateEntry(${idx},'category',this.value)">
+            <option value="" ${!entry.category?'selected':''}>선택</option>
+            <option value="boardgame" ${entry.category==='boardgame'?'selected':''}>보드게임</option>
+            <option value="escape" ${entry.category==='escape'?'selected':''}>방탈출</option>
+            <option value="etc" ${entry.category==='etc'?'selected':''}>기타</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>이용내용</label>
+        <input type="text" value="${entry.description}" placeholder="이용 내용을 입력하세요" onchange="updateEntry(${idx},'description',this.value)">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="display:block;margin-bottom:6px;font-size:0.85rem;font-weight:500;color:var(--text-muted);">참가자 및 신청금액</label>
+        ${participantRows}
+        <div class="participant-total">합계: ₩${fmt(total)}</div>
+      </div>
+      <div class="form-group">
+        <label>영수증 첨부</label>
+        <div class="ocr-zone" onclick="triggerFileInput(${idx})">
+          ${entry.receiptDataUrl
+            ? `<img src="${entry.receiptDataUrl}" alt="영수증"><div style="margin-top:8px;font-size:0.82rem;color:var(--text-muted);">클릭하여 변경 | <span style="color:var(--primary)">OCR 분석 완료</span></div>`
+            : `<div>📎 영수증 사진을 클릭하여 첨부<br><small style="color:var(--text-muted)">JPG, PNG, PDF 지원 | OCR 자동 인식</small></div>`}
+          <input type="file" accept="image/*,application/pdf" style="display:none" id="file-${idx}" onchange="handleFile(${idx},this)">
+        </div>
+        ${entry.ocrResult ? `<div class="highlight-box mt-2"><b>🤖 OCR 인식 결과:</b><br>${entry.ocrResult}</div>` : ''}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  updateTotalDisplay();
+}
+
+function updateEntry(idx, field, val) {
+  appEntries[idx][field] = val;
+  if (field !== 'date' && field !== 'description') renderAppEntries();
+  else updateTotalDisplay();
+}
+
+function updateParticipant(entryIdx, partIdx, field, val) {
+  if (field === 'userId') {
+    const users = DB.getUsers();
+    const u = users.find(u => u.id === val);
+    appEntries[entryIdx].participants[partIdx].userId = val;
+    appEntries[entryIdx].participants[partIdx].name = u ? u.name : '';
+  } else {
+    appEntries[entryIdx].participants[partIdx][field] = val;
+  }
+  // re-render only totals
+  updateTotalDisplay();
+  // update total in entry
+  const totalEl = document.querySelectorAll('.participant-total')[entryIdx];
+  if (totalEl) {
+    const total = appEntries[entryIdx].participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
+    totalEl.textContent = '합계: ₩' + fmt(total);
+  }
+}
+
+function updateTotalDisplay() {
+  const total = appEntries.reduce((s, e) =>
+    s + e.participants.reduce((ss, p) => ss + (parseFloat(p.amount)||0), 0), 0);
+  document.getElementById('apply-total-display').textContent = '총 신청금액: ₩' + fmt(total);
+}
+
+function triggerFileInput(idx) {
+  document.getElementById('file-'+idx).click();
+}
+
+function handleFile(idx, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    appEntries[idx].receiptDataUrl = e.target.result;
+    appEntries[idx].receipt = file.name;
+    // Simulate OCR
+    simulateOCR(idx, file.name);
+    renderAppEntries();
+  };
+  reader.readAsDataURL(file);
+}
+
+function simulateOCR(idx, filename) {
+  // Simulate OCR extraction
+  const simulatedData = [
+    '가맹점: 보드게임카페 나비효과\n날짜: ' + new Date().toLocaleDateString() + '\n금액: 18,000원\n품목: 보드게임 2인 입장',
+    '가맹점: 이스케이프 룸 서울\n날짜: ' + new Date().toLocaleDateString() + '\n금액: 28,000원\n품목: 방탈출 2인',
+    '가맹점: 주사위 왕국\n날짜: ' + new Date().toLocaleDateString() + '\n금액: 12,000원\n품목: 보드게임 카페 입장료',
+  ];
+  appEntries[idx].ocrResult = simulatedData[Math.floor(Math.random() * simulatedData.length)];
+  showToast('🤖 OCR 영수증 분석 완료!', 'success');
+}
+
+function clearApply() {
+  appEntries = [];
+  addAppEntry();
+  document.getElementById('apply-account-name').value = '';
+  document.getElementById('apply-bank').value = '';
+  document.getElementById('apply-account-num').value = '';
+  document.getElementById('apply-note').value = '';
+}
+
+function submitApplication() {
+  // Validation
+  for (let i = 0; i < appEntries.length; i++) {
+    const e = appEntries[i];
+    if (!e.date) { showToast(`신청 #${i+1}: 일자를 입력하세요`, 'error'); return; }
+    if (!e.category) { showToast(`신청 #${i+1}: 신청구분을 선택하세요`, 'error'); return; }
+    if (!e.description) { showToast(`신청 #${i+1}: 이용내용을 입력하세요`, 'error'); return; }
+    for (let j = 1; j < e.participants.length; j++) {
+      if (!e.participants[j].userId) { showToast(`신청 #${i+1}: 공동이용자 회원을 선택하세요`, 'error'); return; }
+    }
+  }
+
+  const bank = document.getElementById('apply-bank').value;
+  const accountName = document.getElementById('apply-account-name').value;
+  const accountNum = document.getElementById('apply-account-num').value;
+
+  if (!accountName || !bank || !accountNum) {
+    showToast('환급 계좌 정보를 모두 입력하세요', 'error'); return;
+  }
+
+  // Credit check
+  const users = DB.getUsers();
+  const avail = (u) => Math.max(0, u.creditTotal - u.creditUsed - u.creditPending);
+
+  // Check each participant's credit
+  for (let e of appEntries) {
+    for (let p of e.participants) {
+      const u = users.find(u => u.id === p.userId);
+      if (!u) continue;
+      const amt = parseFloat(p.amount) || 0;
+      if (amt <= 0) continue;
+      // Sum all amounts for this user across entries
+      const totalForUser = appEntries.reduce((s, en) =>
+        s + en.participants.filter(pp=>pp.userId===u.id).reduce((ss,pp)=>ss+(parseFloat(pp.amount)||0),0), 0);
+      if (totalForUser > avail(u)) {
+        showToast(`${u.name}님의 크레딧이 부족합니다 (가능: ₩${fmt(avail(u))})`, 'error');
+        return;
+      }
+    }
+  }
+
+  // Create application record
+  const app = {
+    id: 'app_' + Date.now(),
+    applicantId: currentUser.id,
+    applicantName: currentUser.name,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    bankName: bank,
+    accountName,
+    accountNum,
+    note: document.getElementById('apply-note').value,
+    entries: appEntries.map(e => ({
+      ...e,
+      totalAmount: e.participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0)
+    })),
+    totalAmount: appEntries.reduce((s,e)=>s+e.participants.reduce((ss,p)=>ss+(parseFloat(p.amount)||0),0),0)
+  };
+
+  // Deduct pending credits
+  const updatedUsers = [...users];
+  for (let e of appEntries) {
+    for (let p of e.participants) {
+      const amt = parseFloat(p.amount) || 0;
+      if (amt <= 0 || !p.userId) continue;
+      const uIdx = updatedUsers.findIndex(u => u.id === p.userId);
+      if (uIdx !== -1) updatedUsers[uIdx].creditPending += amt;
+    }
+  }
+  DB.saveUsers(updatedUsers);
+
+  const apps = DB.getApps();
+  apps.push(app);
+  DB.saveApps(apps);
+  DB.addLog(`신청 제출: ${app.id} / 총 ₩${fmt(app.totalAmount)}`, currentUser.id);
+
+  showToast('✅ 신청이 완료되었습니다!', 'success');
+  clearApply();
+  refreshCurrentUser();
+  navigateTo('my-apps');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MY APPLICATIONS
+// ═══════════════════════════════════════════════════════════
+
+function renderMyApps() {
+  refreshCurrentUser();
+  const myApps = DB.getApps().filter(a => a.applicantId === currentUser.id)
+    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const container = document.getElementById('my-apps-table');
+  if (myApps.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>신청 내역이 없습니다</p></div>`;
+    return;
+  }
+
+  container.innerHTML = buildAppsTable(myApps, true, false);
+}
+
+function refreshMyApps() { renderMyApps(); }
+
+function buildAppsTable(apps, showDetail=true, isAdmin=false) {
+  return `<table>
+    <thead><tr>
+      <th>신청일</th><th>신청자</th><th>항목수</th><th>총금액</th><th>상태</th>
+      ${showDetail ? '<th>상세</th>' : ''}
+      ${isAdmin ? '<th>관리</th>' : ''}
+    </tr></thead>
+    <tbody>
+    ${apps.map(a => `<tr>
+      <td>${fmtDate(a.createdAt)}</td>
+      <td>${a.applicantName}</td>
+      <td>${a.entries ? a.entries.length : 0}건</td>
+      <td><b>₩${fmt(a.totalAmount)}</b></td>
+      <td>${statusBadge(a.status)}</td>
+      ${showDetail ? `<td>
+        <button class="btn btn-outline btn-xs" onclick="openAppDetail('${a.id}',${isAdmin})">상세보기</button>
+        ${a.status === 'pending' ? `<button class="btn btn-danger btn-xs" onclick="cancelApp('${a.id}')">취소</button>` : ''}
+      </td>` : ''}
+      ${isAdmin ? `<td>
+        <button class="btn btn-success btn-xs" onclick="approveApp('${a.id}')">승인</button>
+        <button class="btn btn-warning btn-xs" onclick="openAdminEdit('${a.id}')">수정</button>
+        <button class="btn btn-danger btn-xs" onclick="rejectApp('${a.id}')">반려</button>
+      </td>` : ''}
+    </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+function cancelApp(appId) {
+  if (!confirm('신청을 취소하시겠습니까?')) return;
+  const apps = DB.getApps();
+  const idx = apps.findIndex(a => a.id === appId);
+  if (idx === -1) return;
+  const app = apps[idx];
+  if (app.status !== 'pending') { showToast('대기 중인 신청만 취소 가능합니다', 'error'); return; }
+
+  apps[idx].status = 'cancelled';
+  apps[idx].updatedAt = new Date().toISOString();
+  DB.saveApps(apps);
+
+  // Restore pending credits
+  restorePendingCredits(app);
+  DB.addLog(`신청 취소: ${appId}`, currentUser.id);
+  showToast('신청이 취소되었습니다', 'success');
+  refreshCurrentUser();
+  renderMyApps();
+}
+
+function restorePendingCredits(app) {
+  const users = DB.getUsers();
+  for (let e of (app.entries||[])) {
+    for (let p of e.participants) {
+      const amt = parseFloat(p.amount) || 0;
+      if (amt <= 0 || !p.userId) continue;
+      const uIdx = users.findIndex(u => u.id === p.userId);
+      if (uIdx !== -1) users[uIdx].creditPending = Math.max(0, users[uIdx].creditPending - amt);
+    }
+  }
+  DB.saveUsers(users);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  APP DETAIL MODAL
+// ═══════════════════════════════════════════════════════════
+
+function openAppDetail(appId, isAdmin=false) {
+  const app = DB.getApps().find(a => a.id === appId);
+  if (!app) return;
+
+  document.getElementById('modal-app-title').textContent = `신청 상세 — ${fmtDate(app.createdAt)}`;
+
+  const entriesHtml = (app.entries||[]).map((e,i) => `
+    <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid var(--border);">
+      <div style="font-weight:700;margin-bottom:8px;">📄 신청 #${i+1} — ${catLabel(e.category)}</div>
+      <div class="form-row" style="margin-bottom:8px;">
+        <div><b>일자:</b> ${e.date}</div>
+        <div><b>합계:</b> ₩${fmt(e.totalAmount)}</div>
+      </div>
+      <div><b>이용내용:</b> ${e.description}</div>
+      <hr>
+      ${(e.participants||[]).map(p=>`
+        <div class="flex-between" style="margin:4px 0;">
+          <span>${p.name || '(미선택)'}</span>
+          <span><b>₩${fmt(p.amount)}</b></span>
+        </div>
+      `).join('')}
+      ${e.receiptDataUrl ? `<img src="${e.receiptDataUrl}" style="max-width:100%;border-radius:8px;margin-top:8px;">` : ''}
+      ${e.ocrResult ? `<div class="highlight-box mt-2" style="font-size:0.82rem;"><b>OCR:</b><br>${e.ocrResult}</div>` : ''}
+    </div>
+  `).join('');
+
+  document.getElementById('modal-app-content').innerHTML = `
+    <div style="margin-bottom:12px;">
+      <div class="flex-between mb-3">
+        <div><b>신청자:</b> ${app.applicantName}</div>
+        <div>${statusBadge(app.status)}</div>
+      </div>
+      <div><b>계좌:</b> ${app.bankName} ${app.accountNum} (${app.accountName})</div>
+      ${app.note ? `<div><b>비고:</b> ${app.note}</div>` : ''}
+      ${app.adminNote ? `<div><b>관리자 메모:</b> ${app.adminNote}</div>` : ''}
+    </div>
+    ${entriesHtml}
+    <div class="flex-between" style="font-size:1.1rem;font-weight:700;color:var(--primary-dark);">
+      <span>총 신청금액</span><span>₩${fmt(app.totalAmount)}</span>
+    </div>
+  `;
+
+  document.getElementById('modal-app-actions').innerHTML = `
+    <button class="btn btn-outline" onclick="closeModal('modal-app-detail')">닫기</button>
+  `;
+
+  openModal('modal-app-detail');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ADMIN DASHBOARD
+// ═══════════════════════════════════════════════════════════
+
+function renderAdminDash() {
+  const apps = DB.getApps();
+  const users = DB.getUsers().filter(u=>u.role==='user');
+  const pending = apps.filter(a=>a.status==='pending');
+  const approved = apps.filter(a=>a.status==='approved'||a.status==='mod-approved');
+  const totalApproved = approved.reduce((s,a)=>s+a.totalAmount,0);
+
+  document.getElementById('admin-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">전체 회원</div>
+      <div class="stat-value">${users.length}명</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">승인 대기</div>
+      <div class="stat-value accent">${pending.length}건</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">전체 신청</div>
+      <div class="stat-value">${apps.length}건</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">총 지급 금액</div>
+      <div class="stat-value green">₩${fmt(totalApproved)}</div>
+    </div>
+  `;
+
+  const pendingList = document.getElementById('admin-pending-list');
+  if (pending.length === 0) {
+    pendingList.innerHTML = `<div class="empty-state"><div class="icon">✅</div><p>대기 중인 신청이 없습니다</p></div>`;
+    return;
+  }
+
+  pendingList.innerHTML = `<div class="table-wrap">${buildAppsTable(pending.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)), true, true)}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ADMIN: ALL APPS
+// ═══════════════════════════════════════════════════════════
+
+function renderAdminApps() {
+  let apps = DB.getApps();
+  const search = (document.getElementById('admin-search')?.value||'').toLowerCase();
+  const statusFilter = document.getElementById('admin-filter-status')?.value||'';
+
+  if (search) apps = apps.filter(a =>
+    a.applicantName.toLowerCase().includes(search) ||
+    a.id.toLowerCase().includes(search) ||
+    (a.note||'').toLowerCase().includes(search)
+  );
+  if (statusFilter) apps = apps.filter(a => a.status === statusFilter);
+
+  apps.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+
+  const container = document.getElementById('admin-apps-table');
+  if (apps.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>검색 결과가 없습니다</p></div>`;
+    return;
+  }
+
+  container.innerHTML = buildAppsTable(apps, true, true);
+}
+
+function approveApp(appId) {
+  if (!confirm('이 신청을 승인하시겠습니까?')) return;
+  const apps = DB.getApps();
+  const idx = apps.findIndex(a => a.id === appId);
+  if (idx === -1) return;
+  const app = apps[idx];
+
+  const prevStatus = app.status;
+  apps[idx].status = prevStatus === 'pending' ? 'approved' : 'mod-approved';
+  apps[idx].updatedAt = new Date().toISOString();
+  apps[idx].approvedBy = currentUser.id;
+  apps[idx].approvedAt = new Date().toISOString();
+  DB.saveApps(apps);
+
+  // Move pending -> used
+  const users = DB.getUsers();
+  for (let e of (app.entries||[])) {
+    for (let p of e.participants) {
+      const amt = parseFloat(p.amount)||0;
+      if (amt<=0||!p.userId) continue;
+      const uIdx = users.findIndex(u=>u.id===p.userId);
+      if (uIdx!==-1) {
+        users[uIdx].creditPending = Math.max(0, users[uIdx].creditPending - amt);
+        users[uIdx].creditUsed += amt;
+      }
+    }
+  }
+  DB.saveUsers(users);
+  DB.addLog(`신청 승인: ${appId} / ₩${fmt(app.totalAmount)}`, currentUser.id);
+  showToast('✅ 승인 완료!', 'success');
+  closeModal('modal-app-detail');
+  renderAdminDash();
+}
+
+function rejectApp(appId) {
+  if (!confirm('이 신청을 반려하시겠습니까?')) return;
+  const apps = DB.getApps();
+  const idx = apps.findIndex(a => a.id === appId);
+  if (idx === -1) return;
+  const app = apps[idx];
+
+  apps[idx].status = 'rejected';
+  apps[idx].updatedAt = new Date().toISOString();
+  DB.saveApps(apps);
+
+  // Restore pending credits
+  restorePendingCredits(app);
+  DB.addLog(`신청 반려: ${appId}`, currentUser.id);
+  showToast('반려 처리되었습니다', 'warning');
+  closeModal('modal-app-detail');
+  renderAdminDash();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ADMIN EDIT
+// ═══════════════════════════════════════════════════════════
+
+let editingAppId = null;
+
+function openAdminEdit(appId) {
+  editingAppId = appId;
+  const app = DB.getApps().find(a => a.id === appId);
+  if (!app) return;
+
+  const content = document.getElementById('modal-admin-edit-content');
+  const entriesHtml = (app.entries||[]).map((e,i) => `
+    <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:12px;">
+      <b>신청 #${i+1}</b>
+      <div class="form-row mt-2">
+        <div class="form-group">
+          <label>일자</label>
+          <input type="date" id="edit-date-${i}" value="${e.date}">
+        </div>
+        <div class="form-group">
+          <label>구분</label>
+          <select id="edit-cat-${i}">
+            <option value="boardgame" ${e.category==='boardgame'?'selected':''}>보드게임</option>
+            <option value="escape" ${e.category==='escape'?'selected':''}>방탈출</option>
+            <option value="etc" ${e.category==='etc'?'selected':''}>기타</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>이용내용</label>
+        <input type="text" id="edit-desc-${i}" value="${e.description}">
+      </div>
+      ${(e.participants||[]).map((p,pi)=>`
+        <div class="form-row">
+          <div><label>${pi===0?'본인':'공동이용자'}: ${p.name}</label></div>
+          <div class="form-group">
+            <label>신청금액</label>
+            <input type="number" id="edit-amt-${i}-${pi}" value="${p.amount}">
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+
+  content.innerHTML = `
+    <div class="form-group">
+      <label>은행</label>
+      <input type="text" id="edit-bank" value="${app.bankName}">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>예금주</label>
+        <input type="text" id="edit-acname" value="${app.accountName}">
+      </div>
+      <div class="form-group">
+        <label>계좌번호</label>
+        <input type="text" id="edit-acnum" value="${app.accountNum}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>관리자 메모</label>
+      <textarea id="edit-admin-note">${app.adminNote||''}</textarea>
+    </div>
+    ${entriesHtml}
+  `;
+
+  document.getElementById('modal-admin-edit-actions').innerHTML = `
+    <button class="btn btn-outline" onclick="closeModal('modal-admin-edit')">취소</button>
+    <button class="btn btn-warning" onclick="saveAdminEdit(false)">수정 저장</button>
+    <button class="btn btn-success" onclick="saveAdminEdit(true)">수정 후 승인</button>
+  `;
+
+  openModal('modal-admin-edit');
+}
+
+function saveAdminEdit(andApprove) {
+  const apps = DB.getApps();
+  const idx = apps.findIndex(a => a.id === editingAppId);
+  if (idx === -1) return;
+  const app = apps[idx];
+  const prevStatus = app.status;
+
+  app.bankName = document.getElementById('edit-bank').value;
+  app.accountName = document.getElementById('edit-acname').value;
+  app.accountNum = document.getElementById('edit-acnum').value;
+  app.adminNote = document.getElementById('edit-admin-note').value;
+
+  let newTotal = 0;
+  app.entries.forEach((e, i) => {
+    e.date = document.getElementById(`edit-date-${i}`)?.value || e.date;
+    e.category = document.getElementById(`edit-cat-${i}`)?.value || e.category;
+    e.description = document.getElementById(`edit-desc-${i}`)?.value || e.description;
+    e.participants.forEach((p, pi) => {
+      const newAmt = parseFloat(document.getElementById(`edit-amt-${i}-${pi}`)?.value) || 0;
+      // Update pending difference if still pending
+      if (app.status === 'pending') {
+        const diff = newAmt - (parseFloat(p.amount)||0);
+        if (p.userId && diff !== 0) {
+          const users = DB.getUsers();
+          const uIdx = users.findIndex(u=>u.id===p.userId);
+          if (uIdx !== -1) { users[uIdx].creditPending = Math.max(0, users[uIdx].creditPending + diff); DB.saveUsers(users); }
+        }
+      }
+      p.amount = newAmt;
+    });
+    e.totalAmount = e.participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
+    newTotal += e.totalAmount;
+  });
+  app.totalAmount = newTotal;
+
+  if (andApprove) {
+    app.status = 'mod-approved';
+    app.approvedBy = currentUser.id;
+    app.approvedAt = new Date().toISOString();
+    // Move pending -> used
+    const users = DB.getUsers();
+    for (let e of app.entries) {
+      for (let p of e.participants) {
+        const amt = parseFloat(p.amount)||0;
+        if (amt<=0||!p.userId) continue;
+        const uIdx = users.findIndex(u=>u.id===p.userId);
+        if (uIdx!==-1) {
+          users[uIdx].creditPending = Math.max(0, users[uIdx].creditPending - amt);
+          users[uIdx].creditUsed += amt;
+        }
+      }
+    }
+    DB.saveUsers(users);
+  }
+
+  app.updatedAt = new Date().toISOString();
+  apps[idx] = app;
+  DB.saveApps(apps);
+  DB.addLog(`신청 수정${andApprove?'+승인':''}: ${editingAppId}`, currentUser.id);
+  showToast(andApprove ? '✅ 수정 후 승인 완료' : '✏️ 수정 완료', 'success');
+  closeModal('modal-admin-edit');
+  renderAdminDash();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ADMIN MEMBERS
+// ═══════════════════════════════════════════════════════════
+
+function renderAdminMembers() {
+  const users = DB.getUsers();
+  const container = document.getElementById('admin-members-table');
+
+  container.innerHTML = `<table>
+    <thead><tr>
+      <th>이름</th><th>이메일</th><th>가입방법</th><th>상태</th>
+      <th>총크레딧</th><th>사용</th><th>대기</th><th>가용</th><th>관리</th>
+    </tr></thead>
+    <tbody>
+    ${users.map(u => {
+      const avail = Math.max(0, u.creditTotal - u.creditUsed - u.creditPending);
+      return `<tr>
+        <td><b>${u.name}</b>${u.role==='admin'?'<span style="margin-left:4px;font-size:0.75rem;background:var(--primary-dark);color:#fff;border-radius:4px;padding:1px 5px;">관리자</span>':''}</td>
+        <td>${u.email}</td>
+        <td>${u.provider||'local'}</td>
+        <td>${u.status==='approved'?'<span style="color:var(--success);">✅ 승인</span>':u.status==='pending'?'<span style="color:var(--warning);">⏳ 대기</span>':'<span style="color:var(--danger);">❌ 거절</span>'}</td>
+        <td>₩${fmt(u.creditTotal)}</td>
+        <td>₩${fmt(u.creditUsed)}</td>
+        <td>₩${fmt(u.creditPending)}</td>
+        <td><b>₩${fmt(avail)}</b></td>
+        <td>
+          ${u.status==='pending'?`<button class="btn btn-success btn-xs" onclick="approveUser('${u.id}')">승인</button>`:''}
+          <button class="btn btn-info btn-xs" onclick="openCreditEdit('${u.id}')">크레딧</button>
+          ${u.status!=='rejected'&&u.role!=='admin'?`<button class="btn btn-danger btn-xs" onclick="rejectUser('${u.id}')">거절</button>`:''}
+        </td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table>`;
+}
+
+function approveUser(userId) {
+  const users = DB.getUsers();
+  const idx = users.findIndex(u=>u.id===userId);
+  if (idx===-1) return;
+  users[idx].status = 'approved';
+  users[idx].creditTotal = 30000; // grant initial credit
+  DB.saveUsers(users);
+  DB.addLog(`회원 승인 + 크레딧 ₩30,000 부여: ${users[idx].email}`, currentUser.id);
+  showToast(`${users[idx].name} 승인 완료! 크레딧 ₩30,000 지급`, 'success');
+  renderAdminMembers();
+}
+
+function rejectUser(userId) {
+  const users = DB.getUsers();
+  const idx = users.findIndex(u=>u.id===userId);
+  if (idx===-1) return;
+  if (!confirm(`${users[idx].name}을 거절하시겠습니까?`)) return;
+  users[idx].status = 'rejected';
+  DB.saveUsers(users);
+  DB.addLog(`회원 거절: ${users[idx].email}`, currentUser.id);
+  showToast('거절 처리되었습니다', 'warning');
+  renderAdminMembers();
+}
+
+let editingUserId = null;
+function openCreditEdit(userId) {
+  editingUserId = userId;
+  const users = DB.getUsers();
+  const u = users.find(u=>u.id===userId);
+  if (!u) return;
+  document.getElementById('credit-edit-content').innerHTML = `
+    <div style="margin-bottom:14px;"><b>${u.name}</b> (${u.email})</div>
+    <div class="form-group">
+      <label>총 크레딧 (원)</label>
+      <input type="number" id="credit-total-input" value="${u.creditTotal}">
+    </div>
+    <div class="form-group">
+      <label>사용 크레딧 (원) — 관리자 조정용</label>
+      <input type="number" id="credit-used-input" value="${u.creditUsed}">
+    </div>
+    <div class="text-muted">대기 중: ₩${fmt(u.creditPending)} (신청 취소/반려 시 자동 복구)</div>
+  `;
+  openModal('modal-credit-edit');
+}
+
+function saveCreditEdit() {
+  const users = DB.getUsers();
+  const idx = users.findIndex(u=>u.id===editingUserId);
+  if (idx===-1) return;
+  users[idx].creditTotal = parseFloat(document.getElementById('credit-total-input').value)||0;
+  users[idx].creditUsed = parseFloat(document.getElementById('credit-used-input').value)||0;
+  DB.saveUsers(users);
+  DB.addLog(`크레딧 수정: ${users[idx].email} → 총 ₩${fmt(users[idx].creditTotal)}`, currentUser.id);
+  showToast('크레딧 수정 완료', 'success');
+  closeModal('modal-credit-edit');
+  renderAdminMembers();
+}
+
+function openCreateUserModal() {
+  document.getElementById('new-user-name').value = '';
+  document.getElementById('new-user-email').value = '';
+  document.getElementById('new-user-pw').value = '4321';
+  document.getElementById('new-user-credit').value = '30000';
+  document.getElementById('new-user-role').value = 'user';
+  openModal('modal-create-user');
+}
+
+function createUser() {
+  const name = document.getElementById('new-user-name').value.trim();
+  const email = document.getElementById('new-user-email').value.trim();
+  const pw = document.getElementById('new-user-pw').value;
+  const credit = parseFloat(document.getElementById('new-user-credit').value)||0;
+  const role = document.getElementById('new-user-role').value;
+
+  if (!name||!email) { showToast('이름과 이메일을 입력하세요', 'error'); return; }
+
+  const users = DB.getUsers();
+  if (users.find(u=>u.email===email)) { showToast('이미 존재하는 이메일입니다', 'error'); return; }
+
+  const newUser = {
+    id: 'u_' + Date.now(),
+    email, name, role,
+    status: 'approved',
+    provider: 'admin',
+    password: pw,
+    creditTotal: credit,
+    creditUsed: 0,
+    creditPending: 0,
+    createdAt: new Date().toISOString()
+  };
+  users.push(newUser);
+  DB.saveUsers(users);
+  DB.addLog(`관리자가 계정 생성: ${email}`, currentUser.id);
+  showToast(`${name} 계정 생성 완료`, 'success');
+  closeModal('modal-create-user');
+  renderAdminMembers();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LOGS
+// ═══════════════════════════════════════════════════════════
+
+function renderLogs() {
+  const logs = DB.getLogs();
+  const container = document.getElementById('logs-list');
+  if (logs.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>로그가 없습니다</p></div>`;
+    return;
+  }
+  container.innerHTML = logs.map(l => `
+    <div style="display:flex;gap:12px;padding:8px 4px;border-bottom:1px solid var(--border);font-size:0.85rem;">
+      <div style="color:var(--text-muted);white-space:nowrap;min-width:130px;">${fmtDate(l.ts, true)}</div>
+      <div style="color:var(--text-muted);min-width:80px;">${l.userId||'system'}</div>
+      <div>${l.msg}</div>
+    </div>
+  `).join('');
+}
+
+function clearLogs() {
+  if (!confirm('모든 로그를 삭제하시겠습니까?')) return;
+  DB.set('logs', []);
+  DB.addLog('로그 초기화', currentUser.id);
+  renderLogs();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CSV EXPORT
+// ═══════════════════════════════════════════════════════════
+
+function exportCSV() {
+  const apps = DB.getApps();
+  const rows = [['신청ID','신청자','신청일','총금액','상태','은행','계좌번호','예금주','비고']];
+  apps.forEach(a => {
+    rows.push([a.id, a.applicantName, fmtDate(a.createdAt), a.totalAmount, a.status, a.bankName, a.accountNum, a.accountName, a.note||'']);
+  });
+  const csv = rows.map(r => r.map(c => `"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = '신청취합_' + new Date().toLocaleDateString() + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  DB.addLog('CSV 내보내기', currentUser.id);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MODAL HELPERS
+// ═══════════════════════════════════════════════════════════
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ═══════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════
+
+function showToast(msg, type='') {
+  const container = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = `<span>${msg}</span>`;
+  container.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(20px)'; t.style.transition = '0.3s'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════
+
+function fmt(n) { return Number(n||0).toLocaleString('ko-KR'); }
+function fmtDate(iso, withTime=false) {
+  if (!iso) return '-';
+  const d = new Date(iso);
+  const date = d.toLocaleDateString('ko-KR');
+  const time = d.toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
+  return withTime ? `${date} ${time}` : date;
+}
+function statusBadge(s) {
+  const map = {
+    pending: ['대기', 'badge-pending'],
+    approved: ['승인', 'badge-approved'],
+    rejected: ['반려', 'badge-rejected'],
+    cancelled: ['취소', 'badge-cancelled'],
+    'mod-approved': ['수정승인', 'badge-mod-approved'],
+  };
+  const [label, cls] = map[s] || [s, ''];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+function catLabel(c) {
+  return {boardgame:'보드게임',escape:'방탈출',etc:'기타'}[c] || c || '-';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════
+
+window.addEventListener('DOMContentLoaded', () => {
+  seedData();
+
+  setTimeout(() => {
+    document.getElementById('loading-screen').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('loading-screen').style.display = 'none';
+
+      // Check session
+      const sessionId = DB.get('session');
+      if (sessionId) {
+        const user = DB.getUsers().find(u => u.id === sessionId);
+        if (user && user.status === 'approved') {
+          currentUser = user;
+          document.getElementById('login-page').style.display = 'none';
+          document.getElementById('app').style.display = 'block';
+          initApp();
+          return;
+        }
+      }
+      document.getElementById('login-page').style.display = 'flex';
+    }, 500);
+  }, 1500);
+});
+</script>
+</body>
+</html>
