@@ -2,1481 +2,1686 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026년 보동보동 갓생지원금 신청 사이트</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>2026 보동보동 갓생지원금</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+<!-- Supabase JS Client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+/* ═══════════════════════════════════════
+   CSS VARIABLES — BLUE THEME
+═══════════════════════════════════════ */
 :root {
-  --primary: #2D6A4F;
-  --primary-light: #52B788;
-  --primary-dark: #1B4332;
-  --accent: #F77F00;
-  --accent2: #FCBF49;
-  --bg: #F0F4F0;
+  --primary: #1A56DB;
+  --primary-light: #3F83F8;
+  --primary-dark: #1e3a8a;
+  --primary-darker: #172554;
+  --accent: #F59E0B;
+  --accent2: #FCD34D;
+  --kakao: #FEE500;
+  --kakao-text: #000000;
+  --bg: #EFF6FF;
   --surface: #FFFFFF;
-  --surface2: #F8FAF8;
-  --text: #1A2E1A;
-  --text-muted: #6B7C6B;
-  --border: #D4E4D4;
-  --danger: #E63946;
-  --success: #52B788;
-  --warning: #F77F00;
-  --info: #4895EF;
-  --shadow: 0 2px 16px rgba(45,106,79,0.10);
+  --surface2: #F0F7FF;
+  --text: #1E3A5F;
+  --text-muted: #64748B;
+  --border: #BFDBFE;
+  --border-strong: #93C5FD;
+  --danger: #EF4444;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --info: #3B82F6;
+  --shadow: 0 4px 20px rgba(26,86,219,0.10);
+  --shadow-lg: 0 8px 32px rgba(26,86,219,0.15);
   --radius: 16px;
-  --radius-sm: 8px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
+/* ═══════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════ */
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
 body {
   font-family: 'Noto Sans KR', sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
-/* ── LOADING ── */
+/* ═══════════════════════════════════════
+   LOADING
+═══════════════════════════════════════ */
 #loading-screen {
-  position: fixed; inset: 0; background: var(--primary-dark);
+  position: fixed; inset: 0;
+  background: linear-gradient(160deg, var(--primary-darker) 0%, var(--primary-dark) 60%, #1e40af 100%);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   z-index: 9999; transition: opacity 0.5s;
 }
-#loading-screen .logo-big { font-family: 'Gmarket Sans', sans-serif; font-size: 2.5rem; color: var(--accent2); font-weight: 700; margin-bottom: 8px; }
-#loading-screen .sub { color: #B7E4C7; font-size: 1rem; margin-bottom: 32px; }
-.spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--accent2); border-radius: 50%; animation: spin 0.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.loading-dice { font-size: 4rem; animation: bounce 1s infinite; }
+@keyframes bounce { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-12px); } }
+.loading-title { font-family:'Gmarket Sans',sans-serif; font-size:1.6rem; color:var(--accent2); font-weight:700; margin:12px 0 4px; }
+.loading-sub { color:#93C5FD; font-size:0.9rem; margin-bottom:28px; }
+.spinner { width:36px; height:36px; border:3px solid rgba(255,255,255,0.2); border-top-color:var(--accent2); border-radius:50%; animation:spin 0.8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ═══════════════════════════════════════
+   LOGIN PAGE — MOBILE FIRST
+═══════════════════════════════════════ */
+#login-page {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: linear-gradient(160deg, var(--primary-darker) 0%, var(--primary-dark) 55%, #1d4ed8 100%);
+  overflow-y: auto;
+}
+.login-container {
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 24px 20px;
+}
+.login-hero { text-align: center; margin-bottom: 32px; }
+.login-emoji { font-size: 4rem; display: block; margin-bottom: 12px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
+.login-title { font-family:'Gmarket Sans',sans-serif; font-size:1.7rem; color:#FCD34D; font-weight:700; line-height:1.3; margin-bottom:8px; }
+.login-subtitle { color:#93C5FD; font-size:0.9rem; }
+.login-card {
+  background: #fff; border-radius: 24px; padding: 28px 24px; width: 100%; max-width: 400px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+}
+.login-tab-row { display: flex; gap: 0; margin-bottom: 20px; background: var(--bg); border-radius: 10px; padding: 3px; }
+.login-tab {
+  flex: 1; text-align: center; padding: 9px 6px; border-radius: 8px; cursor: pointer;
+  font-size: 0.85rem; font-weight: 500; color: var(--text-muted); transition: all 0.2s;
+  border: none; background: transparent; font-family: inherit;
+}
+.login-tab.active { background: #fff; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-weight: 700; }
+
+/* LOGIN PANEL */
+.login-panel { display: none; }
+.login-panel.active { display: block; }
+.sso-btn {
+  width: 100%; padding: 14px 16px; border: none; border-radius: 12px;
+  font-family: inherit; font-size: 0.95rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-bottom: 10px; font-weight: 600; transition: all 0.2s; letter-spacing: -0.2px;
+}
+.sso-kakao { 
+  background: var(--kakao); 
+  color: var(--kakao-text); 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.sso-kakao:hover, .sso-kakao:active { 
+  background: #FDDC00; 
+  transform: translateY(-1px); 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.form-divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; }
+.form-divider::before, .form-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.form-divider span { font-size:0.8rem; color:var(--text-muted); white-space:nowrap; }
+
+/* SIGNUP PANEL */
+.signup-panel-wrap { display: none; }
+.signup-panel-wrap.active { display: block; }
+.signup-intro { text-align: center; font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px; }
+
+/* GENERAL INPUT FORM (login) */
+.fl-input { position: relative; margin-bottom: 14px; }
+.fl-input input {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 14px 14px 6px; font-family: inherit; font-size: 0.95rem;
+  background: var(--surface2); color: var(--text); outline: none; transition: border-color 0.2s;
+}
+.fl-input input:focus { border-color: var(--primary-light); background: #fff; }
+.fl-input label {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 0.9rem; color: var(--text-muted); pointer-events: none; transition: all 0.15s;
+}
+.fl-input input:focus ~ label,
+.fl-input input:not(:placeholder-shown) ~ label {
+  top: 8px; transform: none; font-size: 0.72rem; color: var(--primary);
+}
+
+/* ═══════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════ */
+#app { display: none; min-height: 100vh; flex-direction: column; }
 
 /* ── HEADER ── */
-header {
-  background: var(--primary-dark);
-  color: #fff;
-  padding: 0 24px;
-  height: 64px;
-  display: flex; align-items: center; justify-content: space-between;
-  position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+.app-header {
+  background: linear-gradient(135deg, var(--primary-darker) 0%, var(--primary-dark) 100%);
+  padding: 0 16px; height: 56px; display: flex; align-items: center;
+  justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
 }
-.header-logo { font-family: 'Gmarket Sans', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--accent2); cursor: pointer; }
-.header-logo span { color: #B7E4C7; font-weight: 300; font-size: 0.85rem; display: block; }
-.header-right { display: flex; align-items: center; gap: 12px; }
-.user-chip { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
-.credit-badge { background: var(--accent); color: #fff; border-radius: 12px; padding: 3px 10px; font-size: 0.8rem; font-weight: 700; }
-.btn-logout { background: rgba(255,255,255,0.15); border: none; color: #fff; border-radius: 8px; padding: 6px 14px; cursor: pointer; font-size: 0.85rem; font-family: inherit; }
-.btn-logout:hover { background: rgba(255,255,255,0.25); }
+.app-header-logo {
+  font-family: 'Gmarket Sans', sans-serif; font-size: 1rem; color: #FCD34D;
+  font-weight: 700; cursor: pointer; line-height: 1.2;
+}
+.app-header-logo small { display:block; color:#93C5FD; font-size:0.7rem; font-weight:300; }
+.header-user { display: flex; align-items: center; gap: 8px; }
+.header-chip { background: rgba(255,255,255,0.12); border-radius: 20px; padding: 5px 12px; font-size: 0.82rem; color: #E0F2FE; display: flex; align-items: center; gap: 6px; }
+.credit-pill { background: var(--accent); color: #fff; border-radius: 10px; padding: 2px 9px; font-size: 0.78rem; font-weight: 700; }
+.btn-icon { background: rgba(255,255,255,0.12); border: none; color: #fff; border-radius: 8px; padding: 7px 10px; cursor: pointer; font-size: 1rem; line-height: 1; }
 
-/* ── SIDEBAR ── */
-.layout { display: flex; min-height: calc(100vh - 64px); }
-nav.sidebar {
-  width: 220px; min-width: 220px; background: var(--primary-dark);
-  padding: 20px 0; display: flex; flex-direction: column; gap: 4px;
+/* ── BOTTOM NAV (mobile) ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: var(--primary-darker); border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex; padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
 }
-.nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 24px; color: #B7E4C7; cursor: pointer;
-  font-size: 0.9rem; border-left: 3px solid transparent;
-  transition: all 0.2s; white-space: nowrap;
+.bottom-nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 8px 4px; cursor: pointer; border: none; background: none;
+  color: #64748B; font-family: inherit; font-size: 0.65rem; gap: 3px; transition: all 0.2s;
+  border-top: 2px solid transparent;
 }
-.nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
-.nav-item.active { background: rgba(82,183,136,0.15); border-left-color: var(--primary-light); color: #fff; font-weight: 500; }
-.nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; }
-.nav-section { font-size: 0.7rem; color: #52B788; letter-spacing: 1px; padding: 14px 24px 4px; text-transform: uppercase; }
+.bottom-nav-item .nav-icon { font-size: 1.3rem; line-height: 1; }
+.bottom-nav-item.active { color: var(--accent2); border-top-color: var(--accent2); }
+.bottom-nav-item span { white-space: nowrap; }
 
-/* ── MAIN ── */
-.main-content { flex: 1; padding: 28px; overflow-x: hidden; }
+/* ── MAIN SCROLL AREA ── */
+.app-body { flex: 1; overflow-y: auto; padding: 16px 16px 80px; }
+
+/* ═══════════════════════════════════════
+   PAGES
+═══════════════════════════════════════ */
 .page { display: none; }
-.page.active { display: block; animation: fadeIn 0.25s; }
-@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+.page.active { display: block; animation: fadeUp 0.25s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 
-/* ── CARDS ── */
+/* ═══════════════════════════════════════
+   COMPONENTS
+═══════════════════════════════════════ */
+.page-header { margin-bottom: 16px; }
+.page-title { font-family:'Gmarket Sans',sans-serif; font-size:1.25rem; font-weight:700; color:var(--primary-dark); }
+.page-sub { font-size:0.82rem; color:var(--text-muted); margin-top:2px; }
+
+/* Cards */
 .card {
-  background: var(--surface); border-radius: var(--radius);
-  box-shadow: var(--shadow); padding: 24px; margin-bottom: 20px;
+  background: var(--surface); border-radius: var(--radius); padding: 18px;
+  box-shadow: var(--shadow); margin-bottom: 14px;
   border: 1px solid var(--border);
 }
-.card-title { font-size: 1.1rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.card-title { font-size:0.95rem; font-weight:700; color:var(--primary-dark); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
 
-/* ── STATS ── */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 20px; }
+/* Stat Grid */
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
 .stat-card {
-  background: var(--surface); border-radius: var(--radius); padding: 20px;
+  background: var(--surface); border-radius: var(--radius-sm); padding: 14px 12px;
   border: 1px solid var(--border); box-shadow: var(--shadow);
-  display: flex; flex-direction: column; gap: 6px;
 }
-.stat-label { font-size: 0.78rem; color: var(--text-muted); }
-.stat-value { font-size: 1.6rem; font-weight: 700; font-family: 'Gmarket Sans', sans-serif; color: var(--primary-dark); }
+.stat-label { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; }
+.stat-value { font-size: 1.3rem; font-weight: 700; font-family:'Gmarket Sans',sans-serif; color: var(--primary-dark); }
 .stat-value.accent { color: var(--accent); }
-.stat-value.green { color: var(--primary); }
+.stat-value.blue { color: var(--primary); }
+.stat-value.green { color: var(--success); }
+.stat-value.warn { color: var(--warning); }
 
-/* ── BUTTONS ── */
+/* Buttons */
 .btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  border: none; border-radius: 10px; padding: 10px 20px;
-  font-family: inherit; font-size: 0.9rem; font-weight: 500;
-  cursor: pointer; transition: all 0.18s; white-space: nowrap;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: none; border-radius: var(--radius-sm); padding: 12px 20px;
+  font-family: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  transition: all 0.18s; white-space: nowrap; letter-spacing: -0.2px;
+  -webkit-tap-highlight-color: transparent;
 }
+.btn:active { transform: scale(0.97); }
 .btn-primary { background: var(--primary); color: #fff; }
-.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.btn-primary:hover { background: var(--primary-dark); }
 .btn-accent { background: var(--accent); color: #fff; }
-.btn-accent:hover { background: #d4690a; }
-.btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
-.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-accent:hover { background: #D97706; }
+.btn-outline { background: transparent; border: 1.5px solid var(--border-strong); color: var(--primary); }
+.btn-outline:hover { background: var(--surface2); }
 .btn-danger { background: var(--danger); color: #fff; }
-.btn-danger:hover { background: #c0303b; }
-.btn-sm { padding: 6px 12px; font-size: 0.82rem; border-radius: 7px; }
-.btn-xs { padding: 4px 8px; font-size: 0.76rem; border-radius: 5px; }
 .btn-success { background: var(--success); color: #fff; }
+.btn-warn { background: var(--warning); color: #fff; }
 .btn-info { background: var(--info); color: #fff; }
-.btn-warning { background: var(--warning); color: #fff; }
+.btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+.btn-sm { padding: 7px 14px; font-size: 0.82rem; border-radius: 8px; }
+.btn-xs { padding: 4px 10px; font-size: 0.76rem; border-radius: 6px; font-weight: 500; }
+.btn-full { width: 100%; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
 
-/* ── FORMS ── */
-.form-group { margin-bottom: 16px; }
-label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
-input, select, textarea {
-  width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
-  padding: 10px 14px; font-family: inherit; font-size: 0.92rem;
-  background: var(--surface2); color: var(--text); transition: border-color 0.2s;
-  outline: none;
+/* Forms */
+.form-group { margin-bottom: 14px; }
+.form-label { display:block; font-size:0.82rem; font-weight:600; color:var(--text-muted); margin-bottom:6px; }
+.form-label .req { color:var(--danger); margin-left:2px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 11px 13px; font-family: inherit; font-size: 0.92rem;
+  background: var(--surface2); color: var(--text); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none;
 }
-input:focus, select:focus, textarea:focus { border-color: var(--primary-light); background: #fff; }
-textarea { resize: vertical; min-height: 80px; }
-.form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
-.form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--primary-light); background: #fff;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+.form-textarea { resize: vertical; min-height: 72px; }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.form-hint { font-size:0.76rem; color:var(--text-muted); margin-top:4px; }
 
-/* ── TABLES ── */
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-th { background: var(--primary-dark); color: #fff; padding: 10px 14px; text-align: left; font-weight: 500; white-space: nowrap; }
-td { padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-tr:hover td { background: var(--surface2); }
+/* Badges & Tags */
 .badge {
-  display: inline-flex; align-items: center; padding: 3px 10px;
-  border-radius: 12px; font-size: 0.78rem; font-weight: 600; white-space: nowrap;
+  display:inline-flex; align-items:center; padding:3px 9px;
+  border-radius:12px; font-size:0.74rem; font-weight:700; white-space:nowrap;
 }
-.badge-pending { background: #FFF3CD; color: #856404; }
-.badge-approved { background: #D1E7DD; color: #155724; }
-.badge-rejected { background: #F8D7DA; color: #842029; }
-.badge-cancelled { background: #E2E3E5; color: #41464B; }
-.badge-mod-approved { background: #CCE5FF; color: #004085; }
+.badge-pending { background:#FEF3C7; color:#92400E; }
+.badge-approved { background:#D1FAE5; color:#065F46; }
+.badge-rejected { background:#FEE2E2; color:#991B1B; }
+.badge-cancelled { background:#F1F5F9; color:#475569; }
+.badge-mod-approved { background:#DBEAFE; color:#1E40AF; }
 
-/* ── LOGIN PAGE ── */
-.login-page {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, var(--primary-dark) 0%, #1a4a2e 60%, #0f2d1a 100%);
-  position: fixed; inset: 0; z-index: 200;
-}
-.login-box {
-  background: #fff; border-radius: 24px; padding: 48px 40px; max-width: 420px; width: 90%;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: center;
-}
-.login-logo { font-family: 'Gmarket Sans', sans-serif; font-size: 1.5rem; color: var(--primary); font-weight: 700; margin-bottom: 6px; }
-.login-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 32px; }
-.sso-btn {
-  width: 100%; padding: 14px; border: none; border-radius: 12px;
-  font-family: inherit; font-size: 1rem; cursor: pointer; display: flex;
-  align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px;
-  font-weight: 500; transition: all 0.2s;
-}
-.sso-naver { background: #03C75A; color: #fff; }
-.sso-naver:hover { background: #02a84a; }
-.sso-google { background: #fff; color: #333; border: 2px solid #ddd; }
-.sso-google:hover { border-color: #aaa; background: #f5f5f5; }
-.login-divider { margin: 20px 0; color: var(--text-muted); font-size: 0.85rem; position: relative; }
-.login-divider::before, .login-divider::after { content:''; position:absolute; top:50%; width:35%; height:1px; background: var(--border); }
-.login-divider::before { left:0; } .login-divider::after { right:0; }
-.admin-login-link { font-size: 0.82rem; color: var(--text-muted); cursor: pointer; margin-top: 12px; }
-.admin-login-link:hover { color: var(--primary); }
+/* Table */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width:100%; border-collapse:collapse; font-size:0.83rem; }
+th { background:var(--primary-dark); color:#fff; padding:9px 10px; text-align:left; font-weight:600; white-space:nowrap; font-size:0.8rem; }
+td { padding:9px 10px; border-bottom:1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background:var(--surface2); }
+.td-nowrap { white-space: nowrap; }
 
-/* ── APPLICATION ENTRY ── */
-.app-entry {
-  background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius);
-  padding: 20px; margin-bottom: 16px; position: relative;
-}
-.app-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.app-entry-title { font-weight: 700; color: var(--primary-dark); font-size: 1rem; }
+/* Credit Bar */
+.credit-bar-bg { background:var(--border); border-radius:4px; height:8px; overflow:hidden; margin-top:4px; }
+.credit-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg, var(--primary-light), var(--primary)); transition:width 0.4s; }
 
-.participant-row {
-  display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 8px;
-}
-.participant-total { text-align: right; font-weight: 700; color: var(--primary); font-size: 0.95rem; margin-top: 8px; }
+/* Section divider */
+.section-divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
 
-/* ── OCR ZONE ── */
-.ocr-zone {
-  border: 2px dashed var(--primary-light); border-radius: var(--radius);
-  padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s;
-  background: rgba(82,183,136,0.04);
+/* Pill select */
+.pill-select-row { display:flex; gap:6px; flex-wrap:wrap; }
+.pill-opt {
+  padding:7px 14px; border-radius:20px; border:1.5px solid var(--border);
+  background:var(--surface2); color:var(--text-muted); font-size:0.83rem; cursor:pointer;
+  font-family:inherit; font-weight:500; transition:all 0.15s;
 }
-.ocr-zone:hover { border-color: var(--primary); background: rgba(82,183,136,0.08); }
-.ocr-zone img { max-height: 120px; border-radius: 8px; margin-top: 12px; }
+.pill-opt.selected { border-color:var(--primary); background:var(--primary); color:#fff; }
 
-/* ── MODAL ── */
-.modal-overlay {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-  z-index: 500; align-items: center; justify-content: center;
-  backdrop-filter: blur(3px);
+/* Amount display */
+.amount-display {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  border-radius: var(--radius-sm); padding: 14px 16px; color: #fff;
+  display: flex; justify-content: space-between; align-items: center;
 }
-.modal-overlay.open { display: flex; }
-.modal {
-  background: #fff; border-radius: 20px; padding: 32px; max-width: 560px; width: 92%;
-  max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
-.modal-title { font-size: 1.15rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 20px; }
+.amount-display .label { font-size:0.82rem; opacity:0.8; }
+.amount-display .value { font-size:1.3rem; font-weight:700; font-family:'Gmarket Sans',sans-serif; }
 
-/* ── TOAST ── */
-#toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+/* App entry card */
+.entry-card {
+  background: var(--surface); border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(26,86,219,0.07);
+}
+.entry-card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.entry-card-title { font-weight:700; color:var(--primary-dark); font-size:0.95rem; display:flex; align-items:center; gap:6px; }
+.entry-num { background:var(--primary); color:#fff; width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.78rem; font-weight:700; }
+
+/* Participant row */
+.participant-block { background:var(--surface2); border-radius:var(--radius-sm); padding:12px; margin-bottom:8px; border:1px solid var(--border); }
+.participant-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.participant-label { font-size:0.8rem; font-weight:700; color:var(--primary); }
+.participant-subtotal { font-size:0.82rem; font-weight:700; color:var(--primary-dark); }
+
+/* Receipt upload */
+.receipt-zone {
+  border: 2px dashed var(--border-strong); border-radius: var(--radius-sm);
+  padding: 20px 16px; text-align: center; cursor: pointer; transition: all 0.2s;
+  background: var(--surface2); position: relative;
+}
+.receipt-zone:hover, .receipt-zone:active { border-color: var(--primary); background: #EFF6FF; }
+.receipt-zone.has-file { border-color: var(--success); border-style: solid; background: #F0FDF4; }
+.receipt-zone img { max-width: 100%; max-height: 160px; border-radius: 8px; margin-top: 10px; object-fit: contain; }
+.receipt-remove { position:absolute; top:8px; right:8px; background:var(--danger); color:#fff; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:0.8rem; display:flex; align-items:center; justify-content:center; }
+
+/* Entry total bar */
+.entry-total { background:linear-gradient(135deg,#EFF6FF,#DBEAFE); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; margin-top:10px; border:1px solid var(--border-strong); }
+.entry-total .label { font-size:0.82rem; color:var(--primary); font-weight:600; }
+.entry-total .value { font-size:1.05rem; font-weight:700; color:var(--primary-dark); }
+
+/* Floating submit */
+.floating-bar {
+  position: fixed; bottom: 56px; left: 0; right: 0; z-index: 90;
+  background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border); padding: 10px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  box-shadow: 0 -4px 20px rgba(26,86,219,0.12);
+}
+.floating-total { font-size:0.82rem; color:var(--text-muted); }
+.floating-total strong { display:block; font-size:1.05rem; color:var(--primary-dark); }
+
+/* App list item (mobile card) */
+.app-list-item {
+  background: var(--surface); border-radius: var(--radius-sm); padding: 14px;
+  border: 1px solid var(--border); margin-bottom: 10px; cursor: pointer;
+  transition: all 0.15s; box-shadow: var(--shadow);
+}
+.app-list-item:active { transform: scale(0.98); }
+.app-list-row { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+.app-list-name { font-weight:700; font-size:0.92rem; color:var(--text); }
+.app-list-date { font-size:0.78rem; color:var(--text-muted); }
+.app-list-amount { font-size:1.05rem; font-weight:700; color:var(--primary-dark); font-family:'Gmarket Sans',sans-serif; }
+.app-list-meta { font-size:0.78rem; color:var(--text-muted); }
+.app-list-actions { display:flex; gap:6px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
+
+/* Toast */
+#toast-container { position:fixed; top:70px; left:16px; right:16px; z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
 .toast {
-  background: var(--primary-dark); color: #fff; border-radius: 12px; padding: 12px 20px;
-  font-size: 0.9rem; min-width: 220px; max-width: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  animation: slideIn 0.3s ease; display: flex; align-items: center; gap: 10px;
+  background:var(--primary-darker); color:#fff; border-radius:12px; padding:13px 18px;
+  font-size:0.88rem; box-shadow:0 4px 20px rgba(0,0,0,0.3);
+  animation:slideDown 0.3s ease; display:flex; align-items:center; gap:10px; pointer-events:auto;
 }
-.toast.success { background: var(--primary); }
-.toast.error { background: var(--danger); }
-.toast.warning { background: var(--warning); }
-@keyframes slideIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
+.toast.success { background:#065F46; }
+.toast.error { background:#991B1B; }
+.toast.warning { background:#92400E; }
+@keyframes slideDown { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:none; } }
 
-/* ── STATUS ── */
-.pending-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 4px; animation: pulse 1.5s infinite; }
-@keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
+/* Modal */
+.modal-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55);
+  z-index:500; align-items:flex-end; justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.modal-overlay.open { display:flex; }
+.modal-overlay.center { align-items:center; }
+.modal {
+  background:#fff; border-radius:24px 24px 0 0; padding:24px 20px;
+  width:100%; max-height:90vh; overflow-y:auto;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.3);
+  animation: slideUp 0.3s ease;
+}
+.modal.center-modal { border-radius: 24px; max-width: 480px; width: calc(100% - 32px); animation: fadeIn 0.25s; }
+@keyframes slideUp { from { transform:translateY(40px); opacity:0; } to { transform:none; opacity:1; } }
+@keyframes fadeIn { from { opacity:0; transform:scale(0.97); } to { opacity:1; transform:none; } }
+.modal-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 18px; }
+.modal-title { font-size:1.05rem; font-weight:700; color:var(--primary-dark); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.modal-actions { display:flex; gap:8px; margin-top:20px; }
+.modal-actions .btn { flex:1; }
 
-/* ── CREDIT METER ── */
-.credit-bar-wrap { margin: 8px 0; }
-.credit-bar-bg { background: var(--border); border-radius: 6px; height: 10px; overflow: hidden; }
-.credit-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--primary-light), var(--primary)); transition: width 0.4s; }
+/* Pull indicator */
+.pending-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.3; } }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-  nav.sidebar { display: none; }
-  .form-row { grid-template-columns: 1fr; }
+/* Highlight box */
+.highlight { background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(147,197,253,0.1)); border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:12px 14px; }
+
+/* Misc */
+.flex-between { display:flex; justify-content:space-between; align-items:center; }
+.flex-center { display:flex; align-items:center; gap:8px; }
+.text-muted { color:var(--text-muted); font-size:0.82rem; }
+.text-right { text-align:right; }
+.mt-1 { margin-top:4px; }
+.mt-2 { margin-top:8px; }
+.mt-3 { margin-top:14px; }
+.mb-2 { margin-bottom:8px; }
+.mb-3 { margin-bottom:14px; }
+.bold { font-weight:700; }
+.empty-state { text-align:center; padding:40px 20px; color:var(--text-muted); }
+.empty-icon { font-size:3rem; margin-bottom:10px; }
+
+/* Admin detail panel */
+.detail-section { margin-bottom:16px; }
+.detail-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:0.88rem; }
+.detail-row:last-child { border-bottom:none; }
+.detail-key { color:var(--text-muted); }
+.detail-val { font-weight:600; text-align:right; flex:1; margin-left:12px; }
+
+/* ═══════════════════════════════════════
+   PRINT STYLES — A4 ONE PAGE
+═══════════════════════════════════════ */
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body, html { margin: 0; padding: 0; background: #fff !important; }
+  #app, header, .bottom-nav, .app-body, #toast-container { display: none !important; }
+  .modal-overlay { display: none !important; }
+  #print-area {
+    display: block !important; position: fixed; inset: 0;
+    background: #fff; z-index: 99999;
+  }
+}
+#print-area { display: none; }
+.print-page {
+  width: 210mm; min-height: 297mm; margin: 0 auto;
+  padding: 18mm 16mm 14mm; font-family: 'Noto Sans KR', sans-serif;
+  font-size: 11pt; color: #000; background: #fff; box-sizing: border-box;
+  display: flex; flex-direction: column;
+}
+.print-header-bar { background: #1e3a8a; color: #fff; padding: 10px 16px; border-radius: 4px; margin-bottom: 6px; }
+.print-main-title { font-size: 14pt; font-weight: 900; }
+.print-sub { font-size: 9pt; opacity: 0.85; margin-top: 2px; }
+.print-stamp-row { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.print-stamp { border: 2px solid #1e3a8a; border-radius: 4px; padding: 6px 20px; font-size: 9pt; text-align: center; }
+.print-stamp .stamp-label { font-weight: 700; color: #1e3a8a; }
+.print-section { margin-bottom: 14px; }
+.print-section-title { font-size: 10pt; font-weight: 700; color: #1e3a8a; border-bottom: 2px solid #1e3a8a; padding-bottom: 4px; margin-bottom: 8px; }
+.print-table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+.print-table th { background: #1e3a8a; color: #fff; padding: 7px 10px; text-align: left; font-weight: 600; }
+.print-table td { padding: 7px 10px; border: 1px solid #ccc; vertical-align: top; }
+.print-table tr:nth-child(even) td { background: #F8F9FA; }
+.print-total-box { border: 2px solid #1e3a8a; border-radius: 4px; padding: 10px 16px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+.print-total-label { font-size: 11pt; font-weight: 700; color: #1e3a8a; }
+.print-total-amount { font-size: 14pt; font-weight: 900; color: #1e3a8a; }
+.print-bank-box { border: 1.5px solid #93C5FD; border-radius: 4px; padding: 12px 16px; background: #EFF6FF; }
+.print-bank-row { display: flex; gap: 8px; margin-bottom: 5px; font-size: 10pt; }
+.print-bank-key { color: #1e40af; font-weight: 700; min-width: 70px; }
+.print-footer { margin-top: auto; padding-top: 12px; border-top: 1px solid #ccc; display: flex; justify-content: space-between; font-size: 8pt; color: #888; }
+.print-sig { border: 1px solid #ccc; border-radius: 4px; padding: 10px 20px; text-align: center; font-size: 9pt; }
+.print-sig-line { border-top: 1px solid #999; width: 80px; margin: 18px auto 4px; }
+
+/* ═══════════════════════════════════════
+   ADMIN SPECIFIC
+═══════════════════════════════════════ */
+.admin-tag { background:rgba(255,215,0,0.2); border:1px solid rgba(255,215,0,0.5); color:#7C3AED; border-radius:4px; padding:2px 7px; font-size:0.72rem; font-weight:700; }
+.filter-row { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+.filter-row input, .filter-row select { flex:1; min-width:120px; font-size:0.85rem; padding:9px 12px; }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE TWEAKS
+═══════════════════════════════════════ */
+@media (max-width: 380px) {
   .stats-grid { grid-template-columns: 1fr 1fr; }
-  .participant-row { grid-template-columns: 1fr 1fr; }
-  .participant-row .btn-xs { grid-column: 1/-1; justify-self: end; }
+  .form-row-2 { grid-template-columns: 1fr; }
+  .form-row-3 { grid-template-columns: 1fr 1fr; }
 }
-
-/* ── MISC ── */
-.empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
-.empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
-.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.page-title { font-family: 'Gmarket Sans', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--primary-dark); }
-.text-muted { color: var(--text-muted); font-size: 0.85rem; }
-.text-right { text-align: right; }
-hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-.highlight-box { background: linear-gradient(135deg, rgba(247,127,0,0.08), rgba(252,191,73,0.08)); border: 1px solid rgba(247,127,0,0.2); border-radius: var(--radius-sm); padding: 12px 16px; }
-.flex { display: flex; }
-.flex-between { display: flex; justify-content: space-between; align-items: center; }
-.gap-2 { gap: 8px; }
-.mt-2 { margin-top: 8px; }
-.mt-3 { margin-top: 16px; }
-.mb-3 { margin-bottom: 16px; }
-.w-full { width: 100%; }
+@media (min-width: 600px) {
+  .app-body { max-width: 600px; margin: 0 auto; }
+  .floating-bar { max-width: 600px; left: 50%; transform: translateX(-50%); }
+  .bottom-nav { max-width: 600px; left: 50%; transform: translateX(-50%); }
+}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
+<!-- ═══════════════════════════════ LOADING ═══════════════════════════════ -->
 <div id="loading-screen">
-  <div class="logo-big">🎲 보동보동</div>
-  <div class="sub">갓생지원금 신청 시스템 로딩 중...</div>
+  <div class="loading-dice">🎲</div>
+  <div class="loading-title">보동보동 갓생지원금</div>
+  <div class="loading-sub">2026 보드게임 지원금 신청 시스템</div>
   <div class="spinner"></div>
 </div>
 
-<!-- LOGIN PAGE -->
-<div class="login-page" id="login-page" style="display:none;">
-  <div class="login-box">
-    <div style="font-size:3rem;margin-bottom:12px;">🎲</div>
-    <div class="login-logo">2026 보동보동<br>갓생지원금</div>
-    <div class="login-subtitle">보드게임 & 방탈출 지원금 신청 플랫폼</div>
-
-    <button class="sso-btn sso-naver" onclick="loginSSO('naver')">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z"/></svg>
-      네이버로 로그인 / 가입
-    </button>
-    <button class="sso-btn sso-google" onclick="loginSSO('google')">
-      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-      Google로 로그인 / 가입
-    </button>
-
-    <div class="login-divider">또는</div>
-    <div class="admin-login-link" onclick="showAdminLogin()">🔐 관리자 로그인</div>
-
-    <div id="admin-login-form" style="display:none; margin-top:16px; text-align:left;">
-      <div class="form-group">
-        <label>관리자 아이디</label>
-        <input type="text" id="admin-id" placeholder="admin" value="admin">
-      </div>
-      <div class="form-group">
-        <label>비밀번호</label>
-        <input type="password" id="admin-pw" placeholder="비밀번호" value="4321">
-      </div>
-      <button class="btn btn-primary w-full" onclick="adminLogin()">관리자 로그인</button>
+<!-- ═══════════════════════════════ LOGIN ═══════════════════════════════ -->
+<div id="login-page">
+  <div class="login-container">
+    <div class="login-hero">
+      <span class="login-emoji">🎲</span>
+      <div class="login-title">2026 보동보동<br>갓생지원금</div>
+      <div class="login-subtitle">보드게임 · 방탈출 지원금 신청 플랫폼</div>
     </div>
 
-    <div id="sso-simulator" style="display:none; margin-top:16px; text-align:left;">
-      <div style="background:#f0f4f0; border-radius:10px; padding:14px; margin-bottom:12px; font-size:0.83rem; color:#666;">
-        🧪 <b>테스트 모드</b> — 실제 SSO 연동 시 API 키 필요<br>
-        아래에서 계정을 선택하세요
+    <div class="login-card">
+      <div class="login-tab-row">
+        <button class="login-tab active" onclick="switchLoginTab('login')">로그인</button>
+        <button class="login-tab" onclick="switchLoginTab('signup')">회원가입</button>
       </div>
-      <div id="sso-provider-label" style="font-size:0.85rem; color:#888; margin-bottom:8px;"></div>
-      <div id="sso-accounts"></div>
-      <button class="btn btn-outline btn-sm mt-2" onclick="hideSSOSim()">취소</button>
+
+      <!-- 로그인 패널 -->
+      <div class="login-panel active" id="panel-login">
+        <!-- 카카오 로그인 -->
+        <button class="sso-btn sso-kakao" onclick="loginKakao('login')">
+          <svg width="20" height="18" viewBox="0 0 20 18" fill="currentColor">
+            <path d="M10 0C4.477 0 0 3.53 0 7.886c0 2.854 1.943 5.353 4.86 6.738-.198.723-.735 2.684-.844 3.102-.13.498.182.492.383.358.164-.11 2.64-1.78 3.644-2.457.69.095 1.397.145 2.118.145 5.523 0 10-3.53 10-7.886S15.523 0 10 0z"/>
+          </svg>
+          카카오 로그인
+        </button>
+
+        <div class="form-divider"><span>이메일 로그인</span></div>
+
+        <!-- 일반 로그인 -->
+        <div class="fl-input">
+          <input type="email" id="login-email" placeholder=" " autocomplete="email">
+          <label>이메일</label>
+        </div>
+        <div class="fl-input">
+          <input type="password" id="login-pw" placeholder=" " autocomplete="current-password" onkeydown="if(event.key==='Enter')doEmailLogin()">
+          <label>비밀번호</label>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="doEmailLogin()">로그인</button>
+      </div>
+
+      <!-- 회원가입 패널 -->
+      <div class="login-panel" id="panel-signup">
+        <div class="signup-intro">
+          카카오 계정으로 간편하게 가입하세요.<br>관리자 승인 후 이용 가능합니다.
+        </div>
+        <button class="sso-btn sso-kakao" onclick="loginKakao('signup')">
+          <svg width="20" height="18" viewBox="0 0 20 18" fill="currentColor">
+            <path d="M10 0C4.477 0 0 3.53 0 7.886c0 2.854 1.943 5.353 4.86 6.738-.198.723-.735 2.684-.844 3.102-.13.498.182.492.383.358.164-.11 2.64-1.78 3.644-2.457.69.095 1.397.145 2.118.145 5.523 0 10-3.53 10-7.886S15.523 0 10 0z"/>
+          </svg>
+          카카오로 가입
+        </button>
+        <div class="form-divider"><span>직접 입력</span></div>
+        <div class="fl-input">
+          <input type="text" id="signup-name" placeholder=" ">
+          <label>이름</label>
+        </div>
+        <div class="fl-input">
+          <input type="email" id="signup-email" placeholder=" ">
+          <label>이메일</label>
+        </div>
+        <div class="fl-input">
+          <input type="password" id="signup-pw" placeholder=" " value="4321">
+          <label>비밀번호</label>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="doSignup()">가입 신청</button>
+      </div>
+    </div>
+
+    <!-- Kakao OAuth Simulator (개발/테스트용) -->
+    <div id="kakao-sim" style="display:none; background:#fff; border-radius:20px; padding:20px; width:100%; max-width:400px; margin-top:12px; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+      <div style="font-weight:700; color:var(--primary-dark); margin-bottom:4px;" id="kakao-sim-title">카카오 계정 선택</div>
+      <div style="font-size:0.8rem; color:#888; margin-bottom:14px;">🧪 개발 모드 — 실제 배포 시 카카오 API 키 연동 필요</div>
+      <div class="fl-input">
+        <input type="email" id="kakao-email" placeholder=" " value="kakao_test@example.com">
+        <label>이메일 (테스트)</label>
+      </div>
+      <div class="fl-input">
+        <input type="text" id="kakao-name" placeholder=" " value="카카오사용자">
+        <label>이름</label>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:16px;">
+        <button class="btn btn-outline btn-sm" style="flex:1" onclick="hideKakaoSim()">취소</button>
+        <button class="btn sso-kakao btn-sm" style="flex:2" onclick="doKakaoAuth()">
+          <svg width="16" height="14" viewBox="0 0 20 18" fill="currentColor">
+            <path d="M10 0C4.477 0 0 3.53 0 7.886c0 2.854 1.943 5.353 4.86 6.738-.198.723-.735 2.684-.844 3.102-.13.498.182.492.383.358.164-.11 2.64-1.78 3.644-2.457.69.095 1.397.145 2.118.145 5.523 0 10-3.53 10-7.886S15.523 0 10 0z"/>
+          </svg>
+          인증
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- MAIN APP -->
-<div id="app" style="display:none;">
-  <header>
-    <div class="header-logo" onclick="navigateTo('dashboard')">
+<!-- ═══════════════════════════════ APP (기존 코드 유지) ═══════════════════════════════ -->
+<div id="app" style="display:flex; flex-direction:column;">
+  <header class="app-header">
+    <div class="app-header-logo" onclick="goHome()">
       🎲 보동보동 갓생지원금
-      <span>2026 보드게임 지원금 신청 시스템</span>
+      <small>2026 보드게임 지원금</small>
     </div>
-    <div class="header-right">
-      <div class="user-chip" id="header-user">
-        <span id="header-username">-</span>
-        <span class="credit-badge" id="header-credit">₩0</span>
+    <div class="header-user">
+      <div class="header-chip">
+        <span id="hdr-name">-</span>
+        <span class="credit-pill" id="hdr-credit">₩0</span>
       </div>
-      <button class="btn-logout" onclick="logout()">로그아웃</button>
+      <button class="btn-icon" onclick="logout()" title="로그아웃">↩</button>
     </div>
   </header>
 
-  <div class="layout">
-    <nav class="sidebar" id="sidebar">
-      <!-- dynamically filled -->
-    </nav>
-    <div class="main-content">
-      <!-- DASHBOARD -->
-      <div class="page" id="page-dashboard">
-        <div class="section-header">
-          <div class="page-title">📊 대시보드</div>
-        </div>
-        <div class="stats-grid" id="dash-stats"></div>
-        <div class="card">
-          <div class="card-title">📋 최근 신청 내역</div>
-          <div id="dash-recent"></div>
-        </div>
+  <div class="app-body">
+    <!-- ── 대시보드 ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title" id="dash-greeting">안녕하세요 👋</div>
+        <div class="page-sub">지원금 현황을 확인하세요</div>
       </div>
+      <div class="stats-grid" id="dash-stats"></div>
+      <div class="card">
+        <div class="card-title">🕐 최근 신청 내역</div>
+        <div id="dash-recent"></div>
+      </div>
+      <button class="btn btn-accent btn-full" onclick="navigateTo('apply')" style="margin-top:4px;">
+        ✍️ 지원금 신청하기
+      </button>
+    </div>
 
-      <!-- APPLY -->
-      <div class="page" id="page-apply">
-        <div class="section-header">
-          <div class="page-title">✍️ 지원금 신청</div>
-          <button class="btn btn-accent" onclick="addAppEntry()">+ 신청 항목 추가</button>
+    <!-- ── 신청 ── -->
+    <div class="page" id="page-apply">
+      <div class="page-header">
+        <div class="page-title">✍️ 지원금 신청</div>
+        <div class="page-sub">영수증 첨부 필수 · 크레딧 한도 내 신청</div>
+      </div>
+      <div class="card" id="apply-credit-card"></div>
+      <div id="app-entries"></div>
+      <button class="btn btn-outline btn-full" onclick="addAppEntry()" style="margin-bottom:14px;">
+        ＋ 신청 항목 추가
+      </button>
+
+      <div class="card">
+        <div class="card-title">🏦 환급 계좌 정보</div>
+        <div class="form-group">
+          <label class="form-label">예금주<span class="req">*</span></label>
+          <input class="form-input" type="text" id="apply-acname" placeholder="예금주 성함">
         </div>
-        <div class="card">
-          <div class="card-title">💰 내 크레딧 현황</div>
-          <div id="apply-credit-info"></div>
-        </div>
-        <div id="app-entries"></div>
-        <div class="card">
-          <div class="card-title">🏦 환급 계좌 정보</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>예금주</label>
-              <input type="text" id="apply-account-name" placeholder="예금주 성함">
-            </div>
-            <div class="form-group">
-              <label>은행명</label>
-              <select id="apply-bank">
-                <option value="">선택</option>
-                <option>국민은행</option><option>신한은행</option><option>우리은행</option>
-                <option>하나은행</option><option>농협은행</option><option>기업은행</option>
-                <option>카카오뱅크</option><option>토스뱅크</option><option>케이뱅크</option>
-                <option>SC제일은행</option><option>씨티은행</option><option>기타</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>계좌번호</label>
-              <input type="text" id="apply-account-num" placeholder="- 없이 입력">
-            </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">은행명<span class="req">*</span></label>
+            <select class="form-select" id="apply-bank">
+              <option value="">선택</option>
+              <option>국민은행</option><option>신한은행</option><option>우리은행</option>
+              <option>하나은행</option><option>농협은행</option><option>기업은행</option>
+              <option>카카오뱅크</option><option>토스뱅크</option><option>케이뱅크</option>
+              <option>SC제일은행</option><option>씨티은행</option><option>기타</option>
+            </select>
           </div>
           <div class="form-group">
-            <label>비고</label>
-            <textarea id="apply-note" placeholder="기타 전달사항"></textarea>
+            <label class="form-label">계좌번호<span class="req">*</span></label>
+            <input class="form-input" type="text" id="apply-acnum" placeholder="숫자만">
           </div>
         </div>
-        <div class="form-actions">
-          <div id="apply-total-display" style="font-size:1rem; font-weight:700; color:var(--primary-dark); align-self:center;">총 신청금액: ₩0</div>
-          <button class="btn btn-outline" onclick="clearApply()">초기화</button>
-          <button class="btn btn-primary" onclick="submitApplication()">📨 신청서 제출</button>
+        <div class="form-group">
+          <label class="form-label">비고</label>
+          <textarea class="form-textarea" id="apply-note" placeholder="전달사항 (선택)"></textarea>
         </div>
       </div>
+      <div style="height:72px;"></div>
+    </div>
 
-      <!-- MY APPLICATIONS -->
-      <div class="page" id="page-my-apps">
-        <div class="section-header">
-          <div class="page-title">📋 내 신청 내역</div>
-          <button class="btn btn-primary btn-sm" onclick="refreshMyApps()">🔄 새로고침</button>
-        </div>
-        <div class="card">
-          <div class="table-wrap" id="my-apps-table"></div>
-        </div>
+    <!-- ── 내 신청 내역 ── -->
+    <div class="page" id="page-myapps">
+      <div class="page-header flex-between">
+        <div><div class="page-title">📋 내 신청 내역</div></div>
+        <button class="btn btn-outline btn-sm" onclick="renderMyApps()">새로고침</button>
       </div>
+      <div id="myapps-list"></div>
+    </div>
 
-      <!-- ADMIN: DASHBOARD -->
-      <div class="page" id="page-admin-dash">
-        <div class="section-header"><div class="page-title">🛡️ 관리자 대시보드</div></div>
-        <div class="stats-grid" id="admin-stats"></div>
-        <div class="card">
-          <div class="card-title">⏳ 대기 중인 신청 <span class="pending-indicator"></span></div>
-          <div id="admin-pending-list"></div>
-        </div>
+    <!-- ── 관리자 대시보드 ── -->
+    <div class="page" id="page-admin">
+      <div class="page-header flex-between">
+        <div><div class="page-title">🛡️ 관리자</div><div class="page-sub">전체 신청 현황</div></div>
+        <span class="admin-tag">ADMIN</span>
       </div>
+      <div class="stats-grid" id="admin-stats"></div>
 
-      <!-- ADMIN: ALL APPLICATIONS -->
-      <div class="page" id="page-admin-apps">
-        <div class="section-header">
-          <div class="page-title">📂 전체 신청 내역 취합</div>
-          <div class="flex gap-2">
-            <input type="text" id="admin-search" placeholder="검색..." style="width:200px" oninput="renderAdminApps()">
-            <select id="admin-filter-status" onchange="renderAdminApps()" style="width:130px">
-              <option value="">전체 상태</option>
-              <option value="pending">대기</option>
-              <option value="approved">승인</option>
-              <option value="rejected">반려</option>
-              <option value="cancelled">취소</option>
-            </select>
-            <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV 내보내기</button>
-          </div>
+      <div class="card">
+        <div class="card-title flex-between">
+          <span>⏳ 승인 대기 <span class="pending-dot"></span></span>
+          <button class="btn btn-outline btn-xs" onclick="navigateTo('admin-all')">전체보기</button>
         </div>
-        <div class="card"><div class="table-wrap" id="admin-apps-table"></div></div>
-      </div>
-
-      <!-- ADMIN: MEMBERS -->
-      <div class="page" id="page-admin-members">
-        <div class="section-header">
-          <div class="page-title">👥 회원 관리</div>
-          <button class="btn btn-accent" onclick="openCreateUserModal()">+ 계정 생성</button>
-        </div>
-        <div class="card"><div class="table-wrap" id="admin-members-table"></div></div>
-      </div>
-
-      <!-- ADMIN: LOGS -->
-      <div class="page" id="page-admin-logs">
-        <div class="section-header">
-          <div class="page-title">📜 시스템 로그</div>
-          <button class="btn btn-outline btn-sm" onclick="clearLogs()">🗑️ 로그 초기화</button>
-        </div>
-        <div class="card"><div id="logs-list"></div></div>
+        <div id="admin-pending"></div>
       </div>
     </div>
+
+    <!-- ── 관리자: 전체 신청 ── -->
+    <div class="page" id="page-admin-all">
+      <div class="page-header">
+        <div class="page-title">📂 전체 신청 취합</div>
+      </div>
+      <div class="filter-row">
+        <input class="form-input" type="search" id="admin-search" placeholder="검색…" oninput="renderAdminAll()">
+        <select class="form-select" id="admin-status-filter" onchange="renderAdminAll()" style="min-width:110px;">
+          <option value="">전체</option>
+          <option value="pending">대기</option>
+          <option value="approved">승인</option>
+          <option value="mod-approved">수정승인</option>
+          <option value="rejected">반려</option>
+          <option value="cancelled">취소</option>
+        </select>
+      </div>
+      <div class="flex-between mb-2" style="gap:8px;">
+        <div id="admin-all-count" class="text-muted"></div>
+        <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV</button>
+      </div>
+      <div id="admin-all-list"></div>
+    </div>
+
+    <!-- ── 관리자: 회원 관리 ── -->
+    <div class="page" id="page-admin-members">
+      <div class="page-header flex-between">
+        <div class="page-title">👥 회원 관리</div>
+        <button class="btn btn-accent btn-sm" onclick="openCreateUserModal()">＋ 계정 생성</button>
+      </div>
+      <div id="admin-members-list"></div>
+    </div>
+
+    <!-- ── 관리자: 로그 ── -->
+    <div class="page" id="page-admin-logs">
+      <div class="page-header flex-between">
+        <div class="page-title">📜 시스템 로그</div>
+        <button class="btn btn-ghost btn-sm" onclick="clearLogs()">초기화</button>
+      </div>
+      <div class="card" id="logs-content"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav" id="bottom-nav"></nav>
+
+  <!-- Floating submit bar -->
+  <div class="floating-bar" id="floating-bar" style="display:none;">
+    <div class="floating-total">
+      총 신청금액<strong id="float-total">₩0</strong>
+    </div>
+    <button class="btn btn-primary" onclick="submitApplication()" style="padding:11px 22px;">
+      📨 신청 제출
+    </button>
   </div>
 </div>
 
-<!-- MODALS -->
-<!-- Application Detail Modal -->
-<div class="modal-overlay" id="modal-app-detail">
+<!-- ═══════════════════════════════ MODALS (기존 유지) ═══════════════════════════════ -->
+<div class="modal-overlay" id="modal-detail">
   <div class="modal">
-    <div class="modal-title" id="modal-app-title">신청 상세</div>
-    <div id="modal-app-content"></div>
-    <div class="form-actions" id="modal-app-actions"></div>
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-detail-title">신청 상세</div>
+    <div id="modal-detail-body"></div>
+    <div class="modal-actions" id="modal-detail-actions"></div>
   </div>
 </div>
 
-<!-- Admin Edit Modal -->
-<div class="modal-overlay" id="modal-admin-edit">
-  <div class="modal">
-    <div class="modal-title">✏️ 신청 내역 수정 (관리자)</div>
-    <div id="modal-admin-edit-content"></div>
-    <div class="form-actions" id="modal-admin-edit-actions"></div>
+<div class="modal-overlay center" id="modal-edit">
+  <div class="modal center-modal">
+    <div class="modal-title">✏️ 신청 수정 (관리자)</div>
+    <div id="modal-edit-body"></div>
+    <div class="modal-actions" id="modal-edit-actions"></div>
   </div>
 </div>
 
-<!-- Create User Modal -->
-<div class="modal-overlay" id="modal-create-user">
-  <div class="modal">
+<div class="modal-overlay center" id="modal-create-user">
+  <div class="modal center-modal">
     <div class="modal-title">➕ 계정 생성</div>
-    <div class="form-group">
-      <label>이름</label>
-      <input type="text" id="new-user-name" placeholder="홍길동">
-    </div>
-    <div class="form-group">
-      <label>이메일 (아이디)</label>
-      <input type="email" id="new-user-email" placeholder="user@example.com">
-    </div>
-    <div class="form-group">
-      <label>비밀번호</label>
-      <input type="password" id="new-user-pw" placeholder="비밀번호" value="4321">
-    </div>
-    <div class="form-group">
-      <label>초기 크레딧 (원)</label>
-      <input type="number" id="new-user-credit" value="30000">
-    </div>
-    <div class="form-group">
-      <label>역할</label>
-      <select id="new-user-role">
+    <div class="form-group"><label class="form-label">이름</label><input class="form-input" type="text" id="nu-name"></div>
+    <div class="form-group"><label class="form-label">이메일</label><input class="form-input" type="email" id="nu-email"></div>
+    <div class="form-group"><label class="form-label">비밀번호</label><input class="form-input" type="password" id="nu-pw" value="4321"></div>
+    <div class="form-group"><label class="form-label">초기 크레딧 (원)</label><input class="form-input" type="number" id="nu-credit" value="30000"></div>
+    <div class="form-group"><label class="form-label">역할</label>
+      <select class="form-select" id="nu-role">
         <option value="user">일반 회원</option>
         <option value="admin">관리자</option>
       </select>
     </div>
-    <div class="form-actions">
+    <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('modal-create-user')">취소</button>
-      <button class="btn btn-primary" onclick="createUser()">계정 생성</button>
+      <button class="btn btn-primary" onclick="createUser()">생성</button>
     </div>
   </div>
 </div>
 
-<!-- Credit Edit Modal -->
-<div class="modal-overlay" id="modal-credit-edit">
-  <div class="modal">
+<div class="modal-overlay center" id="modal-credit">
+  <div class="modal center-modal">
     <div class="modal-title">💰 크레딧 수정</div>
-    <div id="credit-edit-content"></div>
-    <div class="form-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-credit-edit')">취소</button>
+    <div id="modal-credit-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-credit')">취소</button>
       <button class="btn btn-primary" onclick="saveCreditEdit()">저장</button>
     </div>
   </div>
 </div>
 
-<!-- Toast container -->
+<div class="modal-overlay center" id="modal-print">
+  <div class="modal center-modal" style="max-width:520px;">
+    <div class="modal-title">🖨️ 인쇄 미리보기</div>
+    <div id="modal-print-preview" style="border:1px solid var(--border);border-radius:8px;padding:12px;background:#fafafa;max-height:60vh;overflow-y:auto;font-size:0.82rem;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-print')">닫기</button>
+      <button class="btn btn-primary" onclick="doPrint()">🖨️ 인쇄</button>
+    </div>
+  </div>
+</div>
+
+<div id="print-area"></div>
 <div id="toast-container"></div>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-//  DATA STORE (localStorage-based)
-// ═══════════════════════════════════════════════════════════
+'use strict';
 
+/* ═══════════════════════════════════════
+   SUPABASE SETUP
+═══════════════════════════════════════ */
+const SUPABASE_URL = 'https://vkznarlbevlyqnspmnlj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrem5hcmxiZXZseXFuc3BtbmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2OTg5MTcsImV4cCI6MjA4NzI3NDkxN30.Gm_GJJoiWJU4fvtfUhK4Ci-8CP3dJjW1KWzSazhKoJA';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ═══════════════════════════════════════
+   DATA STORE (LocalStorage 유지 - Supabase와 병행)
+═══════════════════════════════════════ */
 const DB = {
-  get(key) { try { return JSON.parse(localStorage.getItem('bgapp_'+key)) || null; } catch { return null; } },
-  set(key, val) { localStorage.setItem('bgapp_'+key, JSON.stringify(val)); },
-  getUsers() { return this.get('users') || []; },
-  getApps() { return this.get('applications') || []; },
-  getLogs() { return this.get('logs') || []; },
+  get(k) { try { return JSON.parse(localStorage.getItem('bg26_'+k)); } catch { return null; } },
+  set(k,v) { try { localStorage.setItem('bg26_'+k, JSON.stringify(v)); } catch(e){} },
+  users() { return this.get('users') || []; },
+  apps() { return this.get('apps') || []; },
+  logs() { return this.get('logs') || []; },
   saveUsers(u) { this.set('users', u); },
-  saveApps(a) { this.set('applications', a); },
-  addLog(msg, userId) {
-    const logs = this.getLogs();
-    logs.unshift({ id: Date.now(), ts: new Date().toISOString(), msg, userId: userId||'system' });
-    if (logs.length > 500) logs.pop();
+  saveApps(a) { this.set('apps', a); },
+  log(msg, uid) {
+    const logs = this.logs();
+    logs.unshift({ id: Date.now(), ts: new Date().toISOString(), msg, uid: uid||'system' });
+    if (logs.length > 600) logs.length = 600;
     this.set('logs', logs);
   }
 };
 
-// ═══════════════════════════════════════════════════════════
-//  INITIAL SEED DATA
-// ═══════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════
+   SEED
+═══════════════════════════════════════ */
+function seed() {
+  if (DB.get('seeded_v3')) return;
+  DB.saveUsers([
+    { id:'admin', email:'admin', name:'관리자', role:'admin', status:'approved', provider:'local', pw:'4321', creditTotal:0, creditUsed:0, creditPending:0, createdAt:now() },
+  ]);
+  DB.set('seeded_v3', true);
+  DB.log('시스템 초기화 완료');
+}
 
-function seedData() {
-  if (DB.get('seeded')) return;
+/* ═══════════════════════════════════════
+   AUTH STATE
+═══════════════════════════════════════ */
+let ME = null;
+let kakaoMode = 'login'; // 'login' | 'signup'
 
-  const users = [
-    {
-      id: 'admin',
-      email: 'admin',
-      name: '관리자',
-      role: 'admin',
-      status: 'approved',
-      provider: 'local',
-      password: '4321',
-      creditTotal: 0,
-      creditUsed: 0,
-      creditPending: 0,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'u_test1',
-      email: '__sso@naver.com',
-      name: '테스트유저1',
-      role: 'user',
-      status: 'approved',
-      provider: 'naver',
-      password: '4321',
-      creditTotal: 30000,
-      creditUsed: 0,
-      creditPending: 0,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'u_test2',
-      email: '__sso1@naver.com',
-      name: '테스트유저2',
-      role: 'user',
-      status: 'approved',
-      provider: 'naver',
-      password: '4321',
-      creditTotal: 30000,
-      creditUsed: 0,
-      creditPending: 0,
-      createdAt: new Date().toISOString()
+function switchLoginTab(tab) {
+  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.login-panel').forEach(p => p.classList.remove('active'));
+  const idx = tab === 'login' ? 0 : 1;
+  document.querySelectorAll('.login-tab')[idx].classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// 카카오 로그인/가입
+function loginKakao(mode) {
+  kakaoMode = mode;
+  document.getElementById('kakao-sim-title').textContent = mode === 'signup' ? '카카오 가입' : '카카오 로그인';
+  document.getElementById('kakao-sim').style.display = 'block';
+}
+
+function hideKakaoSim() {
+  document.getElementById('kakao-sim').style.display = 'none';
+}
+
+async function doKakaoAuth() {
+  const email = document.getElementById('kakao-email').value.trim();
+  const name = document.getElementById('kakao-name').value.trim();
+  
+  if (!email || !name) {
+    toast('이메일과 이름을 입력하세요', 'error');
+    return;
+  }
+
+  try {
+    // Supabase Auth - OAuth 시뮬레이션 (실제로는 signInWithOAuth 사용)
+    const users = DB.users();
+    let user = users.find(u => u.email === email);
+
+    if (kakaoMode === 'signup' || !user) {
+      // 회원가입
+      if (user) {
+        toast('이미 가입된 계정입니다', 'warning');
+        return;
+      }
+
+      const nu = {
+        id: 'u_' + Date.now(),
+        email,
+        name,
+        role: 'user',
+        status: 'pending',
+        provider: 'kakao',
+        pw: null, // OAuth는 비밀번호 없음
+        creditTotal: 0,
+        creditUsed: 0,
+        creditPending: 0,
+        createdAt: now()
+      };
+
+      users.push(nu);
+      DB.saveUsers(users);
+      DB.log(`카카오 가입: ${email}`);
+      
+      toast('가입 신청 완료! 관리자 승인 후 이용 가능합니다', 'warning');
+      hideKakaoSim();
+      return;
     }
-  ];
+
+    // 로그인
+    if (user.status === 'pending') {
+      toast('관리자 승인 대기 중입니다', 'warning');
+      return;
+    }
+    if (user.status === 'rejected') {
+      toast('가입이 거절된 계정입니다', 'error');
+      return;
+    }
+
+    completeLogin(user);
+    hideKakaoSim();
+    
+  } catch (error) {
+    console.error('Kakao auth error:', error);
+    toast('카카오 인증 실패', 'error');
+  }
+}
+
+// 이메일 로그인
+function doEmailLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  
+  if (!email || !pw) {
+    toast('이메일과 비밀번호를 입력하세요', 'error');
+    return;
+  }
+
+  const user = DB.users().find(u => (u.email === email || u.id === email) && u.pw === pw);
+  
+  if (!user) {
+    toast('이메일 또는 비밀번호가 틀렸습니다', 'error');
+    return;
+  }
+  
+  if (user.status === 'pending') {
+    toast('관리자 승인 대기 중입니다', 'warning');
+    return;
+  }
+  
+  if (user.status === 'rejected') {
+    toast('가입이 거절되었습니다', 'error');
+    return;
+  }
+  
+  completeLogin(user);
+}
+
+// 직접 회원가입
+function doSignup() {
+  const name = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pw = document.getElementById('signup-pw').value;
+  
+  if (!name || !email) {
+    toast('이름과 이메일을 입력하세요', 'error');
+    return;
+  }
+  
+  const users = DB.users();
+  
+  if (users.find(u => u.email === email)) {
+    toast('이미 가입된 이메일입니다', 'warning');
+    return;
+  }
+  
+  const nu = {
+    id: 'u_' + Date.now(),
+    email,
+    name,
+    role: 'user',
+    status: 'pending',
+    provider: 'direct',
+    pw,
+    creditTotal: 0,
+    creditUsed: 0,
+    creditPending: 0,
+    createdAt: now()
+  };
+  
+  users.push(nu);
   DB.saveUsers(users);
-  DB.set('seeded', true);
-  DB.addLog('시스템 초기화 완료 — 기본 계정 생성됨');
+  DB.log(`가입 신청: ${email}`);
+  toast('가입 신청 완료! 관리자 승인 후 이용 가능합니다', 'warning');
 }
 
-// ═══════════════════════════════════════════════════════════
-//  AUTH
-// ═══════════════════════════════════════════════════════════
-
-let currentUser = null;
-
-function loginSSO(provider) {
-  // Show SSO simulator
-  const label = provider === 'naver' ? '네이버 계정' : 'Google 계정';
-  document.getElementById('sso-provider-label').textContent = `${label} 선택:`;
-  const users = DB.getUsers().filter(u => u.provider === provider || u.email.includes('@'));
-  const div = document.getElementById('sso-accounts');
-  div.innerHTML = '';
-
-  // Build account list for this provider
-  const accounts = [];
-  if (provider === 'naver') {
-    accounts.push({ email: '__sso@naver.com', name: '테스트유저1' });
-    accounts.push({ email: '__sso1@naver.com', name: '테스트유저2' });
-    // any approved user with naver
-    DB.getUsers().filter(u=>u.provider==='naver' && !['__sso@naver.com','__sso1@naver.com'].includes(u.email)).forEach(u=>accounts.push({email:u.email,name:u.name}));
-  } else {
-    // google — show existing google users or allow new registration
-    DB.getUsers().filter(u=>u.provider==='google').forEach(u=>accounts.push({email:u.email,name:u.name}));
-    accounts.push({ email: 'new_google@gmail.com', name: '새 구글 계정으로 가입' });
-  }
-
-  // show input + accounts
-  div.innerHTML = `<div style="margin-bottom:8px;">
-    <input type="email" id="sso-email-input" placeholder="이메일 직접 입력" style="margin-bottom:6px;">
-    <input type="password" id="sso-pw-input" placeholder="비밀번호 (기본: 4321)" value="4321" style="margin-bottom:8px;">
-    <button class="btn btn-primary w-full btn-sm" onclick="doSSOLogin('${provider}')">로그인 / 가입</button>
-  </div>
-  <div style="font-size:0.8rem;color:#999;margin:8px 0;">—— 또는 기존 계정 선택 ——</div>`;
-
-  accounts.forEach(a => {
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-outline w-full btn-sm';
-    btn.style.marginBottom = '6px';
-    btn.textContent = `${a.name} (${a.email})`;
-    btn.onclick = () => {
-      document.getElementById('sso-email-input').value = a.email;
-    };
-    div.appendChild(btn);
-  });
-
-  document.getElementById('sso-simulator').style.display = 'block';
-  document.getElementById('admin-login-form').style.display = 'none';
-}
-
-function doSSOLogin(provider) {
-  const email = document.getElementById('sso-email-input').value.trim();
-  const pw = document.getElementById('sso-pw-input').value;
-  if (!email) { showToast('이메일을 입력하세요', 'error'); return; }
-
-  let users = DB.getUsers();
-  let user = users.find(u => u.email === email);
-
-  if (user) {
-    // existing — check password
-    if (user.password && user.password !== pw) { showToast('비밀번호가 틀렸습니다', 'error'); return; }
-    if (user.status === 'pending') { showToast('관리자 승인 대기 중입니다', 'warning'); return; }
-    if (user.status === 'rejected') { showToast('가입이 거절된 계정입니다', 'error'); return; }
-    doLogin(user);
-  } else {
-    // register new
-    const newUser = {
-      id: 'u_' + Date.now(),
-      email,
-      name: email.split('@')[0],
-      role: 'user',
-      status: 'pending',
-      provider,
-      password: pw || '4321',
-      creditTotal: 0,
-      creditUsed: 0,
-      creditPending: 0,
-      createdAt: new Date().toISOString()
-    };
-    users.push(newUser);
-    DB.saveUsers(users);
-    DB.addLog(`신규 가입 신청: ${email}`, newUser.id);
-    showToast('가입 신청이 완료되었습니다. 관리자 승인을 기다려주세요.', 'warning');
-    hideSSOSim();
-  }
-}
-
-function showAdminLogin() {
-  document.getElementById('admin-login-form').style.display = 'block';
-  document.getElementById('sso-simulator').style.display = 'none';
-}
-
-function hideSSOSim() {
-  document.getElementById('sso-simulator').style.display = 'none';
-}
-
-function adminLogin() {
-  const id = document.getElementById('admin-id').value;
-  const pw = document.getElementById('admin-pw').value;
-  const users = DB.getUsers();
-  const user = users.find(u => (u.email === id || u.id === id) && u.password === pw && u.role === 'admin');
-  if (user) { doLogin(user); }
-  else { showToast('관리자 정보가 틀렸습니다', 'error'); }
-}
-
-function doLogin(user) {
-  currentUser = user;
+function completeLogin(user) {
+  ME = user;
   DB.set('session', user.id);
-  DB.addLog(`로그인: ${user.name} (${user.email})`, user.id);
+  DB.log(`로그인: ${user.name}`, user.id);
   document.getElementById('login-page').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+  document.getElementById('app').style.display = 'flex';
   initApp();
-  showToast(`안녕하세요, ${user.name}님! 🎲`, 'success');
+  toast(`어서오세요, ${user.name}님! 🎲`, 'success');
 }
 
 function logout() {
-  if (currentUser) DB.addLog(`로그아웃: ${currentUser.name}`, currentUser.id);
-  currentUser = null;
+  if (ME) DB.log(`로그아웃: ${ME.name}`, ME.id);
+  ME = null;
   DB.set('session', null);
   document.getElementById('app').style.display = 'none';
-  document.getElementById('login-page').style.display = 'flex';
-  hideSSOSim();
-  document.getElementById('admin-login-form').style.display = 'none';
+  document.getElementById('login-page').style.display = 'block';
+  hideKakaoSim();
 }
 
-// ═══════════════════════════════════════════════════════════
-//  APP INIT
-// ═══════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════
+   나머지 기존 코드 전부 유지 (APP INIT, NAVIGATION, DASHBOARD, APPLY 등)
+   여기서는 길이 제한으로 생략하지만 위 HTML의 모든 JavaScript 함수 포함
+═══════════════════════════════════════ */
 
+// [기존 코드 전체 복사 - initApp부터 boot까지]
+
+/* ═══════════════════════════════════════
+   APP INIT & NAVIGATION
+═══════════════════════════════════════ */
 function initApp() {
-  refreshCurrentUser();
-  buildSidebar();
-  navigateTo(currentUser.role === 'admin' ? 'admin-dash' : 'dashboard');
+  refreshMe();
+  buildBottomNav();
+  goHome();
 }
 
-function refreshCurrentUser() {
-  const users = DB.getUsers();
-  const u = users.find(u => u.id === currentUser.id);
-  if (u) currentUser = u;
-  document.getElementById('header-username').textContent = currentUser.name;
-  const avail = currentUser.creditTotal - currentUser.creditUsed - currentUser.creditPending;
-  document.getElementById('header-credit').textContent = '₩' + fmt(Math.max(0, avail));
+function refreshMe() {
+  const u = DB.users().find(u=>u.id===ME.id);
+  if (u) ME = u;
+  document.getElementById('hdr-name').textContent = ME.name;
+  const avail = Math.max(0, ME.creditTotal - ME.creditUsed - ME.creditPending);
+  document.getElementById('hdr-credit').textContent = '₩'+fmt(avail);
 }
 
-function buildSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const isAdmin = currentUser.role === 'admin';
-  const items = isAdmin ? [
-    { id: 'admin-dash', icon: '📊', label: '관리자 대시보드' },
-    { id: 'admin-apps', icon: '📂', label: '전체 신청 취합' },
-    { id: 'admin-members', icon: '👥', label: '회원 관리' },
-    { id: 'admin-logs', icon: '📜', label: '시스템 로그' },
-  ] : [
-    { id: 'dashboard', icon: '🏠', label: '대시보드' },
-    { id: 'apply', icon: '✍️', label: '지원금 신청' },
-    { id: 'my-apps', icon: '📋', label: '내 신청 내역' },
-  ];
+const USER_NAVS = [
+  { id:'dashboard', icon:'🏠', label:'홈' },
+  { id:'apply', icon:'✍️', label:'신청' },
+  { id:'myapps', icon:'📋', label:'내역' },
+];
+const ADMIN_NAVS = [
+  { id:'admin', icon:'📊', label:'대시보드' },
+  { id:'admin-all', icon:'📂', label:'신청목록' },
+  { id:'admin-members', icon:'👥', label:'회원' },
+  { id:'admin-logs', icon:'📜', label:'로그' },
+];
 
-  sidebar.innerHTML = items.map(i => `
-    <div class="nav-item" id="nav-${i.id}" onclick="navigateTo('${i.id}')">
-      <span class="icon">${i.icon}</span>${i.label}
-    </div>
-  `).join('');
+function buildBottomNav() {
+  const navs = ME.role === 'admin' ? ADMIN_NAVS : USER_NAVS;
+  document.getElementById('bottom-nav').innerHTML = navs.map(n=>`
+    <button class="bottom-nav-item" id="nav-${n.id}" onclick="navigateTo('${n.id}')">
+      <span class="nav-icon">${n.icon}</span><span>${n.label}</span>
+    </button>`).join('');
 }
 
+function goHome() {
+  navigateTo(ME.role === 'admin' ? 'admin' : 'dashboard');
+}
+
+let currentPage = '';
 function navigateTo(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav-item').forEach(n=>n.classList.remove('active'));
   const p = document.getElementById('page-'+page);
   if (p) p.classList.add('active');
   const n = document.getElementById('nav-'+page);
   if (n) n.classList.add('active');
+  document.getElementById('floating-bar').style.display = page==='apply' ? 'flex' : 'none';
+  document.querySelector('.app-body').scrollTop = 0;
 
-  // Render page content
-  switch (page) {
+  switch(page) {
     case 'dashboard': renderDashboard(); break;
     case 'apply': initApply(); break;
-    case 'my-apps': renderMyApps(); break;
-    case 'admin-dash': renderAdminDash(); break;
-    case 'admin-apps': renderAdminApps(); break;
+    case 'myapps': renderMyApps(); break;
+    case 'admin': renderAdminDash(); break;
+    case 'admin-all': renderAdminAll(); break;
     case 'admin-members': renderAdminMembers(); break;
     case 'admin-logs': renderLogs(); break;
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-//  DASHBOARD
-// ═══════════════════════════════════════════════════════════
-
+/* ═══════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════ */
 function renderDashboard() {
-  refreshCurrentUser();
-  const u = currentUser;
-  const avail = Math.max(0, u.creditTotal - u.creditUsed - u.creditPending);
-  const pct = u.creditTotal > 0 ? ((u.creditUsed + u.creditPending) / u.creditTotal * 100).toFixed(0) : 0;
+  refreshMe();
+  const avail = Math.max(0, ME.creditTotal - ME.creditUsed - ME.creditPending);
+  const pct = ME.creditTotal > 0 ? Math.min(100, (ME.creditUsed + ME.creditPending) / ME.creditTotal * 100) : 0;
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? '좋은 아침이에요' : hour < 17 ? '안녕하세요' : '수고하셨어요';
+  document.getElementById('dash-greeting').textContent = `${greeting}, ${ME.name}님 👋`;
 
   document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">총 지원 크레딧</div><div class="stat-value blue">₩${fmt(ME.creditTotal)}</div></div>
     <div class="stat-card">
-      <div class="stat-label">총 보유 크레딧</div>
-      <div class="stat-value green">₩${fmt(u.creditTotal)}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">사용 가능 크레딧</div>
+      <div class="stat-label">사용 가능</div>
       <div class="stat-value accent">₩${fmt(avail)}</div>
-      <div class="credit-bar-wrap">
-        <div class="credit-bar-bg"><div class="credit-bar-fill" style="width:${pct}%"></div></div>
-      </div>
-      <div class="text-muted">사용+대기: ₩${fmt(u.creditUsed+u.creditPending)} / ${pct}%</div>
+      <div class="credit-bar-bg"><div class="credit-bar-fill" style="width:${pct}%"></div></div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">승인 완료</div>
-      <div class="stat-value">₩${fmt(u.creditUsed)}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">승인 대기 중</div>
-      <div class="stat-value" style="color:var(--warning)">₩${fmt(u.creditPending)}</div>
-    </div>
+    <div class="stat-card"><div class="stat-label">승인 완료</div><div class="stat-value green">₩${fmt(ME.creditUsed)}</div></div>
+    <div class="stat-card"><div class="stat-label">승인 대기</div><div class="stat-value warn">₩${fmt(ME.creditPending)}</div></div>
   `;
 
-  const myApps = DB.getApps().filter(a => a.applicantId === u.id).slice(0, 5);
+  const myApps = DB.apps().filter(a=>a.applicantId===ME.id).slice(0,5);
   if (myApps.length === 0) {
-    document.getElementById('dash-recent').innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>신청 내역이 없습니다</p><button class="btn btn-accent mt-2" onclick="navigateTo('apply')">지금 신청하기</button></div>`;
+    document.getElementById('dash-recent').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div>신청 내역이 없어요</div></div>`;
   } else {
-    document.getElementById('dash-recent').innerHTML = `<div class="table-wrap">${buildAppsTable(myApps, false)}</div>`;
+    document.getElementById('dash-recent').innerHTML = myApps.map(a=>appListItem(a, false)).join('');
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-//  APPLICATION FORM
-// ═══════════════════════════════════════════════════════════
-
-let appEntries = [];
+/* ═══════════════════════════════════════
+   APPLY
+═══════════════════════════════════════ */
+let entries = [];
 
 function initApply() {
-  refreshCurrentUser();
-  const u = currentUser;
-  const avail = Math.max(0, u.creditTotal - u.creditUsed - u.creditPending);
-  document.getElementById('apply-credit-info').innerHTML = `
-    <div class="flex-between mb-3">
-      <div>
-        <div class="stat-label">사용 가능 크레딧</div>
-        <div style="font-size:1.6rem;font-weight:700;color:var(--accent);">₩${fmt(avail)}</div>
-      </div>
-      <div class="text-muted">총 ₩${fmt(u.creditTotal)} 중 ₩${fmt(u.creditUsed+u.creditPending)} 사용/대기</div>
+  refreshMe();
+  const avail = Math.max(0, ME.creditTotal - ME.creditUsed - ME.creditPending);
+  document.getElementById('apply-credit-card').innerHTML = `
+    <div class="card-title">💰 내 크레딧 현황</div>
+    <div class="amount-display">
+      <div><div class="label">사용 가능 크레딧</div><div class="value">₩${fmt(avail)}</div></div>
+      <div style="font-size:0.8rem;opacity:0.8;">총 ₩${fmt(ME.creditTotal)}<br>사용 ₩${fmt(ME.creditUsed+ME.creditPending)}</div>
     </div>
-    <div class="credit-bar-wrap"><div class="credit-bar-bg"><div class="credit-bar-fill" style="width:${Math.min(100,(u.creditUsed+u.creditPending)/Math.max(1,u.creditTotal)*100)}%"></div></div></div>
   `;
-
-  if (appEntries.length === 0) addAppEntry();
-  renderAppEntries();
+  if (entries.length === 0) addAppEntry();
+  else renderEntries();
 }
 
 function addAppEntry() {
-  const users = DB.getUsers().filter(u => u.role === 'user' && u.status === 'approved');
-  appEntries.push({
+  entries.push({
     id: Date.now(),
-    date: new Date().toISOString().split('T')[0],
+    date: todayStr(),
     category: '',
     description: '',
-    receipt: null,
     receiptDataUrl: null,
-    participants: [
-      { userId: currentUser.id, name: currentUser.name, amount: '' }
-    ]
+    receiptName: null,
+    participants: [{ userId: ME.id, name: ME.name, amount: '' }]
   });
-  renderAppEntries();
+  renderEntries();
 }
 
-function removeAppEntry(idx) {
-  appEntries.splice(idx, 1);
-  if (appEntries.length === 0) addAppEntry();
-  else renderAppEntries();
+function removeEntry(idx) {
+  entries.splice(idx, 1);
+  if (entries.length === 0) addAppEntry();
+  else renderEntries();
 }
 
-function addParticipant(entryIdx) {
-  const users = DB.getUsers().filter(u => u.role === 'user' && u.status === 'approved' && u.id !== currentUser.id);
-  appEntries[entryIdx].participants.push({ userId: '', name: '', amount: '' });
-  renderAppEntries();
+function addParticipant(idx) {
+  entries[idx].participants.push({ userId:'', name:'', amount:'' });
+  renderEntries();
 }
 
-function removeParticipant(entryIdx, partIdx) {
-  appEntries[entryIdx].participants.splice(partIdx, 1);
-  renderAppEntries();
+function removeParticipant(eIdx, pIdx) {
+  entries[eIdx].participants.splice(pIdx, 1);
+  renderEntries();
 }
 
-function renderAppEntries() {
-  const users = DB.getUsers().filter(u => u.role === 'user' && u.status === 'approved');
+function renderEntries() {
+  const approvedUsers = DB.users().filter(u=>u.role==='user'&&u.status==='approved'&&u.id!==ME.id);
   const container = document.getElementById('app-entries');
   container.innerHTML = '';
 
-  appEntries.forEach((entry, idx) => {
-    const total = entry.participants.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
-    const div = document.createElement('div');
-    div.className = 'app-entry';
+  entries.forEach((e, ei) => {
+    const entryTotal = e.participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
+    const catBtns = ['boardgame','escape','etc'].map(c=>{
+      const labels = {boardgame:'🎲 보드게임', escape:'🔐 방탈출', etc:'📦 기타'};
+      return `<button class="pill-opt ${e.category===c?'selected':''}" onclick="setEntryField(${ei},'category','${c}')">${labels[c]}</button>`;
+    }).join('');
 
-    const participantRows = entry.participants.map((p, pi) => {
+    const participantBlocks = e.participants.map((p, pi) => {
       const isSelf = pi === 0;
-      const userSelect = isSelf
-        ? `<input type="text" value="${p.name}" disabled style="background:#eee;">`
-        : `<select onchange="updateParticipant(${idx},${pi},'userId',this.value)">
-            <option value="">회원 선택</option>
-            ${users.filter(u=>u.id!==currentUser.id).map(u=>`<option value="${u.id}" ${p.userId===u.id?'selected':''}>${u.name} (${u.email})</option>`).join('')}
+      const nameField = isSelf
+        ? `<div style="font-size:0.88rem;font-weight:600;padding:9px 0;">${p.name}</div>`
+        : `<select class="form-select" onchange="setParticipant(${ei},${pi},'userId',this.value)" style="font-size:0.85rem;">
+            <option value="">회원 선택 (가입회원만)</option>
+            ${approvedUsers.map(u=>`<option value="${u.id}" ${p.userId===u.id?'selected':''}>${u.name} (${u.email})</option>`).join('')}
            </select>`;
-
-      return `<div class="participant-row">
-        <div>
-          <label>${isSelf ? '본인' : '공동이용자'}</label>
-          ${userSelect}
+      return `<div class="participant-block">
+        <div class="participant-header">
+          <span class="participant-label">${isSelf ? '👤 본인' : `👥 공동이용자 ${pi}`}</span>
+          ${!isSelf ? `<button class="btn btn-ghost btn-xs" onclick="removeParticipant(${ei},${pi})">✕ 제거</button>` : ''}
         </div>
-        <div>
-          <label>신청금액 (원)</label>
-          <input type="number" value="${p.amount}" placeholder="0" onchange="updateParticipant(${idx},${pi},'amount',this.value)" oninput="updateParticipant(${idx},${pi},'amount',this.value)">
-        </div>
-        <div>
-          ${!isSelf ? `<button class="btn btn-danger btn-xs" onclick="removeParticipant(${idx},${pi})">✕</button>` : ''}
+        ${nameField}
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">신청금액 (원)</label>
+          <input class="form-input" type="number" placeholder="0" value="${p.amount}"
+            oninput="setParticipant(${ei},${pi},'amount',this.value)" style="font-size:0.95rem;">
         </div>
       </div>`;
     }).join('');
 
-    div.innerHTML = `
-      <div class="app-entry-header">
-        <div class="app-entry-title">📄 신청 #${idx+1}</div>
-        <div class="flex gap-2">
-          <button class="btn btn-outline btn-sm" onclick="addParticipant(${idx})">👥 공동이용자 추가</button>
-          ${appEntries.length > 1 ? `<button class="btn btn-danger btn-sm" onclick="removeAppEntry(${idx})">삭제</button>` : ''}
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>일자</label>
-          <input type="date" value="${entry.date}" onchange="updateEntry(${idx},'date',this.value)">
-        </div>
-        <div class="form-group">
-          <label>신청구분</label>
-          <select onchange="updateEntry(${idx},'category',this.value)">
-            <option value="" ${!entry.category?'selected':''}>선택</option>
-            <option value="boardgame" ${entry.category==='boardgame'?'selected':''}>보드게임</option>
-            <option value="escape" ${entry.category==='escape'?'selected':''}>방탈출</option>
-            <option value="etc" ${entry.category==='etc'?'selected':''}>기타</option>
-          </select>
-        </div>
+    const receiptHtml = e.receiptDataUrl
+      ? `<div class="receipt-zone has-file" onclick="triggerReceipt(${ei})">
+          <div style="font-size:0.82rem;color:var(--success);font-weight:600;">✅ 영수증 첨부 완료</div>
+          <img src="${e.receiptDataUrl}" alt="영수증">
+          <button class="receipt-remove" onclick="removeReceipt(event,${ei})">✕</button>
+         </div>`
+      : `<div class="receipt-zone" onclick="triggerReceipt(${ei})">
+          <div style="font-size:1.5rem;margin-bottom:6px;">📎</div>
+          <div style="font-size:0.88rem;font-weight:600;color:var(--primary);">영수증 사진 첨부 <span style="color:var(--danger);">*필수</span></div>
+          <div style="font-size:0.78rem;color:var(--text-muted);margin-top:4px;">클릭하여 사진 선택 (JPG, PNG)</div>
+         </div>`;
+
+    const card = document.createElement('div');
+    card.className = 'entry-card';
+    card.innerHTML = `
+      <div class="entry-card-header">
+        <div class="entry-card-title"><span class="entry-num">${ei+1}</span> 신청 항목</div>
+        ${entries.length > 1 ? `<button class="btn btn-ghost btn-xs" onclick="removeEntry(${ei})">🗑 삭제</button>` : ''}
       </div>
       <div class="form-group">
-        <label>이용내용</label>
-        <input type="text" value="${entry.description}" placeholder="이용 내용을 입력하세요" onchange="updateEntry(${idx},'description',this.value)">
-      </div>
-      <div style="margin-bottom:12px;">
-        <label style="display:block;margin-bottom:6px;font-size:0.85rem;font-weight:500;color:var(--text-muted);">참가자 및 신청금액</label>
-        ${participantRows}
-        <div class="participant-total">합계: ₩${fmt(total)}</div>
+        <label class="form-label">일자<span class="req">*</span></label>
+        <input class="form-input" type="date" value="${e.date}" onchange="setEntryField(${ei},'date',this.value)">
       </div>
       <div class="form-group">
-        <label>영수증 첨부</label>
-        <div class="ocr-zone" onclick="triggerFileInput(${idx})">
-          ${entry.receiptDataUrl
-            ? `<img src="${entry.receiptDataUrl}" alt="영수증"><div style="margin-top:8px;font-size:0.82rem;color:var(--text-muted);">클릭하여 변경 | <span style="color:var(--primary)">OCR 분석 완료</span></div>`
-            : `<div>📎 영수증 사진을 클릭하여 첨부<br><small style="color:var(--text-muted)">JPG, PNG, PDF 지원 | OCR 자동 인식</small></div>`}
-          <input type="file" accept="image/*,application/pdf" style="display:none" id="file-${idx}" onchange="handleFile(${idx},this)">
-        </div>
-        ${entry.ocrResult ? `<div class="highlight-box mt-2"><b>🤖 OCR 인식 결과:</b><br>${entry.ocrResult}</div>` : ''}
+        <label class="form-label">신청구분<span class="req">*</span></label>
+        <div class="pill-select-row">${catBtns}</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">이용내용<span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="예: 보드게임카페 2인 입장" value="${e.description||''}" onchange="setEntryField(${ei},'description',this.value)">
+      </div>
+      ${participantBlocks}
+      <button class="btn btn-outline btn-sm btn-full mt-2" onclick="addParticipant(${ei})">
+        ＋ 공동이용자 추가
+      </button>
+      <div class="entry-total">
+        <span class="label">항목 합계</span>
+        <span class="value">₩${fmt(entryTotal)}</span>
+      </div>
+      <div class="form-group mt-2">
+        <label class="form-label">영수증<span class="req">*</span></label>
+        ${receiptHtml}
+        <input type="file" accept="image/*" id="file-${ei}" style="display:none" onchange="handleReceipt(${ei},this)">
       </div>
     `;
-    container.appendChild(div);
+    container.appendChild(card);
   });
 
-  updateTotalDisplay();
+  updateFloatingTotal();
 }
 
-function updateEntry(idx, field, val) {
-  appEntries[idx][field] = val;
-  if (field !== 'date' && field !== 'description') renderAppEntries();
-  else updateTotalDisplay();
+function setEntryField(idx, field, val) {
+  entries[idx][field] = val;
+  if (field === 'category') renderEntries();
+  else updateFloatingTotal();
 }
 
-function updateParticipant(entryIdx, partIdx, field, val) {
+function setParticipant(eIdx, pIdx, field, val) {
   if (field === 'userId') {
-    const users = DB.getUsers();
-    const u = users.find(u => u.id === val);
-    appEntries[entryIdx].participants[partIdx].userId = val;
-    appEntries[entryIdx].participants[partIdx].name = u ? u.name : '';
+    const u = DB.users().find(u=>u.id===val);
+    entries[eIdx].participants[pIdx].userId = val;
+    entries[eIdx].participants[pIdx].name = u ? u.name : '';
   } else {
-    appEntries[entryIdx].participants[partIdx][field] = val;
+    entries[eIdx].participants[pIdx][field] = val;
   }
-  // re-render only totals
-  updateTotalDisplay();
-  // update total in entry
-  const totalEl = document.querySelectorAll('.participant-total')[entryIdx];
-  if (totalEl) {
-    const total = appEntries[entryIdx].participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
-    totalEl.textContent = '합계: ₩' + fmt(total);
+  updateFloatingTotal();
+  const cards = document.querySelectorAll('.entry-card');
+  if (cards[eIdx]) {
+    const total = entries[eIdx].participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
+    const tv = cards[eIdx].querySelector('.entry-total .value');
+    if (tv) tv.textContent = '₩'+fmt(total);
   }
 }
 
-function updateTotalDisplay() {
-  const total = appEntries.reduce((s, e) =>
-    s + e.participants.reduce((ss, p) => ss + (parseFloat(p.amount)||0), 0), 0);
-  document.getElementById('apply-total-display').textContent = '총 신청금액: ₩' + fmt(total);
+function updateFloatingTotal() {
+  const total = entries.reduce((s,e)=>s+e.participants.reduce((ss,p)=>ss+(parseFloat(p.amount)||0),0),0);
+  document.getElementById('float-total').textContent = '₩'+fmt(total);
 }
 
-function triggerFileInput(idx) {
-  document.getElementById('file-'+idx).click();
+function triggerReceipt(idx) { document.getElementById('file-'+idx).click(); }
+function removeReceipt(event, idx) {
+  event.stopPropagation();
+  entries[idx].receiptDataUrl = null; entries[idx].receiptName = null;
+  renderEntries();
 }
-
-function handleFile(idx, input) {
-  const file = input.files[0];
-  if (!file) return;
+function handleReceipt(idx, input) {
+  const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    appEntries[idx].receiptDataUrl = e.target.result;
-    appEntries[idx].receipt = file.name;
-    // Simulate OCR
-    simulateOCR(idx, file.name);
-    renderAppEntries();
+    entries[idx].receiptDataUrl = e.target.result;
+    entries[idx].receiptName = file.name;
+    renderEntries();
+    toast('영수증이 첨부되었습니다 ✅','success');
   };
   reader.readAsDataURL(file);
 }
 
-function simulateOCR(idx, filename) {
-  // Simulate OCR extraction
-  const simulatedData = [
-    '가맹점: 보드게임카페 나비효과\n날짜: ' + new Date().toLocaleDateString() + '\n금액: 18,000원\n품목: 보드게임 2인 입장',
-    '가맹점: 이스케이프 룸 서울\n날짜: ' + new Date().toLocaleDateString() + '\n금액: 28,000원\n품목: 방탈출 2인',
-    '가맹점: 주사위 왕국\n날짜: ' + new Date().toLocaleDateString() + '\n금액: 12,000원\n품목: 보드게임 카페 입장료',
-  ];
-  appEntries[idx].ocrResult = simulatedData[Math.floor(Math.random() * simulatedData.length)];
-  showToast('🤖 OCR 영수증 분석 완료!', 'success');
-}
-
-function clearApply() {
-  appEntries = [];
-  addAppEntry();
-  document.getElementById('apply-account-name').value = '';
-  document.getElementById('apply-bank').value = '';
-  document.getElementById('apply-account-num').value = '';
-  document.getElementById('apply-note').value = '';
-}
-
 function submitApplication() {
-  // Validation
-  for (let i = 0; i < appEntries.length; i++) {
-    const e = appEntries[i];
-    if (!e.date) { showToast(`신청 #${i+1}: 일자를 입력하세요`, 'error'); return; }
-    if (!e.category) { showToast(`신청 #${i+1}: 신청구분을 선택하세요`, 'error'); return; }
-    if (!e.description) { showToast(`신청 #${i+1}: 이용내용을 입력하세요`, 'error'); return; }
-    for (let j = 1; j < e.participants.length; j++) {
-      if (!e.participants[j].userId) { showToast(`신청 #${i+1}: 공동이용자 회원을 선택하세요`, 'error'); return; }
+  for (let i=0; i<entries.length; i++) {
+    const e = entries[i];
+    if (!e.date) { toast(`항목 ${i+1}: 일자를 선택하세요`,'error'); return; }
+    if (!e.category) { toast(`항목 ${i+1}: 신청구분을 선택하세요`,'error'); return; }
+    if (!e.description.trim()) { toast(`항목 ${i+1}: 이용내용을 입력하세요`,'error'); return; }
+    if (!e.receiptDataUrl) { toast(`항목 ${i+1}: 영수증을 첨부하세요`,'error'); return; }
+    for (let j=1; j<e.participants.length; j++) {
+      if (!e.participants[j].userId) { toast(`항목 ${i+1}: 공동이용자 회원을 선택하세요`,'error'); return; }
     }
+    const total = e.participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
+    if (total <= 0) { toast(`항목 ${i+1}: 신청금액을 입력하세요`,'error'); return; }
   }
 
+  const acname = document.getElementById('apply-acname').value.trim();
   const bank = document.getElementById('apply-bank').value;
-  const accountName = document.getElementById('apply-account-name').value;
-  const accountNum = document.getElementById('apply-account-num').value;
+  const acnum = document.getElementById('apply-acnum').value.trim();
+  if (!acname||!bank||!acnum) { toast('환급 계좌 정보를 모두 입력하세요','error'); return; }
 
-  if (!accountName || !bank || !accountNum) {
-    showToast('환급 계좌 정보를 모두 입력하세요', 'error'); return;
-  }
-
-  // Credit check
-  const users = DB.getUsers();
-  const avail = (u) => Math.max(0, u.creditTotal - u.creditUsed - u.creditPending);
-
-  // Check each participant's credit
-  for (let e of appEntries) {
+  const users = DB.users();
+  const creditMap = {};
+  for (let e of entries) {
     for (let p of e.participants) {
-      const u = users.find(u => u.id === p.userId);
-      if (!u) continue;
-      const amt = parseFloat(p.amount) || 0;
-      if (amt <= 0) continue;
-      // Sum all amounts for this user across entries
-      const totalForUser = appEntries.reduce((s, en) =>
-        s + en.participants.filter(pp=>pp.userId===u.id).reduce((ss,pp)=>ss+(parseFloat(pp.amount)||0),0), 0);
-      if (totalForUser > avail(u)) {
-        showToast(`${u.name}님의 크레딧이 부족합니다 (가능: ₩${fmt(avail(u))})`, 'error');
-        return;
-      }
+      const amt = parseFloat(p.amount)||0;
+      if (!p.userId || amt<=0) continue;
+      creditMap[p.userId] = (creditMap[p.userId]||0) + amt;
+    }
+  }
+  for (let [uid, requested] of Object.entries(creditMap)) {
+    const u = users.find(u=>u.id===uid);
+    if (!u) continue;
+    const avail = Math.max(0, u.creditTotal - u.creditUsed - u.creditPending);
+    if (requested > avail) {
+      toast(`${u.name}님 크레딧 부족 (가능: ₩${fmt(avail)}, 요청: ₩${fmt(requested)})`,'error');
+      return;
     }
   }
 
-  // Create application record
   const app = {
-    id: 'app_' + Date.now(),
-    applicantId: currentUser.id,
-    applicantName: currentUser.name,
+    id: 'app_'+Date.now(),
+    applicantId: ME.id,
+    applicantName: ME.name,
     status: 'pending',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    bankName: bank,
-    accountName,
-    accountNum,
+    createdAt: now(),
+    updatedAt: now(),
+    bankName: bank, accountName: acname, accountNum: acnum,
     note: document.getElementById('apply-note').value,
-    entries: appEntries.map(e => ({
-      ...e,
-      totalAmount: e.participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0)
-    })),
-    totalAmount: appEntries.reduce((s,e)=>s+e.participants.reduce((ss,p)=>ss+(parseFloat(p.amount)||0),0),0)
+    entries: entries.map(e=>({ ...e, totalAmount: e.participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0) })),
+    totalAmount: entries.reduce((s,e)=>s+e.participants.reduce((ss,p)=>ss+(parseFloat(p.amount)||0),0),0)
   };
 
-  // Deduct pending credits
-  const updatedUsers = [...users];
-  for (let e of appEntries) {
-    for (let p of e.participants) {
-      const amt = parseFloat(p.amount) || 0;
-      if (amt <= 0 || !p.userId) continue;
-      const uIdx = updatedUsers.findIndex(u => u.id === p.userId);
-      if (uIdx !== -1) updatedUsers[uIdx].creditPending += amt;
-    }
-  }
-  DB.saveUsers(updatedUsers);
-
-  const apps = DB.getApps();
-  apps.push(app);
-  DB.saveApps(apps);
-  DB.addLog(`신청 제출: ${app.id} / 총 ₩${fmt(app.totalAmount)}`, currentUser.id);
-
-  showToast('✅ 신청이 완료되었습니다!', 'success');
-  clearApply();
-  refreshCurrentUser();
-  navigateTo('my-apps');
-}
-
-// ═══════════════════════════════════════════════════════════
-//  MY APPLICATIONS
-// ═══════════════════════════════════════════════════════════
-
-function renderMyApps() {
-  refreshCurrentUser();
-  const myApps = DB.getApps().filter(a => a.applicantId === currentUser.id)
-    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-  const container = document.getElementById('my-apps-table');
-  if (myApps.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>신청 내역이 없습니다</p></div>`;
-    return;
-  }
-
-  container.innerHTML = buildAppsTable(myApps, true, false);
-}
-
-function refreshMyApps() { renderMyApps(); }
-
-function buildAppsTable(apps, showDetail=true, isAdmin=false) {
-  return `<table>
-    <thead><tr>
-      <th>신청일</th><th>신청자</th><th>항목수</th><th>총금액</th><th>상태</th>
-      ${showDetail ? '<th>상세</th>' : ''}
-      ${isAdmin ? '<th>관리</th>' : ''}
-    </tr></thead>
-    <tbody>
-    ${apps.map(a => `<tr>
-      <td>${fmtDate(a.createdAt)}</td>
-      <td>${a.applicantName}</td>
-      <td>${a.entries ? a.entries.length : 0}건</td>
-      <td><b>₩${fmt(a.totalAmount)}</b></td>
-      <td>${statusBadge(a.status)}</td>
-      ${showDetail ? `<td>
-        <button class="btn btn-outline btn-xs" onclick="openAppDetail('${a.id}',${isAdmin})">상세보기</button>
-        ${a.status === 'pending' ? `<button class="btn btn-danger btn-xs" onclick="cancelApp('${a.id}')">취소</button>` : ''}
-      </td>` : ''}
-      ${isAdmin ? `<td>
-        <button class="btn btn-success btn-xs" onclick="approveApp('${a.id}')">승인</button>
-        <button class="btn btn-warning btn-xs" onclick="openAdminEdit('${a.id}')">수정</button>
-        <button class="btn btn-danger btn-xs" onclick="rejectApp('${a.id}')">반려</button>
-      </td>` : ''}
-    </tr>`).join('')}
-    </tbody>
-  </table>`;
-}
-
-function cancelApp(appId) {
-  if (!confirm('신청을 취소하시겠습니까?')) return;
-  const apps = DB.getApps();
-  const idx = apps.findIndex(a => a.id === appId);
-  if (idx === -1) return;
-  const app = apps[idx];
-  if (app.status !== 'pending') { showToast('대기 중인 신청만 취소 가능합니다', 'error'); return; }
-
-  apps[idx].status = 'cancelled';
-  apps[idx].updatedAt = new Date().toISOString();
-  DB.saveApps(apps);
-
-  // Restore pending credits
-  restorePendingCredits(app);
-  DB.addLog(`신청 취소: ${appId}`, currentUser.id);
-  showToast('신청이 취소되었습니다', 'success');
-  refreshCurrentUser();
-  renderMyApps();
-}
-
-function restorePendingCredits(app) {
-  const users = DB.getUsers();
-  for (let e of (app.entries||[])) {
-    for (let p of e.participants) {
-      const amt = parseFloat(p.amount) || 0;
-      if (amt <= 0 || !p.userId) continue;
-      const uIdx = users.findIndex(u => u.id === p.userId);
-      if (uIdx !== -1) users[uIdx].creditPending = Math.max(0, users[uIdx].creditPending - amt);
-    }
+  for (let [uid, amt] of Object.entries(creditMap)) {
+    const idx = users.findIndex(u=>u.id===uid);
+    if (idx!==-1) users[idx].creditPending += amt;
   }
   DB.saveUsers(users);
+
+  const apps = DB.apps(); apps.push(app); DB.saveApps(apps);
+  DB.log(`신청 제출: ${app.id} ₩${fmt(app.totalAmount)}`, ME.id);
+  toast('✅ 신청이 완료되었습니다!','success');
+
+  entries = []; clearApplyForm();
+  refreshMe();
+  navigateTo('myapps');
 }
 
-// ═══════════════════════════════════════════════════════════
-//  APP DETAIL MODAL
-// ═══════════════════════════════════════════════════════════
+function clearApplyForm() {
+  ['apply-acname','apply-bank','apply-acnum','apply-note'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
 
-function openAppDetail(appId, isAdmin=false) {
-  const app = DB.getApps().find(a => a.id === appId);
-  if (!app) return;
+/* ═══════════════════════════════════════
+   MY APPS
+═══════════════════════════════════════ */
+function renderMyApps() {
+  refreshMe();
+  const myApps = DB.apps().filter(a=>a.applicantId===ME.id).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  const container = document.getElementById('myapps-list');
+  if (myApps.length===0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div>신청 내역이 없어요</div><button class="btn btn-accent mt-2" onclick="navigateTo('apply')">신청하기</button></div>`;
+    return;
+  }
+  container.innerHTML = myApps.map(a=>appListItem(a, true)).join('');
+}
 
-  document.getElementById('modal-app-title').textContent = `신청 상세 — ${fmtDate(app.createdAt)}`;
+function appListItem(a, showActions=true) {
+  return `<div class="app-list-item" onclick="openDetail('${a.id}')">
+    <div class="app-list-row">
+      <div class="app-list-name">${a.applicantName} · ${a.entries?a.entries.length:0}건</div>
+      <div>${statusBadge(a.status)}</div>
+    </div>
+    <div class="app-list-row">
+      <div class="app-list-amount">₩${fmt(a.totalAmount)}</div>
+      <div class="app-list-date">${fmtDate(a.createdAt)}</div>
+    </div>
+    <div class="app-list-meta">${a.entries?a.entries.map(e=>catLabel(e.category)).join(', '):''}</div>
+    ${showActions && a.status==='pending' ? `<div class="app-list-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-ghost btn-xs" onclick="cancelApp('${a.id}')">🚫 취소</button>
+    </div>` : ''}
+  </div>`;
+}
 
-  const entriesHtml = (app.entries||[]).map((e,i) => `
-    <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid var(--border);">
-      <div style="font-weight:700;margin-bottom:8px;">📄 신청 #${i+1} — ${catLabel(e.category)}</div>
-      <div class="form-row" style="margin-bottom:8px;">
-        <div><b>일자:</b> ${e.date}</div>
-        <div><b>합계:</b> ₩${fmt(e.totalAmount)}</div>
+function cancelApp(id) {
+  if (!confirm('신청을 취소하시겠습니까?')) return;
+  const apps = DB.apps();
+  const idx = apps.findIndex(a=>a.id===id); if (idx===-1) return;
+  if (apps[idx].status!=='pending') { toast('대기 중인 신청만 취소 가능합니다','error'); return; }
+  apps[idx].status = 'cancelled'; apps[idx].updatedAt = now();
+  DB.saveApps(apps);
+  restorePending(apps[idx]);
+  DB.log(`신청 취소: ${id}`, ME.id);
+  toast('취소되었습니다','success');
+  refreshMe(); renderMyApps();
+}
+
+/* ═══════════════════════════════════════
+   DETAIL MODAL
+═══════════════════════════════════════ */
+let detailAppId = '';
+function openDetail(id, isAdmin=false) {
+  detailAppId = id;
+  const app = DB.apps().find(a=>a.id===id); if (!app) return;
+  const isAdminView = isAdmin || ME.role==='admin';
+
+  document.getElementById('modal-detail-title').textContent = `📄 신청 상세 — ${fmtDate(app.createdAt)}`;
+
+  const entriesHtml = (app.entries||[]).map((e,i)=>`
+    <div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid var(--border);">
+      <div style="font-weight:700;color:var(--primary-dark);margin-bottom:8px;">
+        ${catLabel(e.category)} · ${e.date} · <span style="color:var(--primary);">₩${fmt(e.totalAmount)}</span>
       </div>
-      <div><b>이용내용:</b> ${e.description}</div>
-      <hr>
+      <div style="font-size:0.88rem;margin-bottom:8px;color:var(--text);">${e.description}</div>
       ${(e.participants||[]).map(p=>`
-        <div class="flex-between" style="margin:4px 0;">
-          <span>${p.name || '(미선택)'}</span>
-          <span><b>₩${fmt(p.amount)}</b></span>
-        </div>
-      `).join('')}
-      ${e.receiptDataUrl ? `<img src="${e.receiptDataUrl}" style="max-width:100%;border-radius:8px;margin-top:8px;">` : ''}
-      ${e.ocrResult ? `<div class="highlight-box mt-2" style="font-size:0.82rem;"><b>OCR:</b><br>${e.ocrResult}</div>` : ''}
+        <div style="display:flex;justify-content:space-between;font-size:0.85rem;padding:4px 0;border-bottom:1px dashed var(--border);">
+          <span>${p.name||'(미선택)'}</span><span style="font-weight:700;">₩${fmt(p.amount)}</span>
+        </div>`).join('')}
+      ${e.receiptDataUrl ? `<img src="${e.receiptDataUrl}" style="max-width:100%;border-radius:8px;margin-top:10px;" alt="영수증">` : ''}
     </div>
   `).join('');
 
-  document.getElementById('modal-app-content').innerHTML = `
-    <div style="margin-bottom:12px;">
-      <div class="flex-between mb-3">
-        <div><b>신청자:</b> ${app.applicantName}</div>
-        <div>${statusBadge(app.status)}</div>
-      </div>
-      <div><b>계좌:</b> ${app.bankName} ${app.accountNum} (${app.accountName})</div>
-      ${app.note ? `<div><b>비고:</b> ${app.note}</div>` : ''}
-      ${app.adminNote ? `<div><b>관리자 메모:</b> ${app.adminNote}</div>` : ''}
+  document.getElementById('modal-detail-body').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-row"><span class="detail-key">신청자</span><span class="detail-val">${app.applicantName}</span></div>
+      <div class="detail-row"><span class="detail-key">상태</span><span class="detail-val">${statusBadge(app.status)}</span></div>
+      <div class="detail-row"><span class="detail-key">신청일</span><span class="detail-val">${fmtDate(app.createdAt,true)}</span></div>
+      ${app.approvedAt ? `<div class="detail-row"><span class="detail-key">처리일</span><span class="detail-val">${fmtDate(app.approvedAt,true)}</span></div>` : ''}
+      <div class="detail-row"><span class="detail-key">환급계좌</span><span class="detail-val">${app.bankName} ${app.accountNum}<br>(${app.accountName})</span></div>
+      ${app.note ? `<div class="detail-row"><span class="detail-key">비고</span><span class="detail-val">${app.note}</span></div>` : ''}
+      ${app.adminNote ? `<div class="detail-row"><span class="detail-key">관리자메모</span><span class="detail-val" style="color:var(--primary);">${app.adminNote}</span></div>` : ''}
     </div>
+    <div class="section-divider"></div>
+    <div class="card-title" style="margin-bottom:10px;">신청 항목</div>
     ${entriesHtml}
-    <div class="flex-between" style="font-size:1.1rem;font-weight:700;color:var(--primary-dark);">
-      <span>총 신청금액</span><span>₩${fmt(app.totalAmount)}</span>
+    <div class="amount-display mt-2">
+      <div><div class="label">총 신청금액</div><div class="value">₩${fmt(app.totalAmount)}</div></div>
+      <div style="font-size:0.8rem;opacity:0.8;">${(app.entries||[]).length}개 항목</div>
     </div>
   `;
 
-  document.getElementById('modal-app-actions').innerHTML = `
-    <button class="btn btn-outline" onclick="closeModal('modal-app-detail')">닫기</button>
-  `;
-
-  openModal('modal-app-detail');
+  let actions = `<button class="btn btn-outline" onclick="closeModal('modal-detail')">닫기</button>`;
+  if (isAdminView) {
+    actions += `
+      <button class="btn btn-info" onclick="openPrintPreview('${id}')">🖨️ 인쇄</button>
+      <button class="btn btn-warn btn-sm" onclick="openEdit('${id}')">✏️ 수정</button>
+    `;
+    if (app.status === 'pending') {
+      actions += `
+        <button class="btn btn-success" onclick="approveApp('${id}')">✅ 승인</button>
+        <button class="btn btn-danger" onclick="rejectApp('${id}')">❌ 반려</button>
+      `;
+    }
+  } else if (app.status === 'pending') {
+    actions += `<button class="btn btn-danger" onclick="cancelApp('${id}')">취소</button>`;
+  }
+  document.getElementById('modal-detail-actions').innerHTML = actions;
+  openModal('modal-detail');
 }
 
-// ═══════════════════════════════════════════════════════════
-//  ADMIN DASHBOARD
-// ═══════════════════════════════════════════════════════════
-
+/* ═══════════════════════════════════════
+   ADMIN FUNCTIONS (모두 유지)
+═══════════════════════════════════════ */
 function renderAdminDash() {
-  const apps = DB.getApps();
-  const users = DB.getUsers().filter(u=>u.role==='user');
+  const apps = DB.apps();
+  const users = DB.users().filter(u=>u.role==='user');
   const pending = apps.filter(a=>a.status==='pending');
   const approved = apps.filter(a=>a.status==='approved'||a.status==='mod-approved');
-  const totalApproved = approved.reduce((s,a)=>s+a.totalAmount,0);
+  const totalPaid = approved.reduce((s,a)=>s+a.totalAmount,0);
 
   document.getElementById('admin-stats').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-label">전체 회원</div>
-      <div class="stat-value">${users.length}명</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">승인 대기</div>
-      <div class="stat-value accent">${pending.length}건</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">전체 신청</div>
-      <div class="stat-value">${apps.length}건</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">총 지급 금액</div>
-      <div class="stat-value green">₩${fmt(totalApproved)}</div>
-    </div>
+    <div class="stat-card"><div class="stat-label">전체 회원</div><div class="stat-value blue">${users.length}명</div></div>
+    <div class="stat-card"><div class="stat-label">승인 대기</div><div class="stat-value accent">${pending.length}건 <span class="pending-dot"></span></div></div>
+    <div class="stat-card"><div class="stat-label">전체 신청</div><div class="stat-value">${apps.length}건</div></div>
+    <div class="stat-card"><div class="stat-label">총 지급액</div><div class="stat-value green">₩${fmt(totalPaid)}</div></div>
   `;
 
-  const pendingList = document.getElementById('admin-pending-list');
-  if (pending.length === 0) {
-    pendingList.innerHTML = `<div class="empty-state"><div class="icon">✅</div><p>대기 중인 신청이 없습니다</p></div>`;
+  const el = document.getElementById('admin-pending');
+  if (pending.length===0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><div>대기 중인 신청 없음</div></div>`;
     return;
   }
-
-  pendingList.innerHTML = `<div class="table-wrap">${buildAppsTable(pending.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)), true, true)}</div>`;
+  el.innerHTML = pending.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).map(a=>`
+    <div class="app-list-item" onclick="openDetail('${a.id}',true)">
+      <div class="app-list-row">
+        <div class="app-list-name">${a.applicantName}</div>
+        <div>${statusBadge(a.status)}</div>
+      </div>
+      <div class="app-list-row">
+        <div class="app-list-amount">₩${fmt(a.totalAmount)}</div>
+        <div class="app-list-date">${fmtDate(a.createdAt)}</div>
+      </div>
+      <div class="app-list-meta">${a.entries?a.entries.map(e=>catLabel(e.category)).join(', '):''}</div>
+      <div class="app-list-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-success btn-xs" onclick="approveApp('${a.id}')">✅ 승인</button>
+        <button class="btn btn-warn btn-xs" onclick="openEdit('${a.id}')">✏️</button>
+        <button class="btn btn-danger btn-xs" onclick="rejectApp('${a.id}')">❌ 반려</button>
+        <button class="btn btn-info btn-xs" onclick="openPrintPreview('${a.id}')">🖨️</button>
+      </div>
+    </div>
+  `).join('');
 }
 
-// ═══════════════════════════════════════════════════════════
-//  ADMIN: ALL APPS
-// ═══════════════════════════════════════════════════════════
-
-function renderAdminApps() {
-  let apps = DB.getApps();
+function renderAdminAll() {
+  let apps = DB.apps();
   const search = (document.getElementById('admin-search')?.value||'').toLowerCase();
-  const statusFilter = document.getElementById('admin-filter-status')?.value||'';
-
-  if (search) apps = apps.filter(a =>
-    a.applicantName.toLowerCase().includes(search) ||
-    a.id.toLowerCase().includes(search) ||
-    (a.note||'').toLowerCase().includes(search)
-  );
-  if (statusFilter) apps = apps.filter(a => a.status === statusFilter);
-
+  const sf = document.getElementById('admin-status-filter')?.value||'';
+  if (search) apps = apps.filter(a=> a.applicantName.toLowerCase().includes(search)||a.id.includes(search)||(a.note||'').toLowerCase().includes(search));
+  if (sf) apps = apps.filter(a=>a.status===sf);
   apps.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
 
-  const container = document.getElementById('admin-apps-table');
-  if (apps.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>검색 결과가 없습니다</p></div>`;
-    return;
-  }
-
-  container.innerHTML = buildAppsTable(apps, true, true);
+  document.getElementById('admin-all-count').textContent = `총 ${apps.length}건`;
+  const el = document.getElementById('admin-all-list');
+  if (apps.length===0) { el.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div>결과 없음</div></div>`; return; }
+  el.innerHTML = apps.map(a=>`
+    <div class="app-list-item" onclick="openDetail('${a.id}',true)">
+      <div class="app-list-row">
+        <div class="app-list-name">${a.applicantName}</div>
+        <div>${statusBadge(a.status)}</div>
+      </div>
+      <div class="app-list-row">
+        <div class="app-list-amount">₩${fmt(a.totalAmount)}</div>
+        <div class="app-list-date">${fmtDate(a.createdAt)}</div>
+      </div>
+      <div class="app-list-meta">${a.entries?a.entries.map(e=>catLabel(e.category)).join(', '):''}</div>
+      <div class="app-list-actions" onclick="event.stopPropagation()">
+        ${a.status==='pending'?`<button class="btn btn-success btn-xs" onclick="approveApp('${a.id}')">✅</button>`:''}
+        <button class="btn btn-warn btn-xs" onclick="openEdit('${a.id}')">✏️</button>
+        ${a.status==='pending'?`<button class="btn btn-danger btn-xs" onclick="rejectApp('${a.id}')">❌</button>`:''}
+        <button class="btn btn-info btn-xs" onclick="openPrintPreview('${a.id}')">🖨️</button>
+      </div>
+    </div>
+  `).join('');
 }
 
-function approveApp(appId) {
-  if (!confirm('이 신청을 승인하시겠습니까?')) return;
-  const apps = DB.getApps();
-  const idx = apps.findIndex(a => a.id === appId);
-  if (idx === -1) return;
+function approveApp(id) {
+  if (!confirm('승인하시겠습니까?')) return;
+  const apps = DB.apps();
+  const idx = apps.findIndex(a=>a.id===id); if (idx===-1) return;
   const app = apps[idx];
-
   const prevStatus = app.status;
-  apps[idx].status = prevStatus === 'pending' ? 'approved' : 'mod-approved';
-  apps[idx].updatedAt = new Date().toISOString();
-  apps[idx].approvedBy = currentUser.id;
-  apps[idx].approvedAt = new Date().toISOString();
+  apps[idx].status = prevStatus==='pending'?'approved':'mod-approved';
+  apps[idx].updatedAt = now();
+  apps[idx].approvedAt = now();
+  apps[idx].approvedBy = ME.id;
   DB.saveApps(apps);
 
-  // Move pending -> used
-  const users = DB.getUsers();
+  const users = DB.users();
   for (let e of (app.entries||[])) {
     for (let p of e.participants) {
       const amt = parseFloat(p.amount)||0;
-      if (amt<=0||!p.userId) continue;
-      const uIdx = users.findIndex(u=>u.id===p.userId);
-      if (uIdx!==-1) {
-        users[uIdx].creditPending = Math.max(0, users[uIdx].creditPending - amt);
-        users[uIdx].creditUsed += amt;
-      }
+      if (!p.userId||amt<=0) continue;
+      const ui = users.findIndex(u=>u.id===p.userId);
+      if (ui!==-1) { users[ui].creditPending=Math.max(0,users[ui].creditPending-amt); users[ui].creditUsed+=amt; }
     }
   }
   DB.saveUsers(users);
-  DB.addLog(`신청 승인: ${appId} / ₩${fmt(app.totalAmount)}`, currentUser.id);
-  showToast('✅ 승인 완료!', 'success');
-  closeModal('modal-app-detail');
-  renderAdminDash();
+  DB.log(`승인: ${id} ₩${fmt(app.totalAmount)}`, ME.id);
+  toast('✅ 승인 완료','success');
+  closeModal('modal-detail');
+  refreshMe();
+  if (currentPage==='admin') renderAdminDash();
+  else if (currentPage==='admin-all') renderAdminAll();
 }
 
-function rejectApp(appId) {
-  if (!confirm('이 신청을 반려하시겠습니까?')) return;
-  const apps = DB.getApps();
-  const idx = apps.findIndex(a => a.id === appId);
-  if (idx === -1) return;
-  const app = apps[idx];
-
-  apps[idx].status = 'rejected';
-  apps[idx].updatedAt = new Date().toISOString();
+function rejectApp(id) {
+  if (!confirm('반려하시겠습니까?')) return;
+  const apps = DB.apps();
+  const idx = apps.findIndex(a=>a.id===id); if (idx===-1) return;
+  apps[idx].status = 'rejected'; apps[idx].updatedAt = now();
   DB.saveApps(apps);
-
-  // Restore pending credits
-  restorePendingCredits(app);
-  DB.addLog(`신청 반려: ${appId}`, currentUser.id);
-  showToast('반려 처리되었습니다', 'warning');
-  closeModal('modal-app-detail');
-  renderAdminDash();
+  restorePending(apps[idx]);
+  DB.log(`반려: ${id}`, ME.id);
+  toast('반려 처리되었습니다','warning');
+  closeModal('modal-detail');
+  refreshMe();
+  if (currentPage==='admin') renderAdminDash();
+  else if (currentPage==='admin-all') renderAdminAll();
 }
 
-// ═══════════════════════════════════════════════════════════
-//  ADMIN EDIT
-// ═══════════════════════════════════════════════════════════
+let editId = '';
+function openEdit(id) {
+  editId = id;
+  const app = DB.apps().find(a=>a.id===id); if (!app) return;
 
-let editingAppId = null;
-
-function openAdminEdit(appId) {
-  editingAppId = appId;
-  const app = DB.getApps().find(a => a.id === appId);
-  if (!app) return;
-
-  const content = document.getElementById('modal-admin-edit-content');
-  const entriesHtml = (app.entries||[]).map((e,i) => `
-    <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:12px;">
-      <b>신청 #${i+1}</b>
-      <div class="form-row mt-2">
-        <div class="form-group">
-          <label>일자</label>
-          <input type="date" id="edit-date-${i}" value="${e.date}">
-        </div>
-        <div class="form-group">
-          <label>구분</label>
-          <select id="edit-cat-${i}">
+  const entriesHtml = (app.entries||[]).map((e,i)=>`
+    <div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid var(--border);">
+      <div style="font-weight:700;font-size:0.9rem;margin-bottom:10px;">항목 ${i+1}</div>
+      <div class="form-row-2">
+        <div class="form-group"><label class="form-label">일자</label><input class="form-input" type="date" id="ed-date-${i}" value="${e.date}"></div>
+        <div class="form-group"><label class="form-label">구분</label>
+          <select class="form-select" id="ed-cat-${i}">
             <option value="boardgame" ${e.category==='boardgame'?'selected':''}>보드게임</option>
             <option value="escape" ${e.category==='escape'?'selected':''}>방탈출</option>
             <option value="etc" ${e.category==='etc'?'selected':''}>기타</option>
           </select>
         </div>
       </div>
-      <div class="form-group">
-        <label>이용내용</label>
-        <input type="text" id="edit-desc-${i}" value="${e.description}">
-      </div>
+      <div class="form-group"><label class="form-label">이용내용</label><input class="form-input" type="text" id="ed-desc-${i}" value="${e.description}"></div>
       ${(e.participants||[]).map((p,pi)=>`
-        <div class="form-row">
-          <div><label>${pi===0?'본인':'공동이용자'}: ${p.name}</label></div>
-          <div class="form-group">
-            <label>신청금액</label>
-            <input type="number" id="edit-amt-${i}-${pi}" value="${p.amount}">
-          </div>
-        </div>
-      `).join('')}
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="flex:1;font-size:0.83rem;color:var(--text-muted);">${p.name||'?'}</span>
+          <div style="flex:1;"><input class="form-input" type="number" id="ed-amt-${i}-${pi}" value="${p.amount}" style="font-size:0.88rem;"></div>
+        </div>`).join('')}
     </div>
   `).join('');
 
-  content.innerHTML = `
-    <div class="form-group">
-      <label>은행</label>
-      <input type="text" id="edit-bank" value="${app.bankName}">
+  document.getElementById('modal-edit-body').innerHTML = `
+    <div class="form-row-2">
+      <div class="form-group"><label class="form-label">은행</label><input class="form-input" id="ed-bank" value="${app.bankName}"></div>
+      <div class="form-group"><label class="form-label">예금주</label><input class="form-input" id="ed-acname" value="${app.accountName}"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>예금주</label>
-        <input type="text" id="edit-acname" value="${app.accountName}">
-      </div>
-      <div class="form-group">
-        <label>계좌번호</label>
-        <input type="text" id="edit-acnum" value="${app.accountNum}">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>관리자 메모</label>
-      <textarea id="edit-admin-note">${app.adminNote||''}</textarea>
-    </div>
+    <div class="form-group"><label class="form-label">계좌번호</label><input class="form-input" id="ed-acnum" value="${app.accountNum}"></div>
+    <div class="form-group"><label class="form-label">관리자 메모</label><textarea class="form-textarea" id="ed-note">${app.adminNote||''}</textarea></div>
+    <div class="section-divider"></div>
     ${entriesHtml}
   `;
 
-  document.getElementById('modal-admin-edit-actions').innerHTML = `
-    <button class="btn btn-outline" onclick="closeModal('modal-admin-edit')">취소</button>
-    <button class="btn btn-warning" onclick="saveAdminEdit(false)">수정 저장</button>
-    <button class="btn btn-success" onclick="saveAdminEdit(true)">수정 후 승인</button>
+  document.getElementById('modal-edit-actions').innerHTML = `
+    <button class="btn btn-outline" onclick="closeModal('modal-edit')">취소</button>
+    <button class="btn btn-warn btn-sm" onclick="saveEdit(false)">수정 저장</button>
+    <button class="btn btn-success btn-sm" onclick="saveEdit(true)">수정 후 승인</button>
   `;
-
-  openModal('modal-admin-edit');
+  closeModal('modal-detail');
+  openModal('modal-edit');
 }
 
-function saveAdminEdit(andApprove) {
-  const apps = DB.getApps();
-  const idx = apps.findIndex(a => a.id === editingAppId);
-  if (idx === -1) return;
+function saveEdit(andApprove) {
+  const apps = DB.apps();
+  const idx = apps.findIndex(a=>a.id===editId); if (idx===-1) return;
   const app = apps[idx];
-  const prevStatus = app.status;
 
-  app.bankName = document.getElementById('edit-bank').value;
-  app.accountName = document.getElementById('edit-acname').value;
-  app.accountNum = document.getElementById('edit-acnum').value;
-  app.adminNote = document.getElementById('edit-admin-note').value;
+  app.bankName = document.getElementById('ed-bank').value;
+  app.accountName = document.getElementById('ed-acname').value;
+  app.accountNum = document.getElementById('ed-acnum').value;
+  app.adminNote = document.getElementById('ed-note').value;
 
   let newTotal = 0;
-  app.entries.forEach((e, i) => {
-    e.date = document.getElementById(`edit-date-${i}`)?.value || e.date;
-    e.category = document.getElementById(`edit-cat-${i}`)?.value || e.category;
-    e.description = document.getElementById(`edit-desc-${i}`)?.value || e.description;
-    e.participants.forEach((p, pi) => {
-      const newAmt = parseFloat(document.getElementById(`edit-amt-${i}-${pi}`)?.value) || 0;
-      // Update pending difference if still pending
-      if (app.status === 'pending') {
+  app.entries.forEach((e,i)=>{
+    e.date = document.getElementById(`ed-date-${i}`)?.value||e.date;
+    e.category = document.getElementById(`ed-cat-${i}`)?.value||e.category;
+    e.description = document.getElementById(`ed-desc-${i}`)?.value||e.description;
+    e.participants.forEach((p,pi)=>{
+      const inp = document.getElementById(`ed-amt-${i}-${pi}`);
+      if (!inp) return;
+      const newAmt = parseFloat(inp.value)||0;
+      if (app.status==='pending') {
         const diff = newAmt - (parseFloat(p.amount)||0);
-        if (p.userId && diff !== 0) {
-          const users = DB.getUsers();
-          const uIdx = users.findIndex(u=>u.id===p.userId);
-          if (uIdx !== -1) { users[uIdx].creditPending = Math.max(0, users[uIdx].creditPending + diff); DB.saveUsers(users); }
+        if (p.userId && diff!==0) {
+          const users = DB.users();
+          const ui = users.findIndex(u=>u.id===p.userId);
+          if (ui!==-1) { users[ui].creditPending = Math.max(0, users[ui].creditPending+diff); DB.saveUsers(users); }
         }
       }
       p.amount = newAmt;
@@ -1485,295 +1690,362 @@ function saveAdminEdit(andApprove) {
     newTotal += e.totalAmount;
   });
   app.totalAmount = newTotal;
+  app.updatedAt = now();
 
   if (andApprove) {
     app.status = 'mod-approved';
-    app.approvedBy = currentUser.id;
-    app.approvedAt = new Date().toISOString();
-    // Move pending -> used
-    const users = DB.getUsers();
-    for (let e of app.entries) {
-      for (let p of e.participants) {
-        const amt = parseFloat(p.amount)||0;
-        if (amt<=0||!p.userId) continue;
-        const uIdx = users.findIndex(u=>u.id===p.userId);
-        if (uIdx!==-1) {
-          users[uIdx].creditPending = Math.max(0, users[uIdx].creditPending - amt);
-          users[uIdx].creditUsed += amt;
-        }
-      }
+    app.approvedAt = now(); app.approvedBy = ME.id;
+    const users = DB.users();
+    for (let e of app.entries) for (let p of e.participants) {
+      const amt = parseFloat(p.amount)||0;
+      if (!p.userId||amt<=0) continue;
+      const ui = users.findIndex(u=>u.id===p.userId);
+      if (ui!==-1) { users[ui].creditPending=Math.max(0,users[ui].creditPending-amt); users[ui].creditUsed+=amt; }
     }
     DB.saveUsers(users);
   }
 
-  app.updatedAt = new Date().toISOString();
-  apps[idx] = app;
-  DB.saveApps(apps);
-  DB.addLog(`신청 수정${andApprove?'+승인':''}: ${editingAppId}`, currentUser.id);
-  showToast(andApprove ? '✅ 수정 후 승인 완료' : '✏️ 수정 완료', 'success');
-  closeModal('modal-admin-edit');
-  renderAdminDash();
+  apps[idx] = app; DB.saveApps(apps);
+  DB.log(`수정${andApprove?'+승인':''}: ${editId}`, ME.id);
+  toast(andApprove?'✅ 수정 후 승인 완료':'✏️ 수정 완료','success');
+  closeModal('modal-edit');
+  refreshMe();
+  if (currentPage==='admin') renderAdminDash();
+  else if (currentPage==='admin-all') renderAdminAll();
 }
-
-// ═══════════════════════════════════════════════════════════
-//  ADMIN MEMBERS
-// ═══════════════════════════════════════════════════════════
 
 function renderAdminMembers() {
-  const users = DB.getUsers();
-  const container = document.getElementById('admin-members-table');
-
-  container.innerHTML = `<table>
-    <thead><tr>
-      <th>이름</th><th>이메일</th><th>가입방법</th><th>상태</th>
-      <th>총크레딧</th><th>사용</th><th>대기</th><th>가용</th><th>관리</th>
-    </tr></thead>
-    <tbody>
-    ${users.map(u => {
-      const avail = Math.max(0, u.creditTotal - u.creditUsed - u.creditPending);
-      return `<tr>
-        <td><b>${u.name}</b>${u.role==='admin'?'<span style="margin-left:4px;font-size:0.75rem;background:var(--primary-dark);color:#fff;border-radius:4px;padding:1px 5px;">관리자</span>':''}</td>
-        <td>${u.email}</td>
-        <td>${u.provider||'local'}</td>
-        <td>${u.status==='approved'?'<span style="color:var(--success);">✅ 승인</span>':u.status==='pending'?'<span style="color:var(--warning);">⏳ 대기</span>':'<span style="color:var(--danger);">❌ 거절</span>'}</td>
-        <td>₩${fmt(u.creditTotal)}</td>
-        <td>₩${fmt(u.creditUsed)}</td>
-        <td>₩${fmt(u.creditPending)}</td>
-        <td><b>₩${fmt(avail)}</b></td>
-        <td>
-          ${u.status==='pending'?`<button class="btn btn-success btn-xs" onclick="approveUser('${u.id}')">승인</button>`:''}
-          <button class="btn btn-info btn-xs" onclick="openCreditEdit('${u.id}')">크레딧</button>
-          ${u.status!=='rejected'&&u.role!=='admin'?`<button class="btn btn-danger btn-xs" onclick="rejectUser('${u.id}')">거절</button>`:''}
-        </td>
-      </tr>`;
-    }).join('')}
-    </tbody>
-  </table>`;
+  const users = DB.users();
+  const el = document.getElementById('admin-members-list');
+  el.innerHTML = users.map(u=>{
+    const avail = Math.max(0, u.creditTotal - u.creditUsed - u.creditPending);
+    const statusIcon = u.status==='approved'?'✅':u.status==='pending'?'⏳':'❌';
+    return `<div class="card" style="margin-bottom:10px;">
+      <div class="flex-between mb-2">
+        <div>
+          <div style="font-weight:700;font-size:0.95rem;">${u.name} ${u.role==='admin'?'<span class="admin-tag">ADMIN</span>':''}</div>
+          <div style="font-size:0.78rem;color:var(--text-muted);">${u.email} · ${u.provider||'local'}</div>
+        </div>
+        <div>${statusIcon}</div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;">
+        <div style="background:var(--surface2);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:0.68rem;color:var(--text-muted);">총크레딧</div>
+          <div style="font-size:0.9rem;font-weight:700;color:var(--primary);">₩${fmt(u.creditTotal)}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:0.68rem;color:var(--text-muted);">사용</div>
+          <div style="font-size:0.9rem;font-weight:700;color:var(--success);">₩${fmt(u.creditUsed)}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:0.68rem;color:var(--text-muted);">가용</div>
+          <div style="font-size:0.9rem;font-weight:700;color:var(--accent);">₩${fmt(avail)}</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        ${u.status==='pending'?`<button class="btn btn-success btn-sm" onclick="approveUser('${u.id}')">✅ 승인</button>`:''}
+        <button class="btn btn-outline btn-sm" onclick="openCreditEdit('${u.id}')">💰 크레딧</button>
+        ${u.status!=='rejected'&&u.role!=='admin'?`<button class="btn btn-danger btn-sm" onclick="rejectUser('${u.id}')">거절</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function approveUser(userId) {
-  const users = DB.getUsers();
-  const idx = users.findIndex(u=>u.id===userId);
-  if (idx===-1) return;
+function approveUser(uid) {
+  const users = DB.users();
+  const idx = users.findIndex(u=>u.id===uid); if (idx===-1) return;
   users[idx].status = 'approved';
-  users[idx].creditTotal = 30000; // grant initial credit
+  if (users[idx].creditTotal === 0) users[idx].creditTotal = 30000;
   DB.saveUsers(users);
-  DB.addLog(`회원 승인 + 크레딧 ₩30,000 부여: ${users[idx].email}`, currentUser.id);
-  showToast(`${users[idx].name} 승인 완료! 크레딧 ₩30,000 지급`, 'success');
+  DB.log(`회원 승인: ${users[idx].email}`, ME.id);
+  toast(`${users[idx].name} 승인 + 크레딧 ₩30,000 지급`,'success');
   renderAdminMembers();
 }
 
-function rejectUser(userId) {
-  const users = DB.getUsers();
-  const idx = users.findIndex(u=>u.id===userId);
-  if (idx===-1) return;
+function rejectUser(uid) {
+  const users = DB.users();
+  const idx = users.findIndex(u=>u.id===uid); if (idx===-1) return;
   if (!confirm(`${users[idx].name}을 거절하시겠습니까?`)) return;
   users[idx].status = 'rejected';
   DB.saveUsers(users);
-  DB.addLog(`회원 거절: ${users[idx].email}`, currentUser.id);
-  showToast('거절 처리되었습니다', 'warning');
+  DB.log(`회원 거절: ${users[idx].email}`, ME.id);
+  toast('거절 처리','warning');
   renderAdminMembers();
 }
 
-let editingUserId = null;
-function openCreditEdit(userId) {
-  editingUserId = userId;
-  const users = DB.getUsers();
-  const u = users.find(u=>u.id===userId);
-  if (!u) return;
-  document.getElementById('credit-edit-content').innerHTML = `
-    <div style="margin-bottom:14px;"><b>${u.name}</b> (${u.email})</div>
-    <div class="form-group">
-      <label>총 크레딧 (원)</label>
-      <input type="number" id="credit-total-input" value="${u.creditTotal}">
-    </div>
-    <div class="form-group">
-      <label>사용 크레딧 (원) — 관리자 조정용</label>
-      <input type="number" id="credit-used-input" value="${u.creditUsed}">
-    </div>
-    <div class="text-muted">대기 중: ₩${fmt(u.creditPending)} (신청 취소/반려 시 자동 복구)</div>
+let editCreditUid = '';
+function openCreditEdit(uid) {
+  editCreditUid = uid;
+  const u = DB.users().find(u=>u.id===uid); if (!u) return;
+  document.getElementById('modal-credit-body').innerHTML = `
+    <div style="margin-bottom:12px;font-weight:700;">${u.name} (${u.email})</div>
+    <div class="form-group"><label class="form-label">총 크레딧 (원)</label><input class="form-input" type="number" id="cr-total" value="${u.creditTotal}"></div>
+    <div class="form-group"><label class="form-label">사용 크레딧 (관리자 조정)</label><input class="form-input" type="number" id="cr-used" value="${u.creditUsed}"></div>
+    <div class="text-muted">대기: ₩${fmt(u.creditPending)}</div>
   `;
-  openModal('modal-credit-edit');
+  openModal('modal-credit');
 }
-
 function saveCreditEdit() {
-  const users = DB.getUsers();
-  const idx = users.findIndex(u=>u.id===editingUserId);
-  if (idx===-1) return;
-  users[idx].creditTotal = parseFloat(document.getElementById('credit-total-input').value)||0;
-  users[idx].creditUsed = parseFloat(document.getElementById('credit-used-input').value)||0;
+  const users = DB.users();
+  const idx = users.findIndex(u=>u.id===editCreditUid); if (idx===-1) return;
+  users[idx].creditTotal = parseFloat(document.getElementById('cr-total').value)||0;
+  users[idx].creditUsed = parseFloat(document.getElementById('cr-used').value)||0;
   DB.saveUsers(users);
-  DB.addLog(`크레딧 수정: ${users[idx].email} → 총 ₩${fmt(users[idx].creditTotal)}`, currentUser.id);
-  showToast('크레딧 수정 완료', 'success');
-  closeModal('modal-credit-edit');
+  DB.log(`크레딧 수정: ${users[idx].email}`, ME.id);
+  toast('크레딧 수정 완료','success');
+  closeModal('modal-credit');
   renderAdminMembers();
 }
 
 function openCreateUserModal() {
-  document.getElementById('new-user-name').value = '';
-  document.getElementById('new-user-email').value = '';
-  document.getElementById('new-user-pw').value = '4321';
-  document.getElementById('new-user-credit').value = '30000';
-  document.getElementById('new-user-role').value = 'user';
+  ['nu-name','nu-email'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nu-pw').value = '4321';
+  document.getElementById('nu-credit').value = '30000';
+  document.getElementById('nu-role').value = 'user';
   openModal('modal-create-user');
 }
-
 function createUser() {
-  const name = document.getElementById('new-user-name').value.trim();
-  const email = document.getElementById('new-user-email').value.trim();
-  const pw = document.getElementById('new-user-pw').value;
-  const credit = parseFloat(document.getElementById('new-user-credit').value)||0;
-  const role = document.getElementById('new-user-role').value;
-
-  if (!name||!email) { showToast('이름과 이메일을 입력하세요', 'error'); return; }
-
-  const users = DB.getUsers();
-  if (users.find(u=>u.email===email)) { showToast('이미 존재하는 이메일입니다', 'error'); return; }
-
-  const newUser = {
-    id: 'u_' + Date.now(),
-    email, name, role,
-    status: 'approved',
-    provider: 'admin',
-    password: pw,
-    creditTotal: credit,
-    creditUsed: 0,
-    creditPending: 0,
-    createdAt: new Date().toISOString()
-  };
-  users.push(newUser);
+  const name = document.getElementById('nu-name').value.trim();
+  const email = document.getElementById('nu-email').value.trim();
+  const pw = document.getElementById('nu-pw').value;
+  const credit = parseFloat(document.getElementById('nu-credit').value)||0;
+  const role = document.getElementById('nu-role').value;
+  if (!name||!email) { toast('이름과 이메일 필수','error'); return; }
+  const users = DB.users();
+  if (users.find(u=>u.email===email)) { toast('이미 존재하는 이메일','error'); return; }
+  users.push({ id:'u_'+Date.now(), email, name, role, status:'approved', provider:'admin', pw, creditTotal:credit, creditUsed:0, creditPending:0, createdAt:now() });
   DB.saveUsers(users);
-  DB.addLog(`관리자가 계정 생성: ${email}`, currentUser.id);
-  showToast(`${name} 계정 생성 완료`, 'success');
+  DB.log(`계정 생성: ${email}`, ME.id);
+  toast(`${name} 계정 생성 완료`,'success');
   closeModal('modal-create-user');
   renderAdminMembers();
 }
 
-// ═══════════════════════════════════════════════════════════
-//  LOGS
-// ═══════════════════════════════════════════════════════════
-
 function renderLogs() {
-  const logs = DB.getLogs();
-  const container = document.getElementById('logs-list');
-  if (logs.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>로그가 없습니다</p></div>`;
-    return;
-  }
-  container.innerHTML = logs.map(l => `
-    <div style="display:flex;gap:12px;padding:8px 4px;border-bottom:1px solid var(--border);font-size:0.85rem;">
-      <div style="color:var(--text-muted);white-space:nowrap;min-width:130px;">${fmtDate(l.ts, true)}</div>
-      <div style="color:var(--text-muted);min-width:80px;">${l.userId||'system'}</div>
-      <div>${l.msg}</div>
-    </div>
-  `).join('');
+  const logs = DB.logs();
+  const el = document.getElementById('logs-content');
+  if (logs.length===0) { el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div>로그 없음</div></div>`; return; }
+  el.innerHTML = logs.map(l=>`
+    <div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.8rem;align-items:flex-start;">
+      <div style="color:var(--text-muted);white-space:nowrap;min-width:100px;">${fmtDate(l.ts,true)}</div>
+      <div style="flex:1;color:var(--text);">${l.msg}</div>
+    </div>`).join('');
 }
 
 function clearLogs() {
-  if (!confirm('모든 로그를 삭제하시겠습니까?')) return;
-  DB.set('logs', []);
-  DB.addLog('로그 초기화', currentUser.id);
+  if (!confirm('로그를 모두 삭제하시겠습니까?')) return;
+  DB.set('logs',[]);
+  DB.log('로그 초기화', ME.id);
   renderLogs();
 }
 
-// ═══════════════════════════════════════════════════════════
-//  CSV EXPORT
-// ═══════════════════════════════════════════════════════════
+let printAppId = '';
+function openPrintPreview(id) {
+  printAppId = id;
+  const app = DB.apps().find(a=>a.id===id); if (!app) return;
 
-function exportCSV() {
-  const apps = DB.getApps();
-  const rows = [['신청ID','신청자','신청일','총금액','상태','은행','계좌번호','예금주','비고']];
-  apps.forEach(a => {
-    rows.push([a.id, a.applicantName, fmtDate(a.createdAt), a.totalAmount, a.status, a.bankName, a.accountNum, a.accountName, a.note||'']);
-  });
-  const csv = rows.map(r => r.map(c => `"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = '신청취합_' + new Date().toLocaleDateString() + '.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-  DB.addLog('CSV 내보내기', currentUser.id);
+  const topRows = (app.entries||[]).map(e=>{
+    const ps = (e.participants||[]).map(p=>`${p.name} ₩${fmt(p.amount)}`).join(' / ');
+    return `<tr>
+      <td>${e.date}</td>
+      <td>${catLabel(e.category)}</td>
+      <td>${e.description}</td>
+      <td>${ps}</td>
+      <td style="text-align:right;font-weight:700;">₩${fmt(e.totalAmount)}</td>
+    </tr>`;
+  }).join('');
+
+  const previewHtml = `
+    <div style="font-family:'Noto Sans KR',sans-serif;font-size:11pt;color:#000;">
+      <div style="background:#1e3a8a;color:#fff;padding:10px 14px;border-radius:4px;margin-bottom:8px;">
+        <div style="font-size:13pt;font-weight:900;">2026 보동보동 갓생지원금 신청서</div>
+        <div style="font-size:9pt;opacity:0.85;">지원금 환급 신청</div>
+      </div>
+      <div style="font-size:9pt;color:#888;margin-bottom:10px;">신청일: ${fmtDate(app.createdAt,true)} | 신청번호: ${app.id}</div>
+      <table class="print-table" style="width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:10px;">
+        <thead><tr style="background:#1e3a8a;color:#fff;">
+          <th style="padding:6px 8px;">이용일자</th>
+          <th style="padding:6px 8px;">구분</th>
+          <th style="padding:6px 8px;">이용내용</th>
+          <th style="padding:6px 8px;">이용자(금액)</th>
+          <th style="padding:6px 8px;text-align:right;">신청금액</th>
+        </tr></thead>
+        <tbody>${topRows}</tbody>
+      </table>
+      <div style="border:2px solid #1e3a8a;border-radius:4px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-weight:700;color:#1e3a8a;">총 신청금액 (입금 필요 금액)</span>
+        <span style="font-size:14pt;font-weight:900;color:#1e3a8a;">₩${fmt(app.totalAmount)}</span>
+      </div>
+      <div style="border:1.5px solid #93C5FD;border-radius:4px;padding:10px 14px;background:#EFF6FF;">
+        <div style="font-weight:700;color:#1e40af;margin-bottom:6px;">💳 입금 계좌 정보</div>
+        <div style="font-size:9.5pt;"><b>은행:</b> ${app.bankName} &nbsp;|&nbsp; <b>계좌번호:</b> ${app.accountNum} &nbsp;|&nbsp; <b>예금주:</b> ${app.accountName}</div>
+      </div>
+      ${app.note ? `<div style="margin-top:8px;font-size:9pt;color:#666;">비고: ${app.note}</div>` : ''}
+    </div>
+  `;
+
+  document.getElementById('modal-print-preview').innerHTML = previewHtml;
+  openModal('modal-print');
 }
 
-// ═══════════════════════════════════════════════════════════
-//  MODAL HELPERS
-// ═══════════════════════════════════════════════════════════
+function doPrint() {
+  const app = DB.apps().find(a=>a.id===printAppId); if (!app) return;
+
+  const topRows = (app.entries||[]).map(e=>{
+    const ps = (e.participants||[]).map(p=>`${p.name} ₩${fmt(p.amount)}`).join(' / ');
+    return `<tr>
+      <td>${e.date}</td>
+      <td>${catLabel(e.category)}</td>
+      <td>${e.description}</td>
+      <td>${ps}</td>
+      <td style="text-align:right;font-weight:700;">₩${fmt(e.totalAmount)}</td>
+    </tr>`;
+  }).join('');
+
+ document.getElementById('print-area').innerHTML = `
+    <div class="print-page">
+      <div class="print-header-bar">
+        <div class="print-main-title">🎲 2026 보동보동 갓생지원금 신청서</div>
+        <div class="print-sub">보드게임 지원금 환급 신청</div>
+      </div>
+      <div class="print-stamp-row">
+        <div class="print-stamp">
+          <div style="font-size:8pt;color:#888;">신청일</div>
+          <div class="stamp-label">${fmtDate(app.createdAt)}</div>
+          <div style="font-size:7pt;color:#888;">${app.id}</div>
+        </div>
+      </div>
+
+      <div class="print-section">
+        <div class="print-section-title">▶ 신청 내역 (상단)</div>
+        <table class="print-table">
+          <thead><tr>
+            <th>이용일자</th><th>구분</th><th>이용내용</th><th>이용자명 (신청금액)</th><th>신청금액</th>
+          </tr></thead>
+          <tbody>${topRows}</tbody>
+          <tfoot><tr style="background:#EFF6FF;">
+            <td colspan="4" style="text-align:right;font-weight:700;padding:8px 10px;border:1px solid #93C5FD;">합 계</td>
+            <td style="text-align:right;font-weight:900;font-size:12pt;padding:8px 10px;border:1px solid #93C5FD;">₩${fmt(app.totalAmount)}</td>
+          </tr></tfoot>
+        </table>
+      </div>
+
+      <div class="print-total-box">
+        <span class="print-total-label">총 신청금액</span>
+        <span class="print-total-amount">₩${fmt(app.totalAmount)}</span>
+      </div>
+
+      <div class="print-section">
+        <div class="print-section-title">▶ 입금 정보 (하단)</div>
+        <div class="print-bank-box">
+          <div class="print-bank-row"><span class="print-bank-key">은행명</span><span>${app.bankName}</span></div>
+          <div class="print-bank-row"><span class="print-bank-key">계좌번호</span><span style="font-size:12pt;font-weight:700;">${app.accountNum}</span></div>
+          <div class="print-bank-row"><span class="print-bank-key">예금주</span><span>${app.accountName}</span></div>
+          <div class="print-bank-row" style="margin-top:6px;padding-top:6px;border-top:1px solid #93C5FD;">
+            <span class="print-bank-key">입금필요액</span>
+            <span style="font-size:14pt;font-weight:900;color:#1e3a8a;">₩${fmt(app.totalAmount)}</span>
+          </div>
+        </div>
+      </div>
+
+      ${app.note ? `<div style="margin:10px 0;font-size:9pt;color:#555;">📝 비고: ${app.note}</div>` : ''}
+      ${app.adminNote ? `<div style="margin:6px 0;font-size:9pt;color:#1e40af;">💬 관리자 메모: ${app.adminNote}</div>` : ''}
+
+      <div class="print-footer">
+        <span>2026 보동보동 갓생지원금 지원사업</span>
+        <div class="print-sig">
+          <div style="font-size:8pt;">승인자 서명</div>
+          <div class="print-sig-line"></div>
+          <div style="font-size:8pt;">(인)</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  closeModal('modal-print');
+  DB.log(`인쇄: ${printAppId}`, ME.id);
+  setTimeout(()=>window.print(), 200);
+}
+
+/* ═══════════════════════════════════════
+   CSV EXPORT
+═══════════════════════════════════════ */
+function exportCSV() {
+  const apps = DB.apps();
+  const rows = [['신청ID','신청자','신청일','총금액','상태','은행','계좌','예금주','항목수','비고']];
+  apps.forEach(a=>{
+    rows.push([a.id,a.applicantName,fmtDate(a.createdAt),a.totalAmount,a.status,a.bankName,a.accountNum,a.accountName,(a.entries||[]).length,a.note||'']);
+  });
+  const csv = rows.map(r=>r.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=`신청취합_${new Date().toLocaleDateString()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  DB.log('CSV 내보내기', ME.id);
+}
+
+/* ═══════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════ */
+function restorePending(app) {
+  const users = DB.users();
+  for (let e of (app.entries||[])) for (let p of e.participants) {
+    const amt = parseFloat(p.amount)||0;
+    if (!p.userId||amt<=0) continue;
+    const ui = users.findIndex(u=>u.id===p.userId);
+    if (ui!==-1) users[ui].creditPending = Math.max(0, users[ui].creditPending-amt);
+  }
+  DB.saveUsers(users);
+}
 
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 
-document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
-});
-
-// ═══════════════════════════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════════════════════════
-
-function showToast(msg, type='') {
-  const container = document.getElementById('toast-container');
+function toast(msg, type='') {
+  const c = document.getElementById('toast-container');
   const t = document.createElement('div');
-  t.className = 'toast ' + type;
-  t.innerHTML = `<span>${msg}</span>`;
-  container.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(20px)'; t.style.transition = '0.3s'; setTimeout(() => t.remove(), 300); }, 3000);
+  t.className = 'toast '+type;
+  t.innerHTML = msg;
+  c.appendChild(t);
+  setTimeout(()=>{ t.style.transition='0.3s'; t.style.opacity='0'; t.style.transform='translateY(-8px)'; setTimeout(()=>t.remove(),300); },3000);
 }
 
-// ═══════════════════════════════════════════════════════════
-//  UTILS
-// ═══════════════════════════════════════════════════════════
-
 function fmt(n) { return Number(n||0).toLocaleString('ko-KR'); }
+function now() { return new Date().toISOString(); }
+function todayStr() { return new Date().toISOString().split('T')[0]; }
 function fmtDate(iso, withTime=false) {
   if (!iso) return '-';
   const d = new Date(iso);
-  const date = d.toLocaleDateString('ko-KR');
-  const time = d.toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
-  return withTime ? `${date} ${time}` : date;
+  const date = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  if (!withTime) return date;
+  return date+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
 }
 function statusBadge(s) {
-  const map = {
-    pending: ['대기', 'badge-pending'],
-    approved: ['승인', 'badge-approved'],
-    rejected: ['반려', 'badge-rejected'],
-    cancelled: ['취소', 'badge-cancelled'],
-    'mod-approved': ['수정승인', 'badge-mod-approved'],
-  };
-  const [label, cls] = map[s] || [s, ''];
-  return `<span class="badge ${cls}">${label}</span>`;
+  const m = {pending:['대기','badge-pending'],approved:['승인','badge-approved'],rejected:['반려','badge-rejected'],cancelled:['취소','badge-cancelled'],'mod-approved':['수정승인','badge-mod-approved']};
+  const [l,c] = m[s]||[s,''];
+  return `<span class="badge ${c}">${l}</span>`;
 }
-function catLabel(c) {
-  return {boardgame:'보드게임',escape:'방탈출',etc:'기타'}[c] || c || '-';
-}
+function catLabel(c) { return {boardgame:'🎲 보드게임',escape:'🔐 방탈출',etc:'📦 기타'}[c]||c||'-'; }
 
-// ═══════════════════════════════════════════════════════════
-//  BOOT
-// ═══════════════════════════════════════════════════════════
-
-window.addEventListener('DOMContentLoaded', () => {
-  seedData();
-
-  setTimeout(() => {
-    document.getElementById('loading-screen').style.opacity = '0';
-    setTimeout(() => {
-      document.getElementById('loading-screen').style.display = 'none';
-
-      // Check session
-      const sessionId = DB.get('session');
-      if (sessionId) {
-        const user = DB.getUsers().find(u => u.id === sessionId);
-        if (user && user.status === 'approved') {
-          currentUser = user;
-          document.getElementById('login-page').style.display = 'none';
-          document.getElementById('app').style.display = 'block';
-          initApp();
-          return;
-        }
+/* ═══════════════════════════════════════
+   BOOT
+═══════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', ()=>{
+  seed();
+  setTimeout(()=>{
+    const ls = document.getElementById('loading-screen');
+    ls.style.opacity='0';
+    setTimeout(()=>{
+      ls.style.display='none';
+      const sid = DB.get('session');
+      if (sid) {
+        const u = DB.users().find(u=>u.id===sid);
+        if (u && u.status==='approved') { completeLogin(u); return; }
       }
-      document.getElementById('login-page').style.display = 'flex';
-    }, 500);
-  }, 1500);
+      document.getElementById('login-page').style.display='block';
+    },500);
+  },1400);
 });
 </script>
 </body>
