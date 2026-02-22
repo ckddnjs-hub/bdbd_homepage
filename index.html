@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>2026 보동보동 갓생지원금</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
-<!-- Supabase JS Client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ═══════════════════════════════════════
    CSS VARIABLES — BLUE THEME
@@ -18,8 +16,6 @@
   --primary-darker: #172554;
   --accent: #F59E0B;
   --accent2: #FCD34D;
-  --kakao: #FEE500;
-  --kakao-text: #000000;
   --bg: #EFF6FF;
   --surface: #FFFFFF;
   --surface2: #F0F7FF;
@@ -105,16 +101,10 @@ body {
   display: flex; align-items: center; justify-content: center; gap: 10px;
   margin-bottom: 10px; font-weight: 600; transition: all 0.2s; letter-spacing: -0.2px;
 }
-.sso-kakao { 
-  background: var(--kakao); 
-  color: var(--kakao-text); 
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.sso-kakao:hover, .sso-kakao:active { 
-  background: #FDDC00; 
-  transform: translateY(-1px); 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
+.sso-naver { background: #03C75A; color: #fff; }
+.sso-naver:hover, .sso-naver:active { background: #02a84a; transform: translateY(-1px); }
+.sso-google { background: #fff; color: #333; border: 2px solid #E5E7EB; }
+.sso-google:hover, .sso-google:active { border-color: #9CA3AF; transform: translateY(-1px); }
 .form-divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; }
 .form-divider::before, .form-divider::after { content:''; flex:1; height:1px; background:var(--border); }
 .form-divider span { font-size:0.8rem; color:var(--text-muted); white-space:nowrap; }
@@ -517,16 +507,6 @@ tr:hover td { background:var(--surface2); }
 
       <!-- 로그인 패널 -->
       <div class="login-panel active" id="panel-login">
-        <!-- 카카오 로그인 -->
-        <button class="sso-btn sso-kakao" onclick="loginKakao('login')">
-          <svg width="20" height="18" viewBox="0 0 20 18" fill="currentColor">
-            <path d="M10 0C4.477 0 0 3.53 0 7.886c0 2.854 1.943 5.353 4.86 6.738-.198.723-.735 2.684-.844 3.102-.13.498.182.492.383.358.164-.11 2.64-1.78 3.644-2.457.69.095 1.397.145 2.118.145 5.523 0 10-3.53 10-7.886S15.523 0 10 0z"/>
-          </svg>
-          카카오 로그인
-        </button>
-
-        <div class="form-divider"><span>이메일 로그인</span></div>
-
         <!-- 일반 로그인 -->
         <div class="fl-input">
           <input type="email" id="login-email" placeholder=" " autocomplete="email">
@@ -536,19 +516,32 @@ tr:hover td { background:var(--surface2); }
           <input type="password" id="login-pw" placeholder=" " autocomplete="current-password" onkeydown="if(event.key==='Enter')doEmailLogin()">
           <label>비밀번호</label>
         </div>
-        <button class="btn btn-primary btn-full" onclick="doEmailLogin()">로그인</button>
+        <button class="btn btn-primary btn-full" onclick="doEmailLogin()" style="margin-bottom:14px;">로그인</button>
+
+        <div class="form-divider"><span>간편 로그인</span></div>
+
+        <button class="sso-btn sso-naver" onclick="loginSSO('naver')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z"/></svg>
+          네이버로 로그인
+        </button>
+        <button class="sso-btn sso-google" onclick="loginSSO('google')">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google로 로그인
+        </button>
       </div>
 
       <!-- 회원가입 패널 -->
       <div class="login-panel" id="panel-signup">
         <div class="signup-intro">
-          카카오 계정으로 간편하게 가입하세요.<br>관리자 승인 후 이용 가능합니다.
+          SNS 계정으로 간편하게 가입하세요.<br>관리자 승인 후 이용 가능합니다.
         </div>
-        <button class="sso-btn sso-kakao" onclick="loginKakao('signup')">
-          <svg width="20" height="18" viewBox="0 0 20 18" fill="currentColor">
-            <path d="M10 0C4.477 0 0 3.53 0 7.886c0 2.854 1.943 5.353 4.86 6.738-.198.723-.735 2.684-.844 3.102-.13.498.182.492.383.358.164-.11 2.64-1.78 3.644-2.457.69.095 1.397.145 2.118.145 5.523 0 10-3.53 10-7.886S15.523 0 10 0z"/>
-          </svg>
-          카카오로 가입
+        <button class="sso-btn sso-naver" onclick="loginSSO('naver','signup')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z"/></svg>
+          네이버로 가입
+        </button>
+        <button class="sso-btn sso-google" onclick="loginSSO('google','signup')">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google로 가입
         </button>
         <div class="form-divider"><span>직접 입력</span></div>
         <div class="fl-input">
@@ -567,32 +560,28 @@ tr:hover td { background:var(--surface2); }
       </div>
     </div>
 
-    <!-- Kakao OAuth Simulator (개발/테스트용) -->
-    <div id="kakao-sim" style="display:none; background:#fff; border-radius:20px; padding:20px; width:100%; max-width:400px; margin-top:12px; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
-      <div style="font-weight:700; color:var(--primary-dark); margin-bottom:4px;" id="kakao-sim-title">카카오 계정 선택</div>
-      <div style="font-size:0.8rem; color:#888; margin-bottom:14px;">🧪 개발 모드 — 실제 배포 시 카카오 API 키 연동 필요</div>
+    <!-- SSO Simulator -->
+    <div id="sso-sim" style="display:none; background:#fff; border-radius:20px; padding:20px; width:100%; max-width:400px; margin-top:12px; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+      <div style="font-weight:700; color:var(--primary-dark); margin-bottom:4px;" id="sso-sim-title">계정 선택</div>
+      <div style="font-size:0.8rem; color:#888; margin-bottom:14px;">🧪 테스트 모드 — 실제 배포 시 API 키 연동</div>
       <div class="fl-input">
-        <input type="email" id="kakao-email" placeholder=" " value="kakao_test@example.com">
-        <label>이메일 (테스트)</label>
+        <input type="email" id="sso-email" placeholder=" ">
+        <label>이메일</label>
       </div>
       <div class="fl-input">
-        <input type="text" id="kakao-name" placeholder=" " value="카카오사용자">
-        <label>이름</label>
+        <input type="password" id="sso-pw" placeholder=" " value="4321">
+        <label>비밀번호</label>
       </div>
-      <div style="display:flex; gap:8px; margin-top:16px;">
-        <button class="btn btn-outline btn-sm" style="flex:1" onclick="hideKakaoSim()">취소</button>
-        <button class="btn sso-kakao btn-sm" style="flex:2" onclick="doKakaoAuth()">
-          <svg width="16" height="14" viewBox="0 0 20 18" fill="currentColor">
-            <path d="M10 0C4.477 0 0 3.53 0 7.886c0 2.854 1.943 5.353 4.86 6.738-.198.723-.735 2.684-.844 3.102-.13.498.182.492.383.358.164-.11 2.64-1.78 3.644-2.457.69.095 1.397.145 2.118.145 5.523 0 10-3.53 10-7.886S15.523 0 10 0z"/>
-          </svg>
-          인증
-        </button>
+      <div id="sso-quick-accounts" style="margin-bottom:12px;"></div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline btn-sm" style="flex:1" onclick="hideSSOSim()">취소</button>
+        <button class="btn btn-primary btn-sm" style="flex:2" id="sso-sim-btn" onclick="doSSOLogin()">로그인</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════ APP (기존 코드 유지) ═══════════════════════════════ -->
+<!-- ═══════════════════════════════ APP ═══════════════════════════════ -->
 <div id="app" style="display:flex; flex-direction:column;">
   <header class="app-header">
     <div class="app-header-logo" onclick="goHome()">
@@ -664,6 +653,7 @@ tr:hover td { background:var(--surface2); }
           <textarea class="form-textarea" id="apply-note" placeholder="전달사항 (선택)"></textarea>
         </div>
       </div>
+      <!-- spacer for floating bar -->
       <div style="height:72px;"></div>
     </div>
 
@@ -738,7 +728,7 @@ tr:hover td { background:var(--surface2); }
   <!-- Bottom Nav -->
   <nav class="bottom-nav" id="bottom-nav"></nav>
 
-  <!-- Floating submit bar -->
+  <!-- Floating submit bar (apply page) -->
   <div class="floating-bar" id="floating-bar" style="display:none;">
     <div class="floating-total">
       총 신청금액<strong id="float-total">₩0</strong>
@@ -749,7 +739,9 @@ tr:hover td { background:var(--surface2); }
   </div>
 </div>
 
-<!-- ═══════════════════════════════ MODALS (기존 유지) ═══════════════════════════════ -->
+<!-- ═══════════════════════════════ MODALS ═══════════════════════════════ -->
+
+<!-- 신청 상세 / 관리자 뷰 -->
 <div class="modal-overlay" id="modal-detail">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -759,6 +751,7 @@ tr:hover td { background:var(--surface2); }
   </div>
 </div>
 
+<!-- 관리자 수정 모달 -->
 <div class="modal-overlay center" id="modal-edit">
   <div class="modal center-modal">
     <div class="modal-title">✏️ 신청 수정 (관리자)</div>
@@ -767,6 +760,7 @@ tr:hover td { background:var(--surface2); }
   </div>
 </div>
 
+<!-- 계정 생성 -->
 <div class="modal-overlay center" id="modal-create-user">
   <div class="modal center-modal">
     <div class="modal-title">➕ 계정 생성</div>
@@ -787,6 +781,7 @@ tr:hover td { background:var(--surface2); }
   </div>
 </div>
 
+<!-- 크레딧 수정 -->
 <div class="modal-overlay center" id="modal-credit">
   <div class="modal center-modal">
     <div class="modal-title">💰 크레딧 수정</div>
@@ -798,6 +793,7 @@ tr:hover td { background:var(--surface2); }
   </div>
 </div>
 
+<!-- 인쇄 미리보기 -->
 <div class="modal-overlay center" id="modal-print">
   <div class="modal center-modal" style="max-width:520px;">
     <div class="modal-title">🖨️ 인쇄 미리보기</div>
@@ -809,22 +805,17 @@ tr:hover td { background:var(--surface2); }
   </div>
 </div>
 
+<!-- 인쇄용 숨김 영역 -->
 <div id="print-area"></div>
+
+<!-- Toast -->
 <div id="toast-container"></div>
 
 <script>
 'use strict';
 
 /* ═══════════════════════════════════════
-   SUPABASE SETUP
-═══════════════════════════════════════ */
-const SUPABASE_URL = 'https://vkznarlbevlyqnspmnlj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrem5hcmxiZXZseXFuc3BtbmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2OTg5MTcsImV4cCI6MjA4NzI3NDkxN30.Gm_GJJoiWJU4fvtfUhK4Ci-8CP3dJjW1KWzSazhKoJA';
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-/* ═══════════════════════════════════════
-   DATA STORE (LocalStorage 유지 - Supabase와 병행)
+   DATA STORE
 ═══════════════════════════════════════ */
 const DB = {
   get(k) { try { return JSON.parse(localStorage.getItem('bg26_'+k)); } catch { return null; } },
@@ -849,6 +840,8 @@ function seed() {
   if (DB.get('seeded_v3')) return;
   DB.saveUsers([
     { id:'admin', email:'admin', name:'관리자', role:'admin', status:'approved', provider:'local', pw:'4321', creditTotal:0, creditUsed:0, creditPending:0, createdAt:now() },
+    { id:'u1', email:'__sso@naver.com', name:'테스트유저1', role:'user', status:'approved', provider:'naver', pw:'4321', creditTotal:30000, creditUsed:0, creditPending:0, createdAt:now() },
+    { id:'u2', email:'__sso1@naver.com', name:'테스트유저2', role:'user', status:'approved', provider:'naver', pw:'4321', creditTotal:30000, creditUsed:0, creditPending:0, createdAt:now() },
   ]);
   DB.set('seeded_v3', true);
   DB.log('시스템 초기화 완료');
@@ -858,7 +851,8 @@ function seed() {
    AUTH STATE
 ═══════════════════════════════════════ */
 let ME = null;
-let kakaoMode = 'login'; // 'login' | 'signup'
+let ssoMode = 'login'; // 'login' | 'signup'
+let ssoProvider = '';
 
 function switchLoginTab(tab) {
   document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
@@ -868,146 +862,74 @@ function switchLoginTab(tab) {
   document.getElementById('panel-' + tab).classList.add('active');
 }
 
-// 카카오 로그인/가입
-function loginKakao(mode) {
-  kakaoMode = mode;
-  document.getElementById('kakao-sim-title').textContent = mode === 'signup' ? '카카오 가입' : '카카오 로그인';
-  document.getElementById('kakao-sim').style.display = 'block';
+function loginSSO(provider, mode='login') {
+  ssoProvider = provider; ssoMode = mode;
+  const label = provider === 'naver' ? '네이버' : 'Google';
+  document.getElementById('sso-sim-title').textContent = `${label} ${mode==='signup'?'가입':'로그인'}`;
+  document.getElementById('sso-sim-btn').textContent = mode==='signup' ? '가입 신청' : '로그인';
+  document.getElementById('sso-email').value = '';
+  document.getElementById('sso-pw').value = '4321';
+
+  // quick accounts
+  const users = DB.users().filter(u => u.provider === provider);
+  const qEl = document.getElementById('sso-quick-accounts');
+  if (users.length && mode==='login') {
+    qEl.innerHTML = '<div style="font-size:0.78rem;color:#999;margin-bottom:6px;">— 기존 계정 —</div>' +
+      users.map(u => `<button onclick="quickSelect('${u.email}')" style="display:block;width:100%;text-align:left;padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);font-size:0.83rem;margin-bottom:4px;cursor:pointer;font-family:inherit;">${u.name} (${u.email})</button>`).join('');
+  } else { qEl.innerHTML = ''; }
+
+  document.getElementById('sso-sim').style.display = 'block';
 }
+function quickSelect(email) { document.getElementById('sso-email').value = email; }
+function hideSSOSim() { document.getElementById('sso-sim').style.display = 'none'; }
 
-function hideKakaoSim() {
-  document.getElementById('kakao-sim').style.display = 'none';
-}
+function doSSOLogin() {
+  const email = document.getElementById('sso-email').value.trim();
+  const pw = document.getElementById('sso-pw').value;
+  if (!email) { toast('이메일을 입력하세요','error'); return; }
 
-async function doKakaoAuth() {
-  const email = document.getElementById('kakao-email').value.trim();
-  const name = document.getElementById('kakao-name').value.trim();
-  
-  if (!email || !name) {
-    toast('이메일과 이름을 입력하세요', 'error');
-    return;
+  const users = DB.users();
+  let user = users.find(u => u.email === email);
+
+  if (ssoMode === 'signup' || !user) {
+    // Register
+    if (user) { toast('이미 가입된 이메일입니다','warning'); return; }
+    const nu = { id:'u_'+Date.now(), email, name:email.split('@')[0], role:'user', status:'pending', provider:ssoProvider, pw, creditTotal:0, creditUsed:0, creditPending:0, createdAt:now() };
+    users.push(nu); DB.saveUsers(users);
+    DB.log(`신규 가입: ${email}`);
+    toast('가입 신청 완료! 관리자 승인 후 이용 가능합니다','warning');
+    hideSSOSim(); return;
   }
 
-  try {
-    // Supabase Auth - OAuth 시뮬레이션 (실제로는 signInWithOAuth 사용)
-    const users = DB.users();
-    let user = users.find(u => u.email === email);
-
-    if (kakaoMode === 'signup' || !user) {
-      // 회원가입
-      if (user) {
-        toast('이미 가입된 계정입니다', 'warning');
-        return;
-      }
-
-      const nu = {
-        id: 'u_' + Date.now(),
-        email,
-        name,
-        role: 'user',
-        status: 'pending',
-        provider: 'kakao',
-        pw: null, // OAuth는 비밀번호 없음
-        creditTotal: 0,
-        creditUsed: 0,
-        creditPending: 0,
-        createdAt: now()
-      };
-
-      users.push(nu);
-      DB.saveUsers(users);
-      DB.log(`카카오 가입: ${email}`);
-      
-      toast('가입 신청 완료! 관리자 승인 후 이용 가능합니다', 'warning');
-      hideKakaoSim();
-      return;
-    }
-
-    // 로그인
-    if (user.status === 'pending') {
-      toast('관리자 승인 대기 중입니다', 'warning');
-      return;
-    }
-    if (user.status === 'rejected') {
-      toast('가입이 거절된 계정입니다', 'error');
-      return;
-    }
-
-    completeLogin(user);
-    hideKakaoSim();
-    
-  } catch (error) {
-    console.error('Kakao auth error:', error);
-    toast('카카오 인증 실패', 'error');
-  }
-}
-
-// 이메일 로그인
-function doEmailLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pw = document.getElementById('login-pw').value;
-  
-  if (!email || !pw) {
-    toast('이메일과 비밀번호를 입력하세요', 'error');
-    return;
-  }
-
-  const user = DB.users().find(u => (u.email === email || u.id === email) && u.pw === pw);
-  
-  if (!user) {
-    toast('이메일 또는 비밀번호가 틀렸습니다', 'error');
-    return;
-  }
-  
-  if (user.status === 'pending') {
-    toast('관리자 승인 대기 중입니다', 'warning');
-    return;
-  }
-  
-  if (user.status === 'rejected') {
-    toast('가입이 거절되었습니다', 'error');
-    return;
-  }
-  
+  if (user.pw && user.pw !== pw) { toast('비밀번호가 틀렸습니다','error'); return; }
+  if (user.status === 'pending') { toast('관리자 승인 대기 중입니다','warning'); return; }
+  if (user.status === 'rejected') { toast('가입이 거절된 계정입니다','error'); return; }
   completeLogin(user);
 }
 
-// 직접 회원가입
+function doEmailLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  if (!email || !pw) { toast('이메일과 비밀번호를 입력하세요','error'); return; }
+
+  const user = DB.users().find(u => (u.email === email || u.id === email) && u.pw === pw);
+  if (!user) { toast('이메일 또는 비밀번호가 틀렸습니다','error'); return; }
+  if (user.status === 'pending') { toast('관리자 승인 대기 중입니다','warning'); return; }
+  if (user.status === 'rejected') { toast('가입이 거절되었습니다','error'); return; }
+  completeLogin(user);
+}
+
 function doSignup() {
   const name = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const pw = document.getElementById('signup-pw').value;
-  
-  if (!name || !email) {
-    toast('이름과 이메일을 입력하세요', 'error');
-    return;
-  }
-  
+  if (!name||!email) { toast('이름과 이메일을 입력하세요','error'); return; }
   const users = DB.users();
-  
-  if (users.find(u => u.email === email)) {
-    toast('이미 가입된 이메일입니다', 'warning');
-    return;
-  }
-  
-  const nu = {
-    id: 'u_' + Date.now(),
-    email,
-    name,
-    role: 'user',
-    status: 'pending',
-    provider: 'direct',
-    pw,
-    creditTotal: 0,
-    creditUsed: 0,
-    creditPending: 0,
-    createdAt: now()
-  };
-  
-  users.push(nu);
-  DB.saveUsers(users);
+  if (users.find(u=>u.email===email)) { toast('이미 가입된 이메일입니다','warning'); return; }
+  const nu = { id:'u_'+Date.now(), email, name, role:'user', status:'pending', provider:'direct', pw, creditTotal:0, creditUsed:0, creditPending:0, createdAt:now() };
+  users.push(nu); DB.saveUsers(users);
   DB.log(`가입 신청: ${email}`);
-  toast('가입 신청 완료! 관리자 승인 후 이용 가능합니다', 'warning');
+  toast('가입 신청 완료! 관리자 승인 후 이용 가능합니다','warning');
 }
 
 function completeLogin(user) {
@@ -1017,24 +939,16 @@ function completeLogin(user) {
   document.getElementById('login-page').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   initApp();
-  toast(`어서오세요, ${user.name}님! 🎲`, 'success');
+  toast(`어서오세요, ${user.name}님! 🎲`,'success');
 }
 
 function logout() {
   if (ME) DB.log(`로그아웃: ${ME.name}`, ME.id);
-  ME = null;
-  DB.set('session', null);
+  ME = null; DB.set('session', null);
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-page').style.display = 'block';
-  hideKakaoSim();
+  hideSSOSim();
 }
-
-/* ═══════════════════════════════════════
-   나머지 기존 코드 전부 유지 (APP INIT, NAVIGATION, DASHBOARD, APPLY 등)
-   여기서는 길이 제한으로 생략하지만 위 HTML의 모든 JavaScript 함수 포함
-═══════════════════════════════════════ */
-
-// [기존 코드 전체 복사 - initApp부터 boot까지]
 
 /* ═══════════════════════════════════════
    APP INIT & NAVIGATION
@@ -1279,6 +1193,7 @@ function setParticipant(eIdx, pIdx, field, val) {
     entries[eIdx].participants[pIdx][field] = val;
   }
   updateFloatingTotal();
+  // update entry total display
   const cards = document.querySelectorAll('.entry-card');
   if (cards[eIdx]) {
     const total = entries[eIdx].participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
@@ -1311,6 +1226,7 @@ function handleReceipt(idx, input) {
 }
 
 function submitApplication() {
+  // Validate entries
   for (let i=0; i<entries.length; i++) {
     const e = entries[i];
     if (!e.date) { toast(`항목 ${i+1}: 일자를 선택하세요`,'error'); return; }
@@ -1329,8 +1245,9 @@ function submitApplication() {
   const acnum = document.getElementById('apply-acnum').value.trim();
   if (!acname||!bank||!acnum) { toast('환급 계좌 정보를 모두 입력하세요','error'); return; }
 
+  // Credit check per user
   const users = DB.users();
-  const creditMap = {};
+  const creditMap = {}; // userId -> total requested in this submission
   for (let e of entries) {
     for (let p of e.participants) {
       const amt = parseFloat(p.amount)||0;
@@ -1348,6 +1265,7 @@ function submitApplication() {
     }
   }
 
+  // Create app record
   const app = {
     id: 'app_'+Date.now(),
     applicantId: ME.id,
@@ -1361,6 +1279,7 @@ function submitApplication() {
     totalAmount: entries.reduce((s,e)=>s+e.participants.reduce((ss,p)=>ss+(parseFloat(p.amount)||0),0),0)
   };
 
+  // Mark pending credits
   for (let [uid, amt] of Object.entries(creditMap)) {
     const idx = users.findIndex(u=>u.id===uid);
     if (idx!==-1) users[idx].creditPending += amt;
@@ -1491,7 +1410,7 @@ function openDetail(id, isAdmin=false) {
 }
 
 /* ═══════════════════════════════════════
-   ADMIN FUNCTIONS (모두 유지)
+   ADMIN DASHBOARD
 ═══════════════════════════════════════ */
 function renderAdminDash() {
   const apps = DB.apps();
@@ -1533,6 +1452,9 @@ function renderAdminDash() {
   `).join('');
 }
 
+/* ═══════════════════════════════════════
+   ADMIN ALL APPS
+═══════════════════════════════════════ */
 function renderAdminAll() {
   let apps = DB.apps();
   const search = (document.getElementById('admin-search')?.value||'').toLowerCase();
@@ -1565,6 +1487,9 @@ function renderAdminAll() {
   `).join('');
 }
 
+/* ═══════════════════════════════════════
+   ADMIN APPROVE / REJECT
+═══════════════════════════════════════ */
 function approveApp(id) {
   if (!confirm('승인하시겠습니까?')) return;
   const apps = DB.apps();
@@ -1610,6 +1535,9 @@ function rejectApp(id) {
   else if (currentPage==='admin-all') renderAdminAll();
 }
 
+/* ═══════════════════════════════════════
+   ADMIN EDIT
+═══════════════════════════════════════ */
 let editId = '';
 function openEdit(id) {
   editId = id;
@@ -1714,6 +1642,9 @@ function saveEdit(andApprove) {
   else if (currentPage==='admin-all') renderAdminAll();
 }
 
+/* ═══════════════════════════════════════
+   ADMIN MEMBERS
+═══════════════════════════════════════ */
 function renderAdminMembers() {
   const users = DB.users();
   const el = document.getElementById('admin-members-list');
@@ -1821,6 +1752,9 @@ function createUser() {
   renderAdminMembers();
 }
 
+/* ═══════════════════════════════════════
+   LOGS
+═══════════════════════════════════════ */
 function renderLogs() {
   const logs = DB.logs();
   const el = document.getElementById('logs-content');
@@ -1839,6 +1773,9 @@ function clearLogs() {
   renderLogs();
 }
 
+/* ═══════════════════════════════════════
+   PRINT
+═══════════════════════════════════════ */
 let printAppId = '';
 function openPrintPreview(id) {
   printAppId = id;
@@ -1902,7 +1839,7 @@ function doPrint() {
     </tr>`;
   }).join('');
 
- document.getElementById('print-area').innerHTML = `
+  document.getElementById('print-area').innerHTML = `
     <div class="print-page">
       <div class="print-header-bar">
         <div class="print-main-title">🎲 2026 보동보동 갓생지원금 신청서</div>
