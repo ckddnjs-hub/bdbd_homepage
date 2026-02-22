@@ -531,10 +531,14 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 <div id="toast-container"></div>
 
 <script>
+// 2. Supabase 연결 설정 (Supabase 대시보드에서 확인 가능)
+const SUPABASE_URL = 'https://vkznarlbevlyqnspmnlj.supabase.co'; // 내 프로젝트 URL
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrem5hcmxiZXZseXFuc3BtbmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2OTg5MTcsImV4cCI6MjA4NzI3NDkxN30.Gm_GJJoiWJU4fvtfUhK4Ci-8CP3dJjW1KWzSazhKoJA'; // 내 프로젝트 API 키
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ═══════════════════════════════════════════════════════════
 //  DATA STORE (localStorage-based)
 // ═══════════════════════════════════════════════════════════
-
+  
 const DB = {
   get(key) { try { return JSON.parse(localStorage.getItem('bgapp_'+key)) || null; } catch { return null; } },
   set(key, val) { localStorage.setItem('bgapp_'+key, JSON.stringify(val)); },
