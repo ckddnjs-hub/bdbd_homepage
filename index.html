@@ -415,7 +415,7 @@ body.ready { visibility: visible; }
 
       <!-- 로그인 -->
       <div class="login-panel active" id="panel-login">
-        <button class="btn-kakao" onclick="kakaoLogin()">
+        <button class="btn-kakao" onclick="kakaoLoginDirect()">
           <svg class="kakao-icon" viewBox="0 0 24 24" fill="none">
             <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.568 5.077 3.938 6.538L4.8 21l4.2-2.1c.96.18 1.97.27 3 .27 5.523 0 10-3.477 10-7.77C22 6.477 17.523 3 12 3z" fill="#191919"/>
           </svg>
@@ -439,7 +439,7 @@ body.ready { visibility: visible; }
         <div style="text-align:center;font-size:0.88rem;color:var(--text-muted);margin-bottom:16px;">
           SNS 계정으로 가입 후 관리자 승인을 기다려 주세요.
         </div>
-        <button class="btn-kakao" onclick="kakaoLogin()">
+        <button class="btn-kakao" onclick="kakaoSignup()">
           <svg class="kakao-icon" viewBox="0 0 24 24" fill="none">
             <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.568 5.077 3.938 6.538L4.8 21l4.2-2.1c.96.18 1.97.27 3 .27 5.523 0 10-3.477 10-7.77C22 6.477 17.523 3 12 3z" fill="#191919"/>
           </svg>
@@ -448,7 +448,7 @@ body.ready { visibility: visible; }
         <div class="form-divider"><span>또는 이메일로 직접 가입</span></div>
         <div class="fl-input">
           <input type="text" id="signup-name" placeholder=" " oninput="this.value=this.value.replace(/[0-9]/g,'')">
-          <label>이름 <span style="color:var(--danger);font-size:0.75rem;">*필수</span></label>
+          <label>이름</label>
         </div>
         <div class="fl-input">
           <input type="email" id="signup-email" placeholder=" ">
@@ -738,21 +738,35 @@ window.addEventListener('DOMContentLoaded', async () => {
       initialSessionHandled = true;
       document.body.classList.add('ready');
       await fadeOutLoading();
-      ME ? showApp() : showLogin();
+      if (!ME) {
+        showLogin();
+      } else if (ME.status === 'approved') {
+        showApp();
+      } else if (ME.status === 'pending') {
+        showPendingScreen(ME.name);
+      } else {
+        showLogin();
+        await sb.auth.signOut(); ME = null;
+      }
 
     } else if (event === 'SIGNED_IN') {
       // 로그인 완료 (카카오 OAuth 콜백 포함)
       if (!ME && session?.user) {
         await loadProfile(session.user);
       }
+      document.body.classList.add('ready');
+      await fadeOutLoading();
       if (ME && ME.status === 'approved') {
-        document.body.classList.add('ready');
-        await fadeOutLoading();
         showApp();
       } else if (ME && ME.status === 'pending') {
-        toast('가입 신청이 완료되었습니다. 관리자 승인을 기다려 주세요 🙏', 'warning');
-        await sb.auth.signOut();
-        ME = null;
+        // 로그아웃 없이 대기 안내 화면 표시
+        showPendingScreen(ME.name);
+      } else if (ME && ME.status === 'rejected') {
+        showLogin();
+        toast('가입이 거절된 계정입니다', 'error');
+        await sb.auth.signOut(); ME = null;
+      } else {
+        showLogin();
       }
 
     } else if (event === 'SIGNED_OUT') {
@@ -833,56 +847,67 @@ async function loadProfile(authUser) {
      https://vkznarlbevlyqnspmnlj.supabase.co/auth/v1/callback
    ★ Supabase Dashboard > Authentication > Providers > Kakao 활성화 필요
 ════════════════════════════════════════ */
-function kakaoLogin() {
-  // 이름 입력 모달 띄우기 (회원가입/로그인 공통)
-  openKakaoNameModal();
+/* ════════════════════════════════════════
+   AUTH — 카카오 로그인 (이름 입력 없이 바로)
+════════════════════════════════════════ */
+async function kakaoLoginDirect() {
+  toast('카카오 로그인 중...', '');
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'kakao',
+    options: { redirectTo: APP_URL, scopes: 'profile_nickname,account_email' }
+  });
+  if (error) toast('카카오 로그인 오류: ' + error.message, 'error');
 }
 
-function openKakaoNameModal() {
-  // 기존에 모달이 없으면 동적 생성
+/* ════════════════════════════════════════
+   AUTH — 카카오 가입 (이름 필수 입력 후 진행)
+════════════════════════════════════════ */
+function kakaoSignup() {
+  // 이름 입력 모달 생성
   let m = document.getElementById('modal-kakao-name');
-  if (!m) {
-    m = document.createElement('div');
-    m.id = 'modal-kakao-name';
-    m.className = 'modal-overlay center open';
-    m.innerHTML = `
-      <div class="modal center-modal" style="max-width:340px;">
-        <div class="modal-title">🟡 카카오 로그인</div>
-        <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:14px;">
-          카카오로 로그인합니다.<br>이름이 자동으로 가져와지지 않을 경우를 위해 미리 입력해 주세요.
-        </div>
-        <div class="form-group">
-          <label class="form-label">이름 <span style="color:var(--text-muted);font-weight:400;">(선택)</span></label>
-          <input class="form-input" type="text" id="kakao-name-input" placeholder="홍길동"
-            oninput="this.value=this.value.replace(/[0-9]/g,'')">
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-outline" onclick="document.getElementById('modal-kakao-name').remove()">취소</button>
-          <button class="btn btn-kakao" onclick="proceedKakaoLogin()" style="background:var(--kakao);color:var(--kakao-text);">카카오로 계속</button>
-        </div>
-      </div>`;
-    document.body.appendChild(m);
-  } else {
-    m.classList.add('open');
-    document.getElementById('kakao-name-input').value = '';
-  }
+  if (m) m.remove();
+  m = document.createElement('div');
+  m.id = 'modal-kakao-name';
+  m.className = 'modal-overlay center open';
+  m.innerHTML = `
+    <div class="modal center-modal" style="max-width:340px;">
+      <div class="modal-title">🟡 카카오로 가입</div>
+      <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">
+        카카오 계정으로 가입합니다.<br>
+        가입 후 관리자 승인을 받으면 이용할 수 있어요.
+      </div>
+      <div class="form-group">
+        <label class="form-label">이름 <span style="color:var(--danger);">*</span></label>
+        <input class="form-input" type="text" id="kakao-name-input" placeholder="실명을 입력하세요"
+          oninput="this.value=this.value.replace(/[0-9]/g,'')"
+          onkeydown="if(event.key==='Enter')proceedKakaoSignup()">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="document.getElementById('modal-kakao-name').remove()">취소</button>
+        <button class="btn btn-primary" onclick="proceedKakaoSignup()">다음 →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+  setTimeout(() => document.getElementById('kakao-name-input')?.focus(), 100);
 }
 
-async function proceedKakaoLogin() {
-  const nameInput = document.getElementById('kakao-name-input')?.value.trim() || '';
-  // 이름을 sessionStorage에 임시 저장 (리다이렉트 후 사용)
-  if (nameInput) sessionStorage.setItem('kakao_pending_name', nameInput);
+async function proceedKakaoSignup() {
+  const name = document.getElementById('kakao-name-input')?.value.trim() || '';
+  if (!name) {
+    document.getElementById('kakao-name-input')?.focus();
+    const el = document.getElementById('kakao-name-input');
+    if (el) { el.style.borderColor = 'var(--danger)'; setTimeout(() => el.style.borderColor = '', 1500); }
+    toast('이름을 입력해 주세요', 'error'); return;
+  }
+  // 이름을 sessionStorage에 저장 → 리다이렉트 후 loadProfile에서 사용
+  sessionStorage.setItem('kakao_pending_name', name);
   document.getElementById('modal-kakao-name')?.remove();
-
   toast('카카오 로그인 페이지로 이동 중...', '');
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'kakao',
-    options: {
-      redirectTo: APP_URL,
-      scopes: 'profile_nickname,account_email',
-    }
+    options: { redirectTo: APP_URL, scopes: 'profile_nickname,account_email' }
   });
-  if (error) { toast('카카오 로그인 오류: ' + error.message, 'error'); }
+  if (error) { sessionStorage.removeItem('kakao_pending_name'); toast('카카오 오류: ' + error.message, 'error'); }
 }
 
 /* ════════════════════════════════════════
@@ -906,8 +931,7 @@ async function doEmailLogin() {
   if (!ME) { toast('프로필을 불러올 수 없습니다. 잠시 후 다시 시도해주세요', 'error'); return; }
 
   if (ME.status === 'pending')  {
-    toast('관리자 승인 대기 중입니다 🙏', 'warning');
-    await sb.auth.signOut(); ME = null; return;
+    showPendingScreen(ME.name); return;
   }
   if (ME.status === 'rejected') {
     toast('가입이 거절된 계정입니다', 'error');
@@ -933,8 +957,8 @@ async function doEmailSignup() {
   });
   if (error) { toast('가입 실패: ' + error.message, 'error'); return; }
 
-  // profile은 onAuthStateChange → loadProfile에서 생성됨
-  toast('가입 신청 완료! 관리자 승인 후 이용 가능합니다 🙏', 'warning');
+  // onAuthStateChange → SIGNED_IN → loadProfile → showPendingScreen 으로 이어짐
+  // (Supabase 이메일 확인 설정에 따라 바로 SIGNED_IN이 발생할 수 있음)
 }
 
 async function doLogout() {
@@ -948,13 +972,56 @@ async function doLogout() {
    SHOW / HIDE
 ════════════════════════════════════════ */
 function showLogin() {
+  document.getElementById('pending-screen')?.remove();
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-page').style.display = 'block';
 }
 function showApp() {
+  document.getElementById('pending-screen')?.remove();
   document.getElementById('login-page').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   initApp();
+}
+
+function showPendingScreen(name) {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+  // 기존 대기 화면 제거
+  document.getElementById('pending-screen')?.remove();
+
+  const el = document.createElement('div');
+  el.id = 'pending-screen';
+  el.style.cssText = 'position:fixed;inset:0;background:linear-gradient(160deg,#172554 0%,#1e3a8a 60%,#1d4ed8 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:300;padding:32px 24px;';
+  el.innerHTML = `
+    <div style="text-align:center;max-width:360px;width:100%;">
+      <div style="font-size:4rem;margin-bottom:16px;">⏳</div>
+      <div style="font-family:'Gmarket Sans',sans-serif;font-size:1.5rem;color:#FCD34D;font-weight:700;margin-bottom:8px;">
+        가입 승인 대기 중
+      </div>
+      <div style="color:#93C5FD;font-size:0.95rem;margin-bottom:28px;line-height:1.6;">
+        <b style="color:#fff;">${name || '회원'}</b>님, 가입 신청이 완료되었습니다.<br>
+        관리자 승인 후 서비스를 이용할 수 있어요.
+      </div>
+      <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:20px 24px;margin-bottom:24px;text-align:left;">
+        <div style="color:#93C5FD;font-size:0.82rem;margin-bottom:10px;font-weight:600;">📋 가입 절차</div>
+        <div style="color:#E0F2FE;font-size:0.88rem;line-height:2;">
+          ✅ 카카오 가입 완료<br>
+          ⏳ 관리자 승인 대기 중<br>
+          <span style="opacity:0.5;">🔒 서비스 이용</span>
+        </div>
+      </div>
+      <button onclick="doLogoutFromPending()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:10px;padding:11px 24px;font-family:inherit;font-size:0.9rem;cursor:pointer;width:100%;">
+        ↩ 로그아웃
+      </button>
+    </div>`;
+  document.body.appendChild(el);
+}
+
+async function doLogoutFromPending() {
+  await sb.auth.signOut();
+  ME = null;
+  document.getElementById('pending-screen')?.remove();
+  showLogin();
 }
 function switchTab(tab) {
   document.querySelectorAll('.login-tab').forEach((t,i)=>t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='signup')));
