@@ -287,6 +287,18 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
     <div class="login-logo">2026 보동보동<br>갓생지원금</div>
     <div class="login-subtitle">보드게임 & 방탈출 지원금 신청 플랫폼</div>
 
+
+    <div class="login-box">
+    <button class="sso-btn" onclick="loginSSO('kakao')" style="background: #FEE500; color: #000;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="black"><path d="M12 3c-4.97 0-9 3.185-9 7.115 0 2.558 1.707 4.8 4.34 6.111l-.85 3.11c-.046.17.07.338.24.338.08 0 .157-.03.21-.087l3.65-2.435c.46.065.93.1 1.41.1 4.97 0 9-3.185 9-7.115S16.97 3 12 3z"/></svg>
+      카카오톡으로 로그인 / 가입
+    </button>
+
+    <button class="sso-btn sso-naver" onclick="loginSSO('naver')">
+      네이버로 로그인 / 가입
+    </button>
+    
+    </div>
     <button class="sso-btn sso-naver" onclick="loginSSO('naver')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z"/></svg>
       네이버로 로그인 / 가입
