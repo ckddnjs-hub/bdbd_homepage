@@ -690,21 +690,26 @@ body.ready { visibility: visible; }
    CONFIG — Supabase
 ════════════════════════════════════════ */
 const SUPABASE_URL  = 'https://vkznarlbevlyqnspmnlj.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrem5hcmxiZXZseXFuc3BtbmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2OTg5MTcsImV4cCI6MjA4NzI3NDkxN30.Gm_GJJoiWJU4fvtfUhK4Ci-8CP3dJjW1KWzSazhKoJA';
-
-/* ★ 카카오 REST API 키 — 발급받은 키로 교체 */
-const KAKAO_REST_API_KEY = '2417c77943305f9baf157dac61d6c7e6';
-/* ★ 카카오 리다이렉트 URI — 배포 URL로 교체
-   예: https://your-project.vercel.app/ 또는 http://localhost:3000 */
-const KAKAO_REDIRECT_URI = 'https://bdbd-hp.vercel.app/';
+const SUPABASE_ANON = 'sb_publishable_J4nY_BYycnVPH7XXzPGPQg_M9An5myC';
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024; // 2MB
 
 /* ════════════════════════════════════════
    SUPABASE INIT
+   ★ redirectTo: Supabase가 카카오 인증 후 돌아올 URL
+     = 실제 배포 URL (Vercel)
+     카카오 개발자 콘솔 Redirect URI에도 동일하게 등록!
 ════════════════════════════════════════ */
 const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+const APP_URL = 'https://bdbd-hp.vercel.app'; // ← 실제 배포 URL (끝에 / 없이)
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: {
+    redirectTo: APP_URL,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,  // URL hash에서 세션 자동 감지
+  }
+});
 
 /* ════════════════════════════════════════
    STATE
@@ -720,41 +725,58 @@ let currentPage = '';
    BOOT
 ════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
-  // Kakao redirect callback 처리
-  const urlParams = new URLSearchParams(window.location.search);
-  const kakaoCode = urlParams.get('code');
+  let initialSessionHandled = false;
 
-  if (kakaoCode) {
-    await handleKakaoCallback(kakaoCode);
-    // URL 클린업
-    window.history.replaceState({}, '', window.location.pathname);
-  }
-
-  // Supabase 세션 확인
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    await loadProfile(session.user);
-  }
-
-  // 로딩 완료 → body 표시
-  document.body.classList.add('ready');
-  await fadeOutLoading();
-
-  if (ME) {
-    showApp();
-  } else {
-    showLogin();
-  }
-
-  // 세션 변경 감지
+  // ★ onAuthStateChange를 먼저 등록 — INITIAL_SESSION 이벤트 포착
+  //    카카오 OAuth 리다이렉트 후 URL hash를 Supabase가 파싱해 세션 발급
   sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      await loadProfile(session.user);
-      if (ME) { showApp(); }
+    if (event === 'INITIAL_SESSION') {
+      // 첫 번째 세션 체크 (페이지 로드 시)
+      if (session?.user) {
+        await loadProfile(session.user);
+      }
+      initialSessionHandled = true;
+      document.body.classList.add('ready');
+      await fadeOutLoading();
+      ME ? showApp() : showLogin();
+
+    } else if (event === 'SIGNED_IN') {
+      // 로그인 완료 (카카오 OAuth 콜백 포함)
+      if (!ME && session?.user) {
+        await loadProfile(session.user);
+      }
+      if (ME && ME.status === 'approved') {
+        document.body.classList.add('ready');
+        await fadeOutLoading();
+        showApp();
+      } else if (ME && ME.status === 'pending') {
+        toast('가입 신청이 완료되었습니다. 관리자 승인을 기다려 주세요 🙏', 'warning');
+        await sb.auth.signOut();
+        ME = null;
+      }
+
     } else if (event === 'SIGNED_OUT') {
-      ME = null; showLogin();
+      ME = null;
+      document.body.classList.add('ready');
+      showLogin();
     }
   });
+
+  // INITIAL_SESSION이 오지 않는 경우 폴백 (구형 브라우저 등)
+  setTimeout(async () => {
+    if (!initialSessionHandled) {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session?.user) await loadProfile(session.user);
+      document.body.classList.add('ready');
+      await fadeOutLoading();
+      ME ? showApp() : showLogin();
+    }
+  }, 3000);
+
+  // URL 클린업 (카카오 code, hash 등 제거)
+  if (window.location.search.includes('code=') || window.location.hash.includes('access_token')) {
+    window.history.replaceState({}, '', window.location.pathname);
+  }
 });
 
 async function fadeOutLoading() {
@@ -802,23 +824,25 @@ async function loadProfile(authUser) {
 }
 
 /* ════════════════════════════════════════
-   AUTH — KAKAO
+   AUTH — KAKAO (Supabase OAuth 방식)
+   ★ 카카오 개발자 콘솔 Redirect URI에 반드시 등록:
+     https://vkznarlbevlyqnspmnlj.supabase.co/auth/v1/callback
+   ★ Supabase Dashboard > Authentication > Providers > Kakao 활성화 필요
 ════════════════════════════════════════ */
-function kakaoLogin() {
-  const url = `https://kauth.kakao.com/oauth/authorize`
-    + `?client_id=${KAKAO_REST_API_KEY}`
-    + `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}`
-    + `&response_type=code`;
-  window.location.href = url;
-}
-
-async function handleKakaoCallback(code) {
-  // 카카오 access token 교환은 서버사이드에서 해야 안전합니다.
-  // 여기서는 Supabase Edge Function을 통해 처리하거나,
-  // 직접 Supabase OAuth를 사용합니다.
-  // 아래는 Supabase OAuth 방식 (Supabase 대시보드에서 카카오 Provider 설정 필요)
-  toast('카카오 로그인 처리 중...', '');
-  // Supabase가 카카오 리다이렉트를 처리 — onAuthStateChange에서 잡힘
+async function kakaoLogin() {
+  toast('카카오 로그인 페이지로 이동 중...', '');
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'kakao',
+    options: {
+      redirectTo: APP_URL,        // 인증 후 돌아올 우리 사이트 URL
+      scopes: 'profile_nickname,account_email',
+    }
+  });
+  if (error) {
+    toast('카카오 로그인 오류: ' + error.message, 'error');
+  }
+  // 성공 시 → 카카오 로그인 페이지로 자동 이동
+  // 돌아올 때 onAuthStateChange SIGNED_IN 이벤트 발생
 }
 
 /* ════════════════════════════════════════
@@ -830,13 +854,25 @@ async function doEmailLogin() {
   if (!email || !pw) { toast('이메일과 비밀번호를 입력하세요', 'error'); return; }
 
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
-  if (error) { toast('로그인 실패: ' + error.message, 'error'); return; }
+  if (error) {
+    // 에러 메시지 한국어화
+    const msg = error.message.includes('Invalid login') ? '이메일 또는 비밀번호가 틀렸습니다'
+              : error.message.includes('Email not confirmed') ? '이메일 인증이 필요합니다. 받은 편지함을 확인하세요'
+              : error.message;
+    toast(msg, 'error'); return;
+  }
 
   await loadProfile(data.user);
-  if (!ME) { toast('프로필을 불러올 수 없습니다', 'error'); return; }
+  if (!ME) { toast('프로필을 불러올 수 없습니다. 잠시 후 다시 시도해주세요', 'error'); return; }
 
-  if (ME.status === 'pending')  { toast('관리자 승인 대기 중입니다', 'warning'); await sb.auth.signOut(); ME = null; return; }
-  if (ME.status === 'rejected') { toast('가입이 거절되었습니다', 'error'); await sb.auth.signOut(); ME = null; return; }
+  if (ME.status === 'pending')  {
+    toast('관리자 승인 대기 중입니다 🙏', 'warning');
+    await sb.auth.signOut(); ME = null; return;
+  }
+  if (ME.status === 'rejected') {
+    toast('가입이 거절된 계정입니다', 'error');
+    await sb.auth.signOut(); ME = null; return;
+  }
 
   addLog(`로그인: ${ME.name}`, ME.id);
   showApp();
