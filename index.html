@@ -814,6 +814,12 @@ async function loadProfile(authUser) {
     .eq('id', authUser.id)
     .single();
 
+  // 에러 상세 로깅 (디버깅용)
+  if (error) {
+    console.error('[loadProfile] error:', error.code, error.message, error.details);
+    toast('프로필 오류: ' + error.code + ' ' + error.message, 'error');
+  }
+
   if (error && error.code === 'PGRST116') {
     // Profile doesn't exist — create it
     const name = authUser.user_metadata?.full_name
