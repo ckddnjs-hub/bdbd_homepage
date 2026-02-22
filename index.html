@@ -751,6 +751,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     } else if (event === 'SIGNED_IN') {
       // 로그인 완료 (카카오 OAuth 콜백 포함)
+      const isEmailLogin = session?.user?.app_metadata?.provider === 'email';
       if (!ME && session?.user) {
         await loadProfile(session.user);
       }
@@ -758,8 +759,10 @@ window.addEventListener('DOMContentLoaded', async () => {
       await fadeOutLoading();
       if (ME && ME.status === 'approved') {
         showApp();
+        // 이메일 로그인은 doEmailLogin()에서 토스트 처리하므로 카카오만 표시
+        if (!isEmailLogin) toast(`어서오세요, ${ME.name}님! 🎲`, 'success');
       } else if (ME && ME.status === 'pending') {
-        // 로그아웃 없이 대기 안내 화면 표시
+        toast('가입 승인 대기 중입니다. 관리자 승인 후 이용 가능해요 🙏', 'warning');
         showPendingScreen(ME.name);
       } else if (ME && ME.status === 'rejected') {
         showLogin();
