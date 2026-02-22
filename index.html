@@ -447,8 +447,8 @@ body.ready { visibility: visible; }
         </button>
         <div class="form-divider"><span>또는 이메일로 직접 가입</span></div>
         <div class="fl-input">
-          <input type="text" id="signup-name" placeholder=" ">
-          <label>이름</label>
+          <input type="text" id="signup-name" placeholder=" " oninput="this.value=this.value.replace(/[0-9]/g,'')">
+          <label>이름 <span style="color:var(--danger);font-size:0.75rem;">*필수</span></label>
         </div>
         <div class="fl-input">
           <input type="email" id="signup-email" placeholder=" ">
@@ -923,7 +923,9 @@ async function doEmailSignup() {
   const name  = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const pw    = document.getElementById('signup-pw').value;
-  if (!name || !email || !pw) { toast('모든 항목을 입력하세요', 'error'); return; }
+  if (!name) { toast('이름을 입력해 주세요', 'error'); document.getElementById('signup-name').focus(); return; }
+  if (!email) { toast('이메일을 입력해 주세요', 'error'); return; }
+  if (!pw) { toast('비밀번호를 입력해 주세요', 'error'); return; }
 
   const { data, error } = await sb.auth.signUp({
     email, password: pw,
@@ -1724,16 +1726,23 @@ async function approveUser(uid) {
 }
 
 async function setAdminRole(uid, newRole, name) {
-  const label = newRole === 'admin' ? '관리자' : '일반회원';
+  // newRole='admin' → 일반회원에게 관리자 권한 부여
+  // newRole='user'  → 관리자에게 일반회원 권한으로 변경
+  const isGrant = newRole === 'admin';
   showConfirm({
-    icon: newRole==='admin' ? '🛡️' : '👤',
-    title: `${name}을(를) ${label}로 변경하시겠습니까?`,
-    msg: newRole==='admin' ? '관리자 권한이 부여됩니다.' : '관리자 권한이 해제됩니다.',
-    okLabel: '변경', okClass: newRole==='admin' ? 'btn-info' : 'btn-warn',
+    icon: isGrant ? '🛡️' : '👤',
+    title: isGrant
+      ? `${name}에게 관리자 권한을 부여하시겠습니까?`
+      : `${name}의 관리자 권한을 해제하시겠습니까?`,
+    msg: isGrant
+      ? '관리자로 변경되며 모든 관리 기능을 사용할 수 있게 됩니다.'
+      : '일반 회원으로 변경되며 관리 기능 접근이 제한됩니다.',
+    okLabel: isGrant ? '권한 부여' : '권한 해제',
+    okClass: isGrant ? 'btn-info' : 'btn-warn',
     onOk: async () => {
       await sb.from('profiles').update({ role: newRole }).eq('id', uid);
       addLog(`권한 변경: ${uid} → ${newRole}`, ME.id);
-      toast(`✅ ${name} → ${label} 변경 완료`,'success');
+      toast(`✅ ${name} → ${isGrant ? '관리자' : '일반회원'} 변경 완료`, 'success');
       renderAdminMembers();
     }
   });
