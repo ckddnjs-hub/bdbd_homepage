@@ -546,7 +546,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 // 2. Supabase 연결 설정 (Supabase 대시보드에서 확인 가능)
 const SUPABASE_URL = 'https://vkznarlbevlyqnspmnlj.supabase.co'; // 내 프로젝트 URL
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrem5hcmxiZXZseXFuc3BtbmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2OTg5MTcsImV4cCI6MjA4NzI3NDkxN30.Gm_GJJoiWJU4fvtfUhK4Ci-8CP3dJjW1KWzSazhKoJA'; // 내 프로젝트 API 키
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ═══════════════════════════════════════════════════════════
 //  DATA STORE (localStorage-based)
 // ═══════════════════════════════════════════════════════════
@@ -626,12 +626,12 @@ function seedData() {
 
 let currentUser = null;
 
-// [추가] 카카오 로그인 실행 함수
+// 카카오 로그인 실행 함수
 async function loginWithKakao() {
-  const { data, error } = await supabase.auth.signInWithOAuth({
+  const { data, error } = await supabaseClient.auth.signInWithOAuth({
     provider: 'kakao',
     options: {
-      redirectTo: window.location.origin // 로그인 후 돌아올 주소 (Vercel 주소)
+      redirectTo: window.location.origin
     }
   });
   
@@ -640,20 +640,51 @@ async function loginWithKakao() {
     showToast('카카오 로그인에 실패했습니다.', 'error');
   }
 }
-  
-// [수정] 기존 loginSSO 함수를 아래와 같이 변경
+
+// 이 함수를 통째로 덮어쓰세요
 function loginSSO(provider) {
   if (provider === 'kakao') {
-    loginWithKakao(); // 카카오는 실제 로그인 실행
-  } else {
-    // 네이버, 구글은 기존처럼 시뮬레이터 작동 (나중에 하나씩 실제 연동 가능)
-    const label = provider === 'naver' ? '네이버 계정' : 'Google 계정';
-    document.getElementById('sso-provider-label').textContent = `${label} 선택:`;
-    // ... (기존 시뮬레이터 코드 생략) ...
-    document.getElementById('sso-simulator').style.display = 'block';
-    document.getElementById('admin-login-form').style.display = 'none';
+    loginWithKakao();
+    return; // 카카오는 여기서 종료
   }
-};
+
+  // 네이버, 구글용 시뮬레이터 로직 시작
+  const div = document.getElementById('sso-accounts');
+  div.innerHTML = '';
+  const label = provider === 'naver' ? '네이버 계정' : 'Google 계정';
+  document.getElementById('sso-provider-label').textContent = `${label} 선택:`;
+
+  const accounts = [];
+  if (provider === 'naver') {
+    accounts.push({ email: '__sso@naver.com', name: '테스트유저1' });
+    accounts.push({ email: '__sso1@naver.com', name: '테스트유저2' });
+    DB.getUsers().filter(u=>u.provider==='naver' && !['__sso@naver.com','__sso1@naver.com'].includes(u.email)).forEach(u=>accounts.push({email:u.email,name:u.name}));
+  } else {
+    DB.getUsers().filter(u=>u.provider==='google').forEach(u=>accounts.push({email:u.email,name:u.name}));
+    accounts.push({ email: 'new_google@gmail.com', name: '새 구글 계정으로 가입' });
+  }
+
+  div.innerHTML = `<div style="margin-bottom:8px;">
+    <input type="email" id="sso-email-input" placeholder="이메일 직접 입력" style="margin-bottom:6px;">
+    <input type="password" id="sso-pw-input" placeholder="비밀번호 (기본: 4321)" value="4321" style="margin-bottom:8px;">
+    <button class="btn btn-primary w-full btn-sm" onclick="doSSOLogin('${provider}')">로그인 / 가입</button>
+  </div>
+  <div style="font-size:0.8rem;color:#999;margin:8px 0;">—— 또는 기존 계정 선택 ——</div>`;
+
+  accounts.forEach(a => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-outline w-full btn-sm';
+    btn.style.marginBottom = '6px';
+    btn.textContent = `${a.name} (${a.email})`;
+    btn.onclick = () => {
+      document.getElementById('sso-email-input').value = a.email;
+    };
+    div.appendChild(btn);
+  });
+
+  document.getElementById('sso-simulator').style.display = 'block';
+  document.getElementById('admin-login-form').style.display = 'none';
+}
 
   // Build account list for this provider
   const accounts = [];
