@@ -614,13 +614,34 @@ function seedData() {
 
 let currentUser = null;
 
+// [추가] 카카오 로그인 실행 함수
+async function loginWithKakao() {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'kakao',
+    options: {
+      redirectTo: window.location.origin // 로그인 후 돌아올 주소 (Vercel 주소)
+    }
+  });
+  
+  if (error) {
+    console.error('로그인 에러:', error.message);
+    showToast('카카오 로그인에 실패했습니다.', 'error');
+  }
+}
+  
+// [수정] 기존 loginSSO 함수를 아래와 같이 변경
 function loginSSO(provider) {
-  // Show SSO simulator
-  const label = provider === 'naver' ? '네이버 계정' : 'Google 계정';
-  document.getElementById('sso-provider-label').textContent = `${label} 선택:`;
-  const users = DB.getUsers().filter(u => u.provider === provider || u.email.includes('@'));
-  const div = document.getElementById('sso-accounts');
-  div.innerHTML = '';
+  if (provider === 'kakao') {
+    loginWithKakao(); // 카카오는 실제 로그인 실행
+  } else {
+    // 네이버, 구글은 기존처럼 시뮬레이터 작동 (나중에 하나씩 실제 연동 가능)
+    const label = provider === 'naver' ? '네이버 계정' : 'Google 계정';
+    document.getElementById('sso-provider-label').textContent = `${label} 선택:`;
+    // ... (기존 시뮬레이터 코드 생략) ...
+    document.getElementById('sso-simulator').style.display = 'block';
+    document.getElementById('admin-login-form').style.display = 'none';
+  }
+};
 
   // Build account list for this provider
   const accounts = [];
