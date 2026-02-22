@@ -502,10 +502,10 @@ body.ready { visibility: visible; }
       <div id="app-entries"></div>
       <button class="btn btn-outline btn-full" onclick="addEntry()" style="margin-bottom:14px;">＋ 신청 항목 추가</button>
       <div class="card">
-        <div class="card-title">🏦 환급 계좌 정보</div>
+        <div class="card-title">🏦 계좌 정보 <span style="font-size:0.78rem;font-weight:400;color:var(--text-muted);">(신청자에게 일괄 입금)</span></div>
         <div class="form-group">
           <label class="form-label">예금주<span class="req">*</span></label>
-          <input class="form-input" type="text" id="apply-acname" placeholder="예금주 성함">
+          <input class="form-input" type="text" id="apply-acname" placeholder="예금주 성함" oninput="this.value=this.value.replace(/[0-9]/g,'')">
         </div>
         <div class="form-row-2">
           <div class="form-group">
@@ -803,6 +803,10 @@ async function loadProfile(authUser) {
                || authUser.user_metadata?.name
                || authUser.email?.split('@')[0]
                || '신규회원';
+    // 카카오 가입 시 사전 입력된 이름 우선 적용
+    const pendingName = sessionStorage.getItem('kakao_pending_name');
+    if (pendingName) { name = pendingName; sessionStorage.removeItem('kakao_pending_name'); }
+
     const { data: newP, error: insertErr } = await sb.from('profiles').insert({
       id: authUser.id,
       email: authUser.email || '',
@@ -829,20 +833,56 @@ async function loadProfile(authUser) {
      https://vkznarlbevlyqnspmnlj.supabase.co/auth/v1/callback
    ★ Supabase Dashboard > Authentication > Providers > Kakao 활성화 필요
 ════════════════════════════════════════ */
-async function kakaoLogin() {
+function kakaoLogin() {
+  // 이름 입력 모달 띄우기 (회원가입/로그인 공통)
+  openKakaoNameModal();
+}
+
+function openKakaoNameModal() {
+  // 기존에 모달이 없으면 동적 생성
+  let m = document.getElementById('modal-kakao-name');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'modal-kakao-name';
+    m.className = 'modal-overlay center open';
+    m.innerHTML = `
+      <div class="modal center-modal" style="max-width:340px;">
+        <div class="modal-title">🟡 카카오 로그인</div>
+        <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:14px;">
+          카카오로 로그인합니다.<br>이름이 자동으로 가져와지지 않을 경우를 위해 미리 입력해 주세요.
+        </div>
+        <div class="form-group">
+          <label class="form-label">이름 <span style="color:var(--text-muted);font-weight:400;">(선택)</span></label>
+          <input class="form-input" type="text" id="kakao-name-input" placeholder="홍길동"
+            oninput="this.value=this.value.replace(/[0-9]/g,'')">
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="document.getElementById('modal-kakao-name').remove()">취소</button>
+          <button class="btn btn-kakao" onclick="proceedKakaoLogin()" style="background:var(--kakao);color:var(--kakao-text);">카카오로 계속</button>
+        </div>
+      </div>`;
+    document.body.appendChild(m);
+  } else {
+    m.classList.add('open');
+    document.getElementById('kakao-name-input').value = '';
+  }
+}
+
+async function proceedKakaoLogin() {
+  const nameInput = document.getElementById('kakao-name-input')?.value.trim() || '';
+  // 이름을 sessionStorage에 임시 저장 (리다이렉트 후 사용)
+  if (nameInput) sessionStorage.setItem('kakao_pending_name', nameInput);
+  document.getElementById('modal-kakao-name')?.remove();
+
   toast('카카오 로그인 페이지로 이동 중...', '');
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'kakao',
     options: {
-      redirectTo: APP_URL,        // 인증 후 돌아올 우리 사이트 URL
+      redirectTo: APP_URL,
       scopes: 'profile_nickname,account_email',
     }
   });
-  if (error) {
-    toast('카카오 로그인 오류: ' + error.message, 'error');
-  }
-  // 성공 시 → 카카오 로그인 페이지로 자동 이동
-  // 돌아올 때 onAuthStateChange SIGNED_IN 이벤트 발생
+  if (error) { toast('카카오 로그인 오류: ' + error.message, 'error'); }
 }
 
 /* ════════════════════════════════════════
@@ -1268,23 +1308,45 @@ function clearApplyForm() {
 ════════════════════════════════════════ */
 async function renderMyApps() {
   document.getElementById('myapps-list').innerHTML = skeletonList(3);
-  const { data: apps, error } = await sb.from('applications')
+
+  // 1. 본인이 신청자인 것
+  const { data: myApps } = await sb.from('applications')
     .select('*').eq('applicant_id', ME.id).order('created_at',{ascending:false});
 
+  // 2. 공동이용자로 포함된 것 (entries JSONB 안에 userId로 검색)
+  const { data: allApps } = await sb.from('applications')
+    .select('*').neq('applicant_id', ME.id).order('created_at',{ascending:false});
+
+  const participantApps = (allApps||[]).filter(a =>
+    (a.entries||[]).some(e =>
+      (e.participants||[]).some(p => p.userId === ME.id)
+    )
+  );
+
   const el = document.getElementById('myapps-list');
-  if (!apps || apps.length===0) {
+  const combined = [...(myApps||[]), ...participantApps];
+  combined.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+  if (combined.length === 0) {
     el.innerHTML=`<div class="empty-state"><div class="empty-icon">📭</div><div>신청 내역 없음</div><button class="btn btn-accent mt-2" onclick="navigateTo('apply')">신청하기</button></div>`;
     return;
   }
-  el.innerHTML = apps.map(a=>appListItemHTML(a,true)).join('');
+
+  // 본인 신청인지 공동이용자 신청인지 구분
+  const myIds = new Set((myApps||[]).map(a=>a.id));
+  el.innerHTML = combined.map(a => appListItemHTML(a, myIds.has(a.id))).join('');
 }
 
-function appListItemHTML(a, showActions=true) {
+function appListItemHTML(a, canCancel=false) {
   const ents = a.entries || [];
   const cats = ents.map(e=>catLabel(e.category)).join(', ');
+  const isParticipant = a.applicant_id !== ME.id;
   return `<div class="app-list-item" onclick="openDetail('${a.id}')">
     <div class="app-list-row">
-      <div class="app-list-name">${a.applicant_name} · ${ents.length}건</div>
+      <div class="app-list-name">
+        ${a.applicant_name} · ${ents.length}건
+        ${isParticipant ? '<span style="font-size:0.72rem;background:#DBEAFE;color:#1e40af;border-radius:8px;padding:1px 7px;margin-left:4px;">공동이용</span>' : ''}
+      </div>
       <div>${statusBadge(a.status)}</div>
     </div>
     <div class="app-list-row">
@@ -1292,7 +1354,7 @@ function appListItemHTML(a, showActions=true) {
       <div class="app-list-date">${fmtDate(a.created_at)}</div>
     </div>
     <div class="app-list-meta">${cats}</div>
-    ${showActions && a.status==='pending' ? `
+    ${canCancel && a.status==='pending' ? `
     <div class="app-list-actions" onclick="event.stopPropagation()">
       <button class="btn btn-ghost btn-xs" onclick="confirmCancelApp('${a.id}')">🚫 신청 취소</button>
     </div>` : ''}
@@ -1334,23 +1396,22 @@ async function openDetail(id, isAdmin=false) {
       ${app.note?`<div class="detail-row"><span class="detail-key">비고</span><span class="detail-val">${app.note}</span></div>`:''}
       ${app.admin_note?`<div class="detail-row"><span class="detail-key">관리자메모</span><span class="detail-val" style="color:var(--primary);">${app.admin_note}</span></div>`:''}
     </div>
-    <div class="section-divider"></div>
-    <div class="card-title" style="margin-bottom:10px;">신청 항목</div>
-    ${entriesHtml}
-    <div class="amount-display mt-2">
+    <div class="amount-display" style="margin-bottom:14px;">
       <div><div class="label">총 신청금액</div><div class="value">₩${fmt(app.total_amount)}</div></div>
       <div style="font-size:0.8rem;opacity:0.8;">${(app.entries||[]).length}개 항목</div>
-    </div>`;
+    </div>
+    <div class="section-divider"></div>
+    <div class="card-title" style="margin-bottom:10px;">신청 항목</div>
+    ${entriesHtml}`;
 
   let actions = `<button class="btn btn-outline" onclick="closeModal('modal-detail')">닫기</button>`;
   if (isAdm) {
-    actions += `<button class="btn btn-info btn-sm" onclick="openPrintPreview('${id}')">🖨️ 인쇄</button>
-                <button class="btn btn-warn btn-sm" onclick="openEdit('${id}')">✏️ 수정</button>`;
+    actions += `<button class="btn btn-warn btn-sm" onclick="openEdit('${id}')">✏️ 수정</button>`;
     if (app.status==='pending') {
       actions += `<button class="btn btn-success btn-sm" onclick="confirmApprove('${id}')">✅ 승인</button>
                   <button class="btn btn-danger btn-sm" onclick="confirmReject('${id}')">❌ 반려</button>`;
     }
-  } else if (app.status==='pending') {
+  } else if (app.status==='pending' && app.applicant_id === ME.id) {
     actions += `<button class="btn btn-danger" onclick="confirmCancelApp('${id}')">신청 취소</button>`;
   }
   document.getElementById('modal-detail-actions').innerHTML = actions;
@@ -1430,9 +1491,8 @@ async function renderAdminDash() {
       <div class="app-list-meta">${(a.entries||[]).map(e=>catLabel(e.category)).join(', ')}</div>
       <div class="app-list-actions" onclick="event.stopPropagation()">
         <button class="btn btn-success btn-xs" onclick="confirmApprove('${a.id}')">✅ 승인</button>
-        <button class="btn btn-warn btn-xs" onclick="openEdit('${a.id}')">✏️</button>
         <button class="btn btn-danger btn-xs" onclick="confirmReject('${a.id}')">❌ 반려</button>
-        <button class="btn btn-info btn-xs" onclick="openPrintPreview('${a.id}')">🖨️</button>
+        <button class="btn btn-warn btn-xs" onclick="openEdit('${a.id}')">✏️ 수정</button>
       </div>
     </div>`).join('');
 }
@@ -1466,12 +1526,12 @@ async function renderAdminAll() {
         <div class="app-list-date">${fmtDate(a.created_at)}</div>
       </div>
       <div class="app-list-meta">${(a.entries||[]).map(e=>catLabel(e.category)).join(', ')}</div>
+      ${a.status==='pending'?`
       <div class="app-list-actions" onclick="event.stopPropagation()">
-        ${a.status==='pending'?`<button class="btn btn-success btn-xs" onclick="confirmApprove('${a.id}')">✅</button>`:''}
-        <button class="btn btn-warn btn-xs" onclick="openEdit('${a.id}')">✏️</button>
-        ${a.status==='pending'?`<button class="btn btn-danger btn-xs" onclick="confirmReject('${a.id}')">❌</button>`:''}
-        <button class="btn btn-info btn-xs" onclick="openPrintPreview('${a.id}')">🖨️</button>
-      </div>
+        <button class="btn btn-success btn-xs" onclick="confirmApprove('${a.id}')">✅ 승인</button>
+        <button class="btn btn-danger btn-xs" onclick="confirmReject('${a.id}')">❌ 반려</button>
+        <button class="btn btn-warn btn-xs" onclick="openEdit('${a.id}')">✏️ 수정</button>
+      </div>`:''}
     </div>`).join('');
 }
 
@@ -1645,8 +1705,10 @@ async function renderAdminMembers() {
       </div>
       <div class="btn-row">
         ${u.status==='pending'?`<button class="btn btn-success btn-sm" onclick="approveUser('${u.id}')">✅ 승인</button>`:''}
+        ${u.status==='approved'&&u.role!=='admin'?`<button class="btn btn-info btn-sm" onclick="setAdminRole('${u.id}','admin','${u.name}')">🛡️ 관리자</button>`:''}
+        ${u.status==='approved'&&u.role==='admin'&&u.id!=='${ME?.id}'?`<button class="btn btn-ghost btn-sm" onclick="setAdminRole('${u.id}','user','${u.name}')">👤 일반회원</button>`:''}
         <button class="btn btn-outline btn-sm" onclick="openCreditEdit('${u.id}')">💰 크레딧</button>
-        ${u.status!=='rejected'&&u.role!=='admin'?`<button class="btn btn-danger btn-sm" onclick="confirmRejectUser('${u.id}','${u.name}')">거절</button>`:''}
+        ${u.status!=='rejected'&&u.id!=='${ME?.id}'?`<button class="btn btn-danger btn-sm" onclick="confirmRejectUser('${u.id}','${u.name}')">거절</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -1659,6 +1721,22 @@ async function approveUser(uid) {
   addLog(`회원 승인: ${u.email}`, ME.id);
   toast(`${u.name} 승인 완료 + 크레딧 ₩${fmt(u.credit_total||30000)} 지급`,'success');
   renderAdminMembers();
+}
+
+async function setAdminRole(uid, newRole, name) {
+  const label = newRole === 'admin' ? '관리자' : '일반회원';
+  showConfirm({
+    icon: newRole==='admin' ? '🛡️' : '👤',
+    title: `${name}을(를) ${label}로 변경하시겠습니까?`,
+    msg: newRole==='admin' ? '관리자 권한이 부여됩니다.' : '관리자 권한이 해제됩니다.',
+    okLabel: '변경', okClass: newRole==='admin' ? 'btn-info' : 'btn-warn',
+    onOk: async () => {
+      await sb.from('profiles').update({ role: newRole }).eq('id', uid);
+      addLog(`권한 변경: ${uid} → ${newRole}`, ME.id);
+      toast(`✅ ${name} → ${label} 변경 완료`,'success');
+      renderAdminMembers();
+    }
+  });
 }
 
 function confirmRejectUser(uid, name) {
@@ -1700,19 +1778,33 @@ function openCreateUserModal() {
   openModal('modal-create-user');
 }
 async function createUser() {
-  const name  = document.getElementById('nu-name').value.trim();
-  const email = document.getElementById('nu-email').value.trim();
-  const pw    = document.getElementById('nu-pw').value;
-  const credit= parseFloat(document.getElementById('nu-credit').value)||0;
-  const role  = document.getElementById('nu-role').value;
-  if (!name||!email) { toast('이름과 이메일 필수','error'); return; }
+  const name   = document.getElementById('nu-name').value.trim();
+  const email  = document.getElementById('nu-email').value.trim();
+  const pw     = document.getElementById('nu-pw').value;
+  const credit = parseFloat(document.getElementById('nu-credit').value)||0;
+  const role   = document.getElementById('nu-role').value;
+  if (!name || !email) { toast('이름과 이메일을 입력하세요','error'); return; }
+  if (!pw || pw.length < 4) { toast('비밀번호는 4자 이상이어야 합니다','error'); return; }
 
-  const { data, error } = await sb.auth.admin ? null : await sb.auth.signUp({email, password:pw, options:{data:{name}}});
-  // Fallback: insert profile directly (admin context)
-  const uid = 'manual_'+Date.now();
-  await sb.from('profiles').insert({ id:uid, email, name, role, status:'approved', provider:'admin', credit_total:credit, credit_used:0, credit_pending:0 });
-  addLog(`계정 생성: ${email}`, ME.id);
-  toast(`${name} 계정 생성 완료`,'success');
+  // Supabase Auth에 계정 생성
+  const { data: authData, error: authErr } = await sb.auth.signUp({
+    email, password: pw,
+    options: { data: { name }, emailRedirectTo: APP_URL }
+  });
+  if (authErr) { toast('계정 생성 실패: ' + authErr.message, 'error'); return; }
+
+  const uid = authData?.user?.id;
+  if (!uid) { toast('계정 생성 실패: ID를 받지 못했습니다','error'); return; }
+
+  // profiles 업서트 (트리거가 이미 만들었을 수 있으므로 upsert)
+  const { error: profErr } = await sb.from('profiles').upsert({
+    id: uid, email, name, role, status: 'approved',
+    provider: 'email', credit_total: credit, credit_used: 0, credit_pending: 0
+  });
+  if (profErr) { toast('프로필 저장 실패: ' + profErr.message, 'error'); return; }
+
+  addLog(`계정 생성: ${email} (${role})`, ME.id);
+  toast(`✅ ${name} 계정 생성 완료`, 'success');
   closeModal('modal-create-user');
   renderAdminMembers();
 }
@@ -1835,9 +1927,15 @@ async function doPrint() {
 ════════════════════════════════════════ */
 async function exportCSV() {
   const { data: apps } = await sb.from('applications').select('*').order('created_at',{ascending:false});
-  const rows = [['신청ID','신청자','신청일','총금액','상태','은행','계좌','예금주','항목수','비고']];
-  (apps||[]).forEach(a=>{
-    rows.push([a.id,a.applicant_name,fmtDate(a.created_at),a.total_amount,a.status,a.bank_name,a.account_num,a.account_name,(a.entries||[]).length,a.note||'']);
+  // 헤더: 연번, 이용일자, 구분, 이용내용, 이용자, 신청금액(합계)
+  const rows = [['연번','이용일자','구분','이용내용','이용자','신청금액(합계)']];
+  let seq = 1;
+  (apps||[]).forEach(a => {
+    (a.entries||[]).forEach(e => {
+      const users = (e.participants||[]).map(p => p.name||'').filter(Boolean).join(', ');
+      const catName = {boardgame:'보드게임', escape:'방탈출', etc:'기타'}[e.category] || e.category || '';
+      rows.push([seq++, e.date, catName, e.description, users, e.total_amount]);
+    });
   });
   const csv = rows.map(r=>r.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
@@ -1851,7 +1949,14 @@ async function exportCSV() {
 ════════════════════════════════════════ */
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
+// 계정 생성 모달은 배경 클릭으로 닫히지 않음
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => {
+    if (e.target === m && m.id !== 'modal-create-user') {
+      m.classList.remove('open');
+    }
+  });
+});
 
 /* ════════════════════════════════════════
    UTILS
