@@ -752,15 +752,17 @@ window.addEventListener('DOMContentLoaded', async () => {
     } else if (event === 'SIGNED_IN') {
       // 로그인 완료 (카카오 OAuth 콜백 포함)
       const isEmailLogin = session?.user?.app_metadata?.provider === 'email';
-      if (!ME && session?.user) {
+      // 이메일 로그인은 doEmailLogin()에서 직접 처리하므로 여기선 스킵
+      if (isEmailLogin) return;
+      // 카카오 로그인: 항상 최신 profile 로드 (승인 상태 변경 반영)
+      if (session?.user) {
         await loadProfile(session.user);
       }
       document.body.classList.add('ready');
       await fadeOutLoading();
       if (ME && ME.status === 'approved') {
         showApp();
-        // 이메일 로그인은 doEmailLogin()에서 토스트 처리하므로 카카오만 표시
-        if (!isEmailLogin) toast(`어서오세요, ${ME.name}님! 🎲`, 'success');
+        toast(`어서오세요, ${ME.name}님! 🎲`, 'success');
       } else if (ME && ME.status === 'pending') {
         toast('가입 승인 대기 중입니다. 관리자 승인 후 이용 가능해요 🙏', 'warning');
         showPendingScreen(ME.name);
@@ -814,18 +816,20 @@ async function loadProfile(authUser) {
     .eq('id', authUser.id)
     .single();
 
-  // 에러 상세 로깅 (디버깅용)
-  if (error) {
-    console.error('[loadProfile] error:', error.code, error.message, error.details);
+  if (error && error.code !== 'PGRST116') {
+    // PGRST116 = 행 없음(신규 가입) → 정상, 그 외 에러만 표시
+    console.error('[loadProfile] error:', error.code, error.message);
     toast('프로필 오류: ' + error.code + ' ' + error.message, 'error');
   }
 
   if (error && error.code === 'PGRST116') {
-    // Profile doesn't exist — create it
-    const name = authUser.user_metadata?.full_name
-               || authUser.user_metadata?.name
-               || authUser.email?.split('@')[0]
-               || '신규회원';
+    // Profile 없음 → 신규 생성
+    // ★ let으로 선언해야 pendingName으로 재할당 가능
+    let name = authUser.user_metadata?.full_name
+             || authUser.user_metadata?.name
+             || authUser.user_metadata?.nickname
+             || authUser.email?.split('@')[0]
+             || '신규회원';
     // 카카오 가입 시 사전 입력된 이름 우선 적용
     const pendingName = sessionStorage.getItem('kakao_pending_name');
     if (pendingName) { name = pendingName; sessionStorage.removeItem('kakao_pending_name'); }
@@ -844,6 +848,8 @@ async function loadProfile(authUser) {
     if (!insertErr) {
       ME = newP;
       addLog(`신규 가입: ${name} (${authUser.email})`);
+    } else {
+      console.error('[loadProfile] insert error:', insertErr);
     }
   } else if (data) {
     ME = data;
