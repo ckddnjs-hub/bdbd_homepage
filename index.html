@@ -1559,7 +1559,7 @@ async function renderAdminDash() {
   el.innerHTML = pending.map(a=>`
     <div class="app-list-item" onclick="openDetail('${a.id}',true)">
       <div class="app-list-row">
-        <div class="app-list-name">${a.applicant_name}</div>
+        <div class="app-list-name">${a.applicant_name}${coParticipants(a)}</div>
         <div>${statusBadge(a.status)}</div>
       </div>
       <div class="app-list-row">
@@ -1596,7 +1596,7 @@ async function renderAdminAll() {
   el.innerHTML = filtered.map(a=>`
     <div class="app-list-item" onclick="openDetail('${a.id}',true)">
       <div class="app-list-row">
-        <div class="app-list-name">${a.applicant_name}</div>
+        <div class="app-list-name">${a.applicant_name}${coParticipants(a)}</div>
         <div>${statusBadge(a.status)}</div>
       </div>
       <div class="app-list-row">
@@ -2082,6 +2082,22 @@ function statusBadge(s) {
   return `<span class="badge ${c}">${l}</span>`;
 }
 function catLabel(c) { return {boardgame:'🎲 보드게임',escape:'🔐 방탈출',etc:'📦 기타'}[c]||c||'-'; }
+
+// 신청의 공동이용자 이름 목록 반환 (신청자 본인 제외)
+function coParticipants(a) {
+  const seen = new Set();
+  const names = [];
+  for (const e of (a.entries||[])) {
+    for (const p of (e.participants||[])) {
+      if (p.name && p.name !== a.applicant_name && !seen.has(p.name)) {
+        seen.add(p.name);
+        names.push(p.name);
+      }
+    }
+  }
+  if (!names.length) return '';
+  return ` <span style="font-size:0.78rem;color:#64748B;font-weight:400;">${names.join(' ')}</span>`;
+}
 function skeletonList(n) { return `<div class="skeleton sk-card mb-2"></div>`.repeat(n); }
 </script>
 </body>
