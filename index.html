@@ -162,7 +162,7 @@ body.ready { visibility: visible; }
 .bottom-nav-item {
   flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
   padding:8px 4px; cursor:pointer; border:none; background:none;
-  color:#64748B; font-family:inherit; font-size:0.65rem; gap:3px;
+  color:rgba(255,255,255,0.6); font-family:inherit; font-size:0.65rem; gap:3px;
   transition:all 0.2s; border-top:2px solid transparent;
 }
 .bottom-nav-item .nav-icon { font-size:1.3rem; line-height:1; }
@@ -241,8 +241,8 @@ body.ready { visibility: visible; }
 .badge-cancelled { background:#F1F5F9; color:#475569; }
 .badge-mod-approved { background:#DBEAFE; color:#1E40AF; }
 
-.credit-bar-bg { background:var(--border); border-radius:4px; height:8px; overflow:hidden; margin-top:4px; }
-.credit-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--primary-light),var(--primary)); transition:width 0.4s; }
+.credit-bar-bg { background:linear-gradient(90deg,var(--primary-light),var(--primary)); border-radius:4px; height:8px; overflow:hidden; margin-top:4px; position:relative; }
+.credit-bar-fill { height:100%; border-radius:4px; background:var(--border); transition:width 0.4s; position:absolute; right:0; top:0; }
 .section-divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
 
 .pill-select-row { display:flex; gap:6px; flex-wrap:wrap; }
@@ -792,9 +792,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   }, 3000);
 
-  // URL 클린업 (카카오 code, hash 등 제거)
-  if (window.location.search.includes('code=') || window.location.hash.includes('access_token')) {
-    window.history.replaceState({}, '', window.location.pathname);
+  // URL에 카카오 콜백 파라미터가 있으면 Supabase가 자동 파싱함
+  // (detectSessionInUrl: true 설정으로 처리)
+  // URL 클린업은 Supabase 세션 파싱 후 처리
+  if (window.location.hash.includes('access_token') || window.location.search.includes('code=')) {
+    // Supabase가 URL을 파싱할 시간을 주고 클린업
+    setTimeout(() => {
+      window.history.replaceState({}, '', window.location.pathname);
+    }, 500);
   }
 });
 
@@ -869,7 +874,12 @@ async function kakaoLoginDirect() {
   toast('카카오 로그인 중...', '');
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'kakao',
-    options: { redirectTo: APP_URL, scopes: 'profile_nickname,account_email' }
+    options: {
+      redirectTo: APP_URL,
+      scopes: 'profile_nickname,account_email',
+      skipBrowserRedirect: false,
+      queryParams: { prompt: 'select_account' }
+    }
   });
   if (error) toast('카카오 로그인 오류: ' + error.message, 'error');
 }
@@ -920,7 +930,12 @@ async function proceedKakaoSignup() {
   toast('카카오 로그인 페이지로 이동 중...', '');
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'kakao',
-    options: { redirectTo: APP_URL, scopes: 'profile_nickname,account_email' }
+    options: {
+      redirectTo: APP_URL,
+      scopes: 'profile_nickname,account_email',
+      skipBrowserRedirect: false,
+      queryParams: { prompt: 'select_account' }
+    }
   });
   if (error) { sessionStorage.removeItem('kakao_pending_name'); toast('카카오 오류: ' + error.message, 'error'); }
 }
@@ -1225,7 +1240,10 @@ async function renderEntries() {
       </div>
       <div class="form-group">
         <label class="form-label">일자<span class="req">*</span></label>
-        <input class="form-input" type="date" value="${e.date}" onchange="setEntryField(${ei},'date',this.value)">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input class="form-input" type="date" value="${e.date}" onchange="setEntryField(${ei},'date',this.value)" style="flex:1;">
+          <span style="font-size:0.88rem;color:var(--primary);font-weight:600;white-space:nowrap;min-width:28px;" id="dow-${ei}">${e.date ? ['일','월','화','수','목','금','토'][new Date(e.date).getDay()]+'요일' : ''}</span>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">신청구분<span class="req">*</span></label>
@@ -1251,7 +1269,16 @@ async function renderEntries() {
 
 function setEntryField(idx, field, val) {
   entries[idx][field] = val;
-  if (field==='category') renderEntries(); else updateFloatingTotal();
+  if (field==='category') renderEntries();
+  else if (field==='date') {
+    // 요일 즉시 업데이트
+    const dowEl = document.getElementById('dow-'+idx);
+    if (dowEl && val) {
+      const days = ['일','월','화','수','목','금','토'];
+      dowEl.textContent = days[new Date(val).getDay()] + '요일';
+    }
+    updateFloatingTotal();
+  } else updateFloatingTotal();
 }
 
 function setParticipant(eIdx, pIdx, field, val) {
