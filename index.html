@@ -1419,10 +1419,18 @@ function appListItemHTML(a, canCancel=false) {
   const ents = a.entries || [];
   const cats = ents.map(e=>catLabel(e.category)).join(', ');
   const isParticipant = a.applicant_id !== ME.id;
+  // 이용내용 목록 (최대 2개 + 나머지 건수)
+  const descs = ents.map(e=>e.description).filter(Boolean);
+  const descText = descs.length <= 2
+    ? descs.join(', ')
+    : descs.slice(0,2).join(', ') + ` 외 ${descs.length-2}건`;
+  // 공동이용자 이름 (신청자 제외)
+  const coNames = coParticipants(a);
   return `<div class="app-list-item" onclick="openDetail('${a.id}')">
+    <div style="font-size:0.92rem;font-weight:700;color:var(--primary-dark);margin-bottom:6px;">${descText||'(이용내용 없음)'}</div>
     <div class="app-list-row">
-      <div class="app-list-name">
-        ${a.applicant_name} · ${ents.length}건
+      <div class="app-list-name" style="font-size:0.82rem;font-weight:500;">
+        ${a.applicant_name}${coNames}
         ${isParticipant ? '<span style="font-size:0.72rem;background:#DBEAFE;color:#1e40af;border-radius:8px;padding:1px 7px;margin-left:4px;">공동이용</span>' : ''}
       </div>
       <div>${statusBadge(a.status)}</div>
@@ -1556,10 +1564,14 @@ async function renderAdminDash() {
   const { data: pending } = await sb.from('applications').select('*').eq('status','pending').order('created_at',{ascending:false}).limit(20);
   const el = document.getElementById('admin-pending');
   if (!pending||pending.length===0) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">✅</div><div>대기 중 없음</div></div>`; return; }
-  el.innerHTML = pending.map(a=>`
+  el.innerHTML = pending.map(a=>{
+    const descs = (a.entries||[]).map(e=>e.description).filter(Boolean);
+    const descText = descs.length <= 2 ? descs.join(', ') : descs.slice(0,2).join(', ') + ` 외 ${descs.length-2}건`;
+    return `
     <div class="app-list-item" onclick="openDetail('${a.id}',true)">
+      <div style="font-size:0.92rem;font-weight:700;color:var(--primary-dark);margin-bottom:6px;">${descText||'(이용내용 없음)'}</div>
       <div class="app-list-row">
-        <div class="app-list-name">${a.applicant_name}${coParticipants(a)}</div>
+        <div class="app-list-name" style="font-size:0.82rem;font-weight:500;">${a.applicant_name}${coParticipants(a)}</div>
         <div>${statusBadge(a.status)}</div>
       </div>
       <div class="app-list-row">
@@ -1572,7 +1584,8 @@ async function renderAdminDash() {
         <button class="btn btn-danger btn-xs" onclick="confirmReject('${a.id}')">❌ 반려</button>
         <button class="btn btn-warn btn-xs" onclick="openEdit('${a.id}')">✏️ 수정</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 /* ════════════════════════════════════════
@@ -1593,10 +1606,14 @@ async function renderAdminAll() {
   document.getElementById('admin-all-count').textContent = `총 ${filtered.length}건`;
   const el = document.getElementById('admin-all-list');
   if (!filtered.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div>결과 없음</div></div>`; return; }
-  el.innerHTML = filtered.map(a=>`
+  el.innerHTML = filtered.map(a=>{
+    const descs = (a.entries||[]).map(e=>e.description).filter(Boolean);
+    const descText = descs.length <= 2 ? descs.join(', ') : descs.slice(0,2).join(', ') + ` 외 ${descs.length-2}건`;
+    return `
     <div class="app-list-item" onclick="openDetail('${a.id}',true)">
+      <div style="font-size:0.92rem;font-weight:700;color:var(--primary-dark);margin-bottom:6px;">${descText||'(이용내용 없음)'}</div>
       <div class="app-list-row">
-        <div class="app-list-name">${a.applicant_name}${coParticipants(a)}</div>
+        <div class="app-list-name" style="font-size:0.82rem;font-weight:500;">${a.applicant_name}${coParticipants(a)}</div>
         <div>${statusBadge(a.status)}</div>
       </div>
       <div class="app-list-row">
@@ -1610,7 +1627,8 @@ async function renderAdminAll() {
         <button class="btn btn-danger btn-xs" onclick="confirmReject('${a.id}')">❌ 반려</button>
         <button class="btn btn-warn btn-xs" onclick="openEdit('${a.id}')">✏️ 수정</button>
       </div>`:''}
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 /* ════════════════════════════════════════
