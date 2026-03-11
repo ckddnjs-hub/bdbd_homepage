@@ -2,2154 +2,1149 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>2026 보동보동 갓생지원금</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
-
-<!-- Supabase SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎲 보드게임 동호회</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
-/* ════════════════════════════════════════
-   CSS VARIABLES — BLUE THEME
-════════════════════════════════════════ */
-:root {
-  --primary: #1A56DB;
-  --primary-light: #3F83F8;
-  --primary-dark: #1e3a8a;
-  --primary-darker: #172554;
-  --accent: #F59E0B;
-  --accent2: #FCD34D;
-  --kakao: #FEE500;
-  --kakao-text: #191919;
-  --bg: #EFF6FF;
-  --surface: #FFFFFF;
-  --surface2: #F0F7FF;
-  --text: #1E3A5F;
-  --text-muted: #64748B;
-  --border: #BFDBFE;
-  --border-strong: #93C5FD;
-  --danger: #EF4444;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --info: #3B82F6;
-  --shadow: 0 4px 20px rgba(26,86,219,0.10);
-  --radius: 16px;
-  --radius-sm: 10px;
-}
+  :root {
+    --bg: #0f0e17;
+    --surface: #1a1825;
+    --card: #221f35;
+    --accent: #ff6b35;
+    --accent2: #ffd23f;
+    --accent3: #06d6a0;
+    --text: #fffffe;
+    --muted: #a7a9be;
+    --border: #2e2b45;
+  }
 
-/* ════════════════════════════════════════
-   RESET & BASE
-════════════════════════════════════════ */
-* { box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Noto Sans KR', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  font-size: 15px;
-  line-height: 1.5;
-  /* ★ 앱 전체를 처음엔 숨김 — JS가 준비되면 보여줌 */
-  visibility: hidden;
-}
-body.ready { visibility: visible; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* ════════════════════════════════════════
-   LOADING SCREEN
-════════════════════════════════════════ */
-#loading-screen {
-  position: fixed; inset: 0; z-index: 9999;
-  background: linear-gradient(160deg, var(--primary-darker) 0%, var(--primary-dark) 60%, #1e40af 100%);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  transition: opacity 0.4s;
-}
-#loading-screen.hidden { opacity: 0; pointer-events: none; }
-.loading-dice { font-size: 4rem; animation: bounce 1s infinite; }
-@keyframes bounce { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-12px); } }
-.loading-title { font-family:'Gmarket Sans',sans-serif; font-size:1.6rem; color:var(--accent2); font-weight:700; margin:12px 0 4px; }
-.loading-sub { color:#93C5FD; font-size:0.9rem; margin-bottom:28px; }
-.spinner { width:36px; height:36px; border:3px solid rgba(255,255,255,0.2); border-top-color:var(--accent2); border-radius:50%; animation:spin 0.8s linear infinite; }
-@keyframes spin { to { transform:rotate(360deg); } }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
 
-/* ════════════════════════════════════════
-   LOGIN PAGE
-════════════════════════════════════════ */
-#login-page {
-  display: none; position: fixed; inset: 0; z-index: 200;
-  background: linear-gradient(160deg, var(--primary-darker) 0%, var(--primary-dark) 55%, #1d4ed8 100%);
-  overflow-y: auto;
-}
-.login-container {
-  min-height: 100vh; display:flex; flex-direction:column; align-items:center;
-  justify-content:center; padding:24px 20px;
-}
-.login-hero { text-align:center; margin-bottom:32px; }
-.login-emoji { font-size:4rem; display:block; margin-bottom:12px; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
-.login-title { font-family:'Gmarket Sans',sans-serif; font-size:1.7rem; color:#FCD34D; font-weight:700; line-height:1.3; margin-bottom:8px; }
-.login-subtitle { color:#93C5FD; font-size:0.9rem; }
-.login-card {
-  background:#fff; border-radius:24px; padding:28px 24px; width:100%; max-width:400px;
-  box-shadow:0 24px 64px rgba(0,0,0,0.4);
-}
-.login-tab-row { display:flex; gap:0; margin-bottom:20px; background:var(--bg); border-radius:10px; padding:3px; }
-.login-tab {
-  flex:1; text-align:center; padding:9px 6px; border-radius:8px; cursor:pointer;
-  font-size:0.85rem; font-weight:500; color:var(--text-muted); transition:all 0.2s;
-  border:none; background:transparent; font-family:inherit;
-}
-.login-tab.active { background:#fff; color:var(--primary); box-shadow:0 2px 8px rgba(0,0,0,0.1); font-weight:700; }
-.login-panel { display:none; }
-.login-panel.active { display:block; }
+  /* ── 로그인 화면 ── */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
 
-/* Float-label inputs */
-.fl-input { position:relative; margin-bottom:14px; }
-.fl-input input {
-  width:100%; border:1.5px solid var(--border); border-radius:10px;
-  padding:20px 14px 8px; font-family:inherit; font-size:0.95rem;
-  background:var(--surface2); color:var(--text); outline:none; transition:border-color 0.2s;
-}
-.fl-input input:focus { border-color:var(--primary-light); background:#fff; }
-.fl-input label {
-  position:absolute; left:14px; top:50%; transform:translateY(-50%);
-  font-size:0.9rem; color:var(--text-muted); pointer-events:none; transition:all 0.15s;
-}
-.fl-input input:focus ~ label,
-.fl-input input:not(:placeholder-shown) ~ label {
-  top:10px; transform:none; font-size:0.7rem; color:var(--primary); font-weight:600;
-}
-.form-divider { display:flex; align-items:center; gap:10px; margin:16px 0; }
-.form-divider::before,.form-divider::after { content:''; flex:1; height:1px; background:var(--border); }
-.form-divider span { font-size:0.8rem; color:var(--text-muted); white-space:nowrap; }
+  .login-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 30%, rgba(255,107,53,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 70%, rgba(6,214,160,0.08) 0%, transparent 60%);
+  }
 
-/* Kakao button */
-.btn-kakao {
-  width:100%; padding:14px 16px; border:none; border-radius:12px;
-  background:var(--kakao); color:var(--kakao-text);
-  font-family:inherit; font-size:1rem; font-weight:700;
-  display:flex; align-items:center; justify-content:center; gap:10px;
-  cursor:pointer; transition:all 0.2s; margin-bottom:10px; letter-spacing:-0.2px;
-}
-.btn-kakao:hover { background:#e6cf00; transform:translateY(-1px); }
-.btn-kakao:active { transform:scale(0.97); }
-.kakao-icon { width:22px; height:22px; }
+  .dice-float {
+    position: absolute;
+    font-size: 3rem;
+    opacity: 0.06;
+    animation: floatDice 8s ease-in-out infinite;
+    user-select: none;
+  }
+  .dice-float:nth-child(1) { top: 10%; left: 8%; animation-delay: 0s; font-size: 4rem; }
+  .dice-float:nth-child(2) { top: 60%; left: 5%; animation-delay: 2s; }
+  .dice-float:nth-child(3) { top: 20%; right: 10%; animation-delay: 1s; font-size: 5rem; }
+  .dice-float:nth-child(4) { bottom: 15%; right: 8%; animation-delay: 3s; }
+  .dice-float:nth-child(5) { bottom: 30%; left: 20%; animation-delay: 4s; font-size: 2.5rem; }
 
-/* ════════════════════════════════════════
-   APP SHELL
-════════════════════════════════════════ */
-#app { display:none; min-height:100vh; flex-direction:column; }
-#app.show { display:flex; }
+  @keyframes floatDice {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    33% { transform: translateY(-20px) rotate(10deg); }
+    66% { transform: translateY(10px) rotate(-5deg); }
+  }
 
-.app-header {
-  background:linear-gradient(135deg,var(--primary-darker) 0%,var(--primary-dark) 100%);
-  padding:0 16px; height:56px; display:flex; align-items:center;
-  justify-content:space-between; position:sticky; top:0; z-index:100;
-  box-shadow:0 2px 12px rgba(0,0,0,0.25);
-}
-.app-header-logo { font-family:'Gmarket Sans',sans-serif; font-size:0.95rem; color:#FCD34D; font-weight:700; cursor:pointer; line-height:1.2; }
-.app-header-logo small { display:block; color:#93C5FD; font-size:0.68rem; font-weight:300; }
-.header-user { display:flex; align-items:center; gap:8px; }
-.header-chip { background:rgba(255,255,255,0.12); border-radius:20px; padding:5px 12px; font-size:0.82rem; color:#E0F2FE; display:flex; align-items:center; gap:6px; }
-.credit-pill { background:var(--accent); color:#fff; border-radius:10px; padding:2px 9px; font-size:0.76rem; font-weight:700; }
-.btn-icon { background:rgba(255,255,255,0.12); border:none; color:#fff; border-radius:8px; padding:7px 10px; cursor:pointer; font-size:1rem; }
+  .login-box {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 3rem 3.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 380px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    animation: fadeUp 0.6s ease;
+  }
 
-.bottom-nav {
-  position:fixed; bottom:0; left:0; right:0; z-index:100;
-  background:var(--primary-darker); border-top:1px solid rgba(255,255,255,0.1);
-  display:flex; padding-bottom:env(safe-area-inset-bottom);
-  box-shadow:0 -4px 20px rgba(0,0,0,0.3);
-}
-.bottom-nav-item {
-  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  padding:8px 4px; cursor:pointer; border:none; background:none;
-  color:rgba(255,255,255,0.6); font-family:inherit; font-size:0.65rem; gap:3px;
-  transition:all 0.2s; border-top:2px solid transparent;
-}
-.bottom-nav-item .nav-icon { font-size:1.3rem; line-height:1; }
-.bottom-nav-item.active { color:var(--accent2); border-top-color:var(--accent2); }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-.app-body { flex:1; overflow-y:auto; padding:16px 16px 80px; }
+  .login-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    letter-spacing: 3px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
 
-/* ════════════════════════════════════════
-   PAGES
-════════════════════════════════════════ */
-.page { display:none; }
-.page.active { display:block; animation:fadeUp 0.25s ease; }
-@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  .login-subtitle {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
 
-/* ════════════════════════════════════════
-   COMPONENTS
-════════════════════════════════════════ */
-.page-header { margin-bottom:16px; }
-.page-title { font-family:'Gmarket Sans',sans-serif; font-size:1.25rem; font-weight:700; color:var(--primary-dark); }
-.page-sub { font-size:0.82rem; color:var(--text-muted); margin-top:2px; }
+  .login-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: left;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
 
-.card { background:var(--surface); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); margin-bottom:14px; border:1px solid var(--border); }
-.card-title { font-size:0.95rem; font-weight:700; color:var(--primary-dark); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+  .login-input {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 1.4rem;
+    letter-spacing: 6px;
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 1.5rem;
+  }
 
-.stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px; }
-.stat-card { background:var(--surface); border-radius:var(--radius-sm); padding:14px 12px; border:1px solid var(--border); box-shadow:var(--shadow); }
-.stat-label { font-size:0.72rem; color:var(--text-muted); margin-bottom:4px; }
-.stat-value { font-size:1.3rem; font-weight:700; font-family:'Gmarket Sans',sans-serif; color:var(--primary-dark); }
-.stat-value.accent { color:var(--accent); }
-.stat-value.blue { color:var(--primary); }
-.stat-value.green { color:var(--success); }
-.stat-value.warn { color:var(--warning); }
+  .login-input:focus { border-color: var(--accent); }
 
-.btn {
-  display:inline-flex; align-items:center; justify-content:center; gap:6px;
-  border:none; border-radius:var(--radius-sm); padding:12px 20px;
-  font-family:inherit; font-size:0.9rem; font-weight:600; cursor:pointer;
-  transition:all 0.18s; white-space:nowrap; letter-spacing:-0.2px;
-}
-.btn:active { transform:scale(0.97); }
-.btn-primary { background:var(--primary); color:#fff; }
-.btn-primary:hover { background:var(--primary-dark); }
-.btn-accent { background:var(--accent); color:#fff; }
-.btn-outline { background:transparent; border:1.5px solid var(--border-strong); color:var(--primary); }
-.btn-danger { background:var(--danger); color:#fff; }
-.btn-success { background:var(--success); color:#fff; }
-.btn-warn { background:var(--warning); color:#fff; }
-.btn-info { background:var(--info); color:#fff; }
-.btn-ghost { background:transparent; color:var(--text-muted); border:1px solid var(--border); }
-.btn-sm { padding:7px 14px; font-size:0.82rem; border-radius:8px; }
-.btn-xs { padding:4px 10px; font-size:0.76rem; border-radius:6px; font-weight:500; }
-.btn-full { width:100%; }
-.btn-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .login-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 2px;
+  }
 
-.form-group { margin-bottom:14px; }
-.form-label { display:block; font-size:0.82rem; font-weight:600; color:var(--text-muted); margin-bottom:6px; }
-.form-label .req { color:var(--danger); margin-left:2px; }
-.form-input, .form-select, .form-textarea {
-  width:100%; border:1.5px solid var(--border); border-radius:var(--radius-sm);
-  padding:11px 13px; font-family:inherit; font-size:0.92rem;
-  background:var(--surface2); color:var(--text); outline:none;
-  transition:border-color 0.2s, box-shadow 0.2s; -webkit-appearance:none;
-}
-.form-input:focus, .form-select:focus, .form-textarea:focus {
-  border-color:var(--primary-light); background:#fff;
-  box-shadow:0 0 0 3px rgba(59,130,246,0.1);
-}
-.form-textarea { resize:vertical; min-height:72px; }
-.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.form-hint { font-size:0.76rem; color:var(--text-muted); margin-top:4px; }
+  .login-btn:hover { background: #ff8555; transform: translateY(-1px); }
 
-.badge { display:inline-flex; align-items:center; padding:3px 9px; border-radius:12px; font-size:0.74rem; font-weight:700; white-space:nowrap; }
-.badge-pending { background:#FEF3C7; color:#92400E; }
-.badge-approved { background:#D1FAE5; color:#065F46; }
-.badge-rejected { background:#FEE2E2; color:#991B1B; }
-.badge-cancelled { background:#F1F5F9; color:#475569; }
-.badge-mod-approved { background:#DBEAFE; color:#1E40AF; }
+  .login-error {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: #ff4757;
+    min-height: 1.2em;
+  }
 
-.credit-bar-bg { background:linear-gradient(90deg,var(--primary-light),var(--primary)); border-radius:4px; height:8px; overflow:hidden; margin-top:4px; position:relative; }
-.credit-bar-fill { height:100%; border-radius:4px; background:var(--border); transition:width 0.4s; position:absolute; right:0; top:0; }
-.section-divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
+  /* ── 메인 앱 ── */
+  #app { display: none; }
 
-.pill-select-row { display:flex; gap:6px; flex-wrap:wrap; }
-.pill-opt { padding:7px 14px; border-radius:20px; border:1.5px solid var(--border); background:var(--surface2); color:var(--text-muted); font-size:0.83rem; cursor:pointer; font-family:inherit; font-weight:500; transition:all 0.15s; }
-.pill-opt.selected { border-color:var(--primary); background:var(--primary); color:#fff; }
+  /* 헤더 */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
 
-.amount-display { background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 100%); border-radius:var(--radius-sm); padding:14px 16px; color:#fff; display:flex; justify-content:space-between; align-items:center; }
-.amount-display .label { font-size:0.82rem; opacity:0.8; }
-.amount-display .value { font-size:1.3rem; font-weight:700; font-family:'Gmarket Sans',sans-serif; }
+  .header-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    cursor: pointer;
+  }
 
-.entry-card { background:var(--surface); border:1.5px solid var(--border-strong); border-radius:var(--radius); padding:16px; margin-bottom:12px; box-shadow:0 2px 12px rgba(26,86,219,0.07); }
-.entry-card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
-.entry-card-title { font-weight:700; color:var(--primary-dark); font-size:0.95rem; display:flex; align-items:center; gap:6px; }
-.entry-num { background:var(--primary); color:#fff; width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.78rem; font-weight:700; }
+  .header-logo span { color: var(--text); }
 
-.participant-block { background:var(--surface2); border-radius:var(--radius-sm); padding:12px; margin-bottom:8px; border:1px solid var(--border); }
-.participant-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-.participant-label { font-size:0.8rem; font-weight:700; color:var(--primary); }
+  .nav {
+    display: flex;
+    gap: 0.3rem;
+  }
 
-.receipt-zone { border:2px dashed var(--border-strong); border-radius:var(--radius-sm); padding:20px 16px; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--surface2); position:relative; }
-.receipt-zone:hover { border-color:var(--primary); background:#EFF6FF; }
-.receipt-zone.has-file { border-color:var(--success); border-style:solid; background:#F0FDF4; }
-.receipt-zone img { max-width:100%; max-height:160px; border-radius:8px; margin-top:10px; object-fit:contain; }
-.receipt-remove { position:absolute; top:8px; right:8px; background:var(--danger); color:#fff; border:none; border-radius:50%; width:28px; height:28px; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; z-index:2; }
+  .nav-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
 
-.entry-total { background:linear-gradient(135deg,#EFF6FF,#DBEAFE); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; margin-top:10px; border:1px solid var(--border-strong); }
-.entry-total .et-label { font-size:0.82rem; color:var(--primary); font-weight:600; }
-.entry-total .et-value { font-size:1.05rem; font-weight:700; color:var(--primary-dark); }
+  .nav-btn:hover, .nav-btn.active {
+    background: var(--card);
+    color: var(--text);
+  }
 
-.floating-bar {
-  position:fixed; bottom:56px; left:0; right:0; z-index:90;
-  background:rgba(255,255,255,0.96); backdrop-filter:blur(10px);
-  border-top:1px solid var(--border); padding:10px 16px;
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-  box-shadow:0 -4px 20px rgba(26,86,219,0.12);
-}
-.floating-total { font-size:0.82rem; color:var(--text-muted); }
-.floating-total strong { display:block; font-size:1.05rem; color:var(--primary-dark); }
+  .nav-btn.active { color: var(--accent); }
 
-.app-list-item { background:var(--surface); border-radius:var(--radius-sm); padding:14px; border:1px solid var(--border); margin-bottom:10px; cursor:pointer; transition:all 0.15s; box-shadow:var(--shadow); }
-.app-list-item:active { transform:scale(0.98); }
-.app-list-row { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
-.app-list-name { font-weight:700; font-size:0.92rem; color:var(--text); }
-.app-list-date { font-size:0.78rem; color:var(--text-muted); }
-.app-list-amount { font-size:1.05rem; font-weight:700; color:var(--primary-dark); font-family:'Gmarket Sans',sans-serif; }
-.app-list-meta { font-size:0.78rem; color:var(--text-muted); }
-.app-list-actions { display:flex; gap:6px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); flex-wrap:wrap; }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
 
-/* Toast */
-#toast-container { position:fixed; top:70px; left:16px; right:16px; z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
-.toast { background:var(--primary-darker); color:#fff; border-radius:12px; padding:13px 18px; font-size:0.88rem; box-shadow:0 4px 20px rgba(0,0,0,0.3); animation:slideDown 0.3s ease; display:flex; align-items:center; gap:10px; pointer-events:auto; }
-.toast.success { background:#065F46; }
-.toast.error { background:#991B1B; }
-.toast.warning { background:#92400E; }
-@keyframes slideDown { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:none; } }
+  /* 페이지 컨테이너 */
+  .page { display: none; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+  .page.active { display: block; animation: fadeIn 0.3s ease; }
 
-/* Modal */
-.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:500; align-items:flex-end; justify-content:center; backdrop-filter:blur(4px); }
-.modal-overlay.open { display:flex; }
-.modal-overlay.center { align-items:center; }
-.modal { background:#fff; border-radius:24px 24px 0 0; padding:24px 20px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 -8px 40px rgba(0,0,0,0.3); animation:slideUp 0.3s ease; }
-.modal.center-modal { border-radius:24px; max-width:480px; width:calc(100% - 32px); animation:fadeInScale 0.25s; }
-.modal.confirm-modal { border-radius:20px; max-width:340px; width:calc(100% - 32px); animation:fadeInScale 0.2s; padding:28px 24px; text-align:center; }
-@keyframes slideUp { from { transform:translateY(40px); opacity:0; } to { transform:none; opacity:1; } }
-@keyframes fadeInScale { from { opacity:0; transform:scale(0.94); } to { opacity:1; transform:none; } }
-.modal-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 18px; }
-.modal-title { font-size:1.05rem; font-weight:700; color:var(--primary-dark); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
-.modal-actions { display:flex; gap:8px; margin-top:20px; }
-.modal-actions .btn { flex:1; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-/* Confirm Dialog */
-.confirm-icon { font-size:2.5rem; margin-bottom:12px; }
-.confirm-title { font-size:1.05rem; font-weight:700; color:var(--text); margin-bottom:8px; }
-.confirm-msg { font-size:0.88rem; color:var(--text-muted); margin-bottom:20px; line-height:1.5; }
-.confirm-actions { display:flex; gap:8px; }
-.confirm-actions .btn { flex:1; }
+  /* 공통 섹션 헤더 */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 2px;
+    margin-bottom: 0.3rem;
+  }
 
-/* Pending dot */
-.pending-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; animation:pulse 1.5s infinite; }
-@keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.3; } }
+  .section-title span { color: var(--accent); }
 
-.highlight { background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(147,197,253,0.1)); border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:12px 14px; }
-.flex-between { display:flex; justify-content:space-between; align-items:center; }
-.flex-center { display:flex; align-items:center; gap:8px; }
-.text-muted { color:var(--text-muted); font-size:0.82rem; }
-.mt-1 { margin-top:4px; } .mt-2 { margin-top:8px; } .mt-3 { margin-top:14px; }
-.mb-2 { margin-bottom:8px; } .mb-3 { margin-bottom:14px; }
-.empty-state { text-align:center; padding:40px 20px; color:var(--text-muted); }
-.empty-icon { font-size:3rem; margin-bottom:10px; }
+  .section-desc {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
 
-.detail-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:0.88rem; }
-.detail-row:last-child { border-bottom:none; }
-.detail-key { color:var(--text-muted); }
-.detail-val { font-weight:600; text-align:right; flex:1; margin-left:12px; }
+  /* ─── 홈 대시보드 ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
 
-.admin-tag { background:rgba(255,215,0,0.2); border:1px solid rgba(255,215,0,0.5); color:#7C3AED; border-radius:4px; padding:2px 7px; font-size:0.72rem; font-weight:700; }
-.filter-row { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
-.filter-row .form-input, .filter-row .form-select { flex:1; min-width:120px; font-size:0.85rem; padding:9px 12px; }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
 
-/* Skeleton loader */
-.skeleton { background:linear-gradient(90deg,#e8eef7 25%,#d0ddf0 50%,#e8eef7 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:8px; }
-@keyframes shimmer { 0%{ background-position:200% 0; } 100%{ background-position:-200% 0; } }
-.sk-line { height:14px; margin-bottom:8px; }
-.sk-card { height:80px; margin-bottom:10px; }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent-color, var(--accent));
+  }
 
-/* ════════════════════════════════════════
-   PRINT — A4
-════════════════════════════════════════ */
-@media print {
-  * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  body > *:not(#print-area) { display:none !important; }
-  #print-area { display:block !important; position:static !important; }
-}
-#print-area { display:none; }
-.print-page { width:210mm; min-height:297mm; margin:0 auto; padding:18mm 16mm 14mm; font-family:'Noto Sans KR',sans-serif; font-size:11pt; color:#000; background:#fff; display:flex; flex-direction:column; }
-.print-header-bar { background:#1e3a8a; color:#fff; padding:10px 16px; border-radius:4px; margin-bottom:8px; }
-.print-main-title { font-size:14pt; font-weight:900; }
-.print-sub { font-size:9pt; opacity:0.85; margin-top:2px; }
-.print-stamp-row { display:flex; justify-content:flex-end; margin-bottom:12px; }
-.print-stamp { border:2px solid #1e3a8a; border-radius:4px; padding:6px 20px; font-size:9pt; text-align:center; }
-.print-stamp .stamp-label { font-weight:700; color:#1e3a8a; }
-.print-section { margin-bottom:14px; }
-.print-section-title { font-size:10pt; font-weight:700; color:#1e3a8a; border-bottom:2px solid #1e3a8a; padding-bottom:4px; margin-bottom:8px; }
-.print-table { width:100%; border-collapse:collapse; font-size:10pt; }
-.print-table th { background:#1e3a8a; color:#fff; padding:7px 10px; text-align:left; font-weight:600; }
-.print-table td { padding:7px 10px; border:1px solid #ccc; vertical-align:top; }
-.print-table tr:nth-child(even) td { background:#F8F9FA; }
-.print-total-box { border:2px solid #1e3a8a; border-radius:4px; padding:10px 16px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; }
-.print-total-label { font-size:11pt; font-weight:700; color:#1e3a8a; }
-.print-total-amount { font-size:14pt; font-weight:900; color:#1e3a8a; }
-.print-bank-box { border:1.5px solid #93C5FD; border-radius:4px; padding:12px 16px; background:#EFF6FF; }
-.print-bank-row { display:flex; gap:8px; margin-bottom:5px; font-size:10pt; }
-.print-bank-key { color:#1e40af; font-weight:700; min-width:70px; }
-.print-footer { margin-top:auto; padding-top:12px; border-top:1px solid #ccc; display:flex; justify-content:space-between; font-size:8pt; color:#888; }
-.print-sig { border:1px solid #ccc; border-radius:4px; padding:10px 20px; text-align:center; font-size:9pt; }
-.print-sig-line { border-top:1px solid #999; width:80px; margin:18px auto 4px; }
+  .stat-card:nth-child(2) { --accent-color: var(--accent2); }
+  .stat-card:nth-child(3) { --accent-color: var(--accent3); }
+  .stat-card:nth-child(4) { --accent-color: #a78bfa; }
 
-@media (max-width:380px) { .form-row-2 { grid-template-columns:1fr; } }
-@media (min-width:600px) {
-  .app-body { max-width:600px; margin:0 auto; }
-  .floating-bar { max-width:600px; left:50%; transform:translateX(-50%); }
-  .bottom-nav { max-width:600px; left:50%; transform:translateX(-50%); }
-}
+  .stat-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: var(--text); line-height: 1; }
+  .stat-icon { position: absolute; top: 1.2rem; right: 1.2rem; font-size: 1.8rem; opacity: 0.3; }
+
+  .home-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+  }
+
+  /* 최근 공지 */
+  .notice-preview {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+  }
+
+  .card-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .card-link {
+    font-size: 0.75rem;
+    color: var(--accent);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: inherit;
+  }
+
+  .notice-item {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    cursor: pointer;
+  }
+
+  .notice-item:last-child { border-bottom: none; }
+
+  .notice-badge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background: rgba(255,107,53,0.2);
+    color: var(--accent);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .notice-badge.general { background: rgba(167,169,190,0.15); color: var(--muted); }
+
+  .notice-text { font-size: 0.88rem; }
+  .notice-date { font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
+
+  /* 대여 현황 사이드 */
+  .rental-status {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+
+  .rental-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+
+  .rental-item:last-child { border-bottom: none; }
+
+  .rental-name { font-weight: 500; }
+  .rental-who { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+  .badge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+
+  .badge.out { background: rgba(255,71,87,0.2); color: #ff4757; }
+  .badge.in { background: rgba(6,214,160,0.2); color: var(--accent3); }
+
+  /* ─── 보드게임 목록 ─── */
+  .game-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.7rem 1rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+
+  .filter-btn {
+    padding: 0.7rem 1.2rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn.active, .filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(255,107,53,0.08);
+  }
+
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .game-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .game-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255,107,53,0.1);
+  }
+
+  .game-emoji { font-size: 2.5rem; margin-bottom: 0.8rem; display: block; }
+  .game-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; }
+
+  .game-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.8rem;
+  }
+
+  .tag {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+  }
+
+  .tag.players { background: rgba(255,210,63,0.12); color: var(--accent2); }
+  .tag.available { background: rgba(6,214,160,0.12); color: var(--accent3); }
+  .tag.unavailable { background: rgba(255,71,87,0.12); color: #ff4757; }
+
+  .game-owned {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background: rgba(167,129,247,0.15);
+    color: #a78bfa;
+  }
+
+  /* ─── 대여 서비스 ─── */
+  .rental-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .rental-form-card, .rental-list-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.8rem;
+  }
+
+  .form-group { margin-bottom: 1.2rem; }
+
+  .form-label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-control:focus { border-color: var(--accent); }
+  .form-control::placeholder { color: var(--muted); }
+
+  select.form-control option { background: var(--card); }
+
+  .submit-btn {
+    width: 100%;
+    padding: 0.9rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+  }
+
+  .submit-btn:hover { background: #ff8555; transform: translateY(-1px); }
+
+  .rental-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .rental-table th {
+    text-align: left;
+    padding: 0.7rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rental-table td {
+    padding: 0.8rem 0.7rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+
+  .rental-table tr:last-child td { border-bottom: none; }
+
+  /* ─── 공지사항 ─── */
+  .notice-list-full { display: flex; flex-direction: column; gap: 0.8rem; }
+
+  .notice-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.3rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .notice-card:hover { border-color: var(--accent); transform: translateX(4px); }
+
+  .notice-card-badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .notice-card-badge.important {
+    background: rgba(255,107,53,0.2);
+    color: var(--accent);
+  }
+  .notice-card-badge.event {
+    background: rgba(255,210,63,0.2);
+    color: var(--accent2);
+  }
+  .notice-card-badge.general {
+    background: rgba(167,169,190,0.1);
+    color: var(--muted);
+  }
+
+  .notice-card-content { flex: 1; }
+  .notice-card-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; }
+  .notice-card-preview { font-size: 0.8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px; }
+  .notice-card-meta { font-size: 0.75rem; color: var(--muted); flex-shrink: 0; }
+
+  /* ─── 멤버 ─── */
+  .members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .member-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .member-card:hover { border-color: var(--accent3); transform: translateY(-2px); }
+
+  .member-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 1rem;
+  }
+
+  .member-name { font-weight: 700; margin-bottom: 0.3rem; }
+  .member-games { font-size: 0.78rem; color: var(--muted); }
+  .member-role {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    background: rgba(167,129,247,0.15);
+    color: #a78bfa;
+  }
+
+  /* ─── 토스트 ─── */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--accent3);
+    color: var(--text);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    z-index: 999;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* 반응형 */
+  @media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .home-grid { grid-template-columns: 1fr; }
+    .rental-grid { grid-template-columns: 1fr; }
+    .page { padding: 1rem; }
+    .header { padding: 0 1rem; }
+    .nav-btn { font-size: 0.75rem; padding: 0.4rem 0.7rem; }
+  }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════ LOADING ══════════════════ -->
-<div id="loading-screen">
-  <div class="loading-dice">🎲</div>
-  <div class="loading-title">보동보동 갓생지원금</div>
-  <div class="loading-sub">2026 보드게임 지원금 신청 시스템</div>
-  <div class="spinner"></div>
-</div>
+<!-- 로그인 화면 -->
+<div id="login-screen">
+  <div class="login-bg"></div>
+  <span class="dice-float">🎲</span>
+  <span class="dice-float">🃏</span>
+  <span class="dice-float">♟️</span>
+  <span class="dice-float">🎯</span>
+  <span class="dice-float">🎴</span>
 
-<!-- ══════════════════ LOGIN ══════════════════ -->
-<div id="login-page">
-  <div class="login-container">
-    <div class="login-hero">
-      <span class="login-emoji">🎲</span>
-      <div class="login-title">2026 보동보동<br>갓생지원금</div>
-      <div class="login-subtitle">보드게임 · 방탈출 지원금 신청 플랫폼</div>
-    </div>
-
-    <div class="login-card">
-      <div class="login-tab-row">
-        <button class="login-tab active" onclick="switchTab('login')">로그인</button>
-        <button class="login-tab" onclick="switchTab('signup')">회원가입</button>
-      </div>
-
-      <!-- 로그인 -->
-      <div class="login-panel active" id="panel-login">
-        <button class="btn-kakao" onclick="kakaoLoginDirect()">
-          <svg class="kakao-icon" viewBox="0 0 24 24" fill="none">
-            <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.568 5.077 3.938 6.538L4.8 21l4.2-2.1c.96.18 1.97.27 3 .27 5.523 0 10-3.477 10-7.77C22 6.477 17.523 3 12 3z" fill="#191919"/>
-          </svg>
-          카카오로 로그인
-        </button>
-        <div class="form-divider"><span>또는 이메일 로그인</span></div>
-        <div class="fl-input">
-          <input type="email" id="login-email" placeholder=" " autocomplete="email">
-          <label>이메일</label>
-        </div>
-        <div class="fl-input">
-          <input type="password" id="login-pw" placeholder=" " autocomplete="current-password"
-            onkeydown="if(event.key==='Enter')doEmailLogin()">
-          <label>비밀번호</label>
-        </div>
-        <button class="btn btn-primary btn-full" onclick="doEmailLogin()">로그인</button>
-      </div>
-
-      <!-- 회원가입 -->
-      <div class="login-panel" id="panel-signup">
-        <div style="text-align:center;font-size:0.88rem;color:var(--text-muted);margin-bottom:16px;">
-          SNS 계정으로 가입 후 관리자 승인을 기다려 주세요.
-        </div>
-        <button class="btn-kakao" onclick="kakaoSignup()">
-          <svg class="kakao-icon" viewBox="0 0 24 24" fill="none">
-            <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.568 5.077 3.938 6.538L4.8 21l4.2-2.1c.96.18 1.97.27 3 .27 5.523 0 10-3.477 10-7.77C22 6.477 17.523 3 12 3z" fill="#191919"/>
-          </svg>
-          카카오로 가입
-        </button>
-        <div class="form-divider"><span>또는 이메일로 직접 가입</span></div>
-        <div class="fl-input">
-          <input type="text" id="signup-name" placeholder=" " oninput="this.value=this.value.replace(/[0-9]/g,'')">
-          <label>이름</label>
-        </div>
-        <div class="fl-input">
-          <input type="email" id="signup-email" placeholder=" ">
-          <label>이메일</label>
-        </div>
-        <div class="fl-input">
-          <input type="password" id="signup-pw" placeholder=" ">
-          <label>비밀번호</label>
-        </div>
-        <button class="btn btn-primary btn-full" onclick="doEmailSignup()">가입 신청</button>
-      </div>
-    </div>
+  <div class="login-box">
+    <div class="login-logo">BOARD<span>CLUB</span></div>
+    <div class="login-subtitle">보드게임 동호회 · 회원 전용</div>
+    <div class="login-label">입장 코드 입력</div>
+    <input class="login-input" type="password" id="code-input" maxlength="4" placeholder="••••" autofocus>
+    <button class="login-btn" onclick="tryLogin()">🎲 입 장</button>
+    <div class="login-error" id="login-error"></div>
   </div>
 </div>
 
-<!-- ══════════════════ APP ══════════════════ -->
+<!-- 메인 앱 -->
 <div id="app">
-  <header class="app-header">
-    <div class="app-header-logo" onclick="goHome()">
-      🎲 보동보동 갓생지원금
-      <small>2026 보드게임 지원금</small>
-    </div>
-    <div class="header-user">
-      <div class="header-chip">
-        <span id="hdr-name">-</span>
-        <span class="credit-pill" id="hdr-credit">₩0</span>
-      </div>
-      <button class="btn-icon" onclick="doLogout()">↩</button>
+  <header class="header">
+    <div class="header-logo" onclick="showPage('home')">BOARD<span>CLUB</span></div>
+    <nav class="nav">
+      <button class="nav-btn active" onclick="showPage('home')" data-page="home">🏠 홈</button>
+      <button class="nav-btn" onclick="showPage('games')" data-page="games">🎲 보드게임</button>
+      <button class="nav-btn" onclick="showPage('rental')" data-page="rental">📦 대여</button>
+      <button class="nav-btn" onclick="showPage('notice')" data-page="notice">📢 공지</button>
+      <button class="nav-btn" onclick="showPage('members')" data-page="members">👥 멤버</button>
+    </nav>
+    <div class="header-right">
+      <span id="current-date"></span>
+      <button onclick="logout()" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:0.3rem 0.7rem;border-radius:6px;cursor:pointer;font-size:0.75rem;">나가기</button>
     </div>
   </header>
 
-  <div class="app-body">
-    <!-- 대시보드 -->
-    <div class="page active" id="page-dashboard">
-      <div class="page-header">
-        <div class="page-title" id="dash-greeting">안녕하세요 👋</div>
-        <div class="page-sub">지원금 현황을 확인하세요</div>
-      </div>
-      <div class="stats-grid" id="dash-stats"></div>
-      <div class="card"><div class="card-title">🕐 최근 신청</div><div id="dash-recent"></div></div>
-      <button class="btn btn-accent btn-full" onclick="navigateTo('apply')">✍️ 지원금 신청하기</button>
+  <!-- 홈 -->
+  <div class="page active" id="page-home">
+    <div style="margin-bottom:2rem;">
+      <div style="font-size:0.85rem;color:var(--muted);">안녕하세요 👋</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;letter-spacing:2px;">보드게임 동호회 <span style="color:var(--accent);">대시보드</span></div>
     </div>
 
-    <!-- 신청 -->
-    <div class="page" id="page-apply">
-      <div class="page-header">
-        <div class="page-title">✍️ 지원금 신청</div>
-        <div class="page-sub">영수증 첨부 필수 (최대 2MB)</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🎲</div>
+        <div class="stat-label">보유 보드게임</div>
+        <div class="stat-value">24</div>
       </div>
-      <div class="card" id="apply-credit-card"></div>
-      <div id="app-entries"></div>
-      <button class="btn btn-outline btn-full" onclick="addEntry()" style="margin-bottom:14px;">＋ 신청 항목 추가</button>
-      <div class="card">
-        <div class="card-title">🏦 계좌 정보 <span style="font-size:0.78rem;font-weight:400;color:var(--text-muted);">(신청자에게 일괄 입금)</span></div>
-        <div class="form-group">
-          <label class="form-label">예금주<span class="req">*</span></label>
-          <input class="form-input" type="text" id="apply-acname" placeholder="예금주 성함" oninput="this.value=this.value.replace(/[0-9]/g,'')">
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-label">대여 중</div>
+        <div class="stat-value">3</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-label">회원 수</div>
+        <div class="stat-value">18</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🗓️</div>
+        <div class="stat-label">다음 모임</div>
+        <div class="stat-value" style="font-size:1.4rem;padding-top:0.4rem;">3/22</div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="notice-preview">
+        <div class="card-header">
+          <div class="card-title">📢 최근 공지사항</div>
+          <button class="card-link" onclick="showPage('notice')">전체보기 →</button>
         </div>
-        <div class="form-row-2">
-          <div class="form-group">
-            <label class="form-label">은행명<span class="req">*</span></label>
-            <select class="form-select" id="apply-bank">
-              <option value="">선택</option>
-              <option>국민은행</option><option>신한은행</option><option>우리은행</option>
-              <option>하나은행</option><option>농협은행</option><option>기업은행</option>
-              <option>카카오뱅크</option><option>토스뱅크</option><option>케이뱅크</option>
-              <option>SC제일은행</option><option>씨티은행</option><option>기타</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">계좌번호<span class="req">*</span></label>
-            <!-- 숫자만 입력 -->
-            <input class="form-input" type="text" id="apply-acnum" placeholder="숫자만 입력"
-              inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')">
+        <div class="notice-item">
+          <span class="notice-badge">중요</span>
+          <div>
+            <div class="notice-text">3월 정기 모임 일정 안내 (3/22 토요일)</div>
+            <div class="notice-date">2025.03.10</div>
           </div>
         </div>
+        <div class="notice-item">
+          <span class="notice-badge">이벤트</span>
+          <div>
+            <div class="notice-text">신규 게임 추가! 테라포밍마스 입고 완료 🎉</div>
+            <div class="notice-date">2025.03.08</div>
+          </div>
+        </div>
+        <div class="notice-item">
+          <span class="notice-badge general">일반</span>
+          <div>
+            <div class="notice-text">대여 규정 업데이트 안내 (반납 기한 7일)</div>
+            <div class="notice-date">2025.03.05</div>
+          </div>
+        </div>
+        <div class="notice-item">
+          <span class="notice-badge general">일반</span>
+          <div>
+            <div class="notice-text">2월 모임 후기 및 사진 공유</div>
+            <div class="notice-date">2025.02.25</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rental-status">
+        <div class="card-header">
+          <div class="card-title">📦 대여 현황</div>
+          <button class="card-link" onclick="showPage('rental')">신청하기 →</button>
+        </div>
+        <div class="rental-item">
+          <div>
+            <div class="rental-name">카탄</div>
+            <div class="rental-who">김민준 · ~3/15</div>
+          </div>
+          <span class="badge out">대여중</span>
+        </div>
+        <div class="rental-item">
+          <div>
+            <div class="rental-name">아줄</div>
+            <div class="rental-who">이서연 · ~3/17</div>
+          </div>
+          <span class="badge out">대여중</span>
+        </div>
+        <div class="rental-item">
+          <div>
+            <div class="rental-name">스플렌더</div>
+            <div class="rental-who">박지호 · ~3/19</div>
+          </div>
+          <span class="badge out">대여중</span>
+        </div>
+        <div class="rental-item">
+          <div>
+            <div class="rental-name">테라포밍마스</div>
+            <div class="rental-who">—</div>
+          </div>
+          <span class="badge in">반납완료</span>
+        </div>
+        <div class="rental-item">
+          <div>
+            <div class="rental-name">루미큐브</div>
+            <div class="rental-who">—</div>
+          </div>
+          <span class="badge in">대여가능</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 보드게임 목록 -->
+  <div class="page" id="page-games">
+    <div class="section-title">🎲 보드게임 <span>목록</span></div>
+    <div class="section-desc">현재 동호회 보유 게임 목록입니다.</div>
+
+    <div class="game-controls">
+      <input class="search-input" type="text" placeholder="🔍  게임 검색..." oninput="filterGames(this.value)">
+      <button class="filter-btn active" onclick="filterByPlayers('all', this)">전체</button>
+      <button class="filter-btn" onclick="filterByPlayers('2', this)">2인</button>
+      <button class="filter-btn" onclick="filterByPlayers('4', this)">4인 이상</button>
+      <button class="filter-btn" onclick="filterByPlayers('available', this)">대여 가능</button>
+    </div>
+
+    <div class="games-grid" id="games-grid">
+      <!-- 게임 카드는 JS로 생성 -->
+    </div>
+  </div>
+
+  <!-- 대여 서비스 -->
+  <div class="page" id="page-rental">
+    <div class="section-title">📦 보드게임 <span>대여</span></div>
+    <div class="section-desc">게임을 빌리고 반납 현황을 확인하세요.</div>
+
+    <div class="rental-grid">
+      <div class="rental-form-card">
+        <div class="card-title" style="margin-bottom:1.5rem;">✏️ 대여 신청</div>
+
         <div class="form-group">
-          <label class="form-label">비고</label>
-          <textarea class="form-textarea" id="apply-note" placeholder="전달사항 (선택)"></textarea>
+          <label class="form-label">이름</label>
+          <input class="form-control" type="text" placeholder="이름을 입력하세요" id="rent-name">
         </div>
-      </div>
-      <div style="height:72px;"></div>
-    </div>
 
-    <!-- 내 신청 내역 -->
-    <div class="page" id="page-myapps">
-      <div class="page-header flex-between">
-        <div><div class="page-title">📋 내 신청 내역</div></div>
-        <button class="btn btn-outline btn-sm" onclick="renderMyApps()">새로고침</button>
-      </div>
-      <div id="myapps-list"></div>
-    </div>
-
-    <!-- 관리자 대시보드 -->
-    <div class="page" id="page-admin">
-      <div class="page-header flex-between">
-        <div><div class="page-title">🛡️ 관리자</div><div class="page-sub">전체 현황</div></div>
-        <span class="admin-tag">ADMIN</span>
-      </div>
-      <div class="stats-grid" id="admin-stats"></div>
-      <div class="card">
-        <div class="card-title flex-between">
-          <span>⏳ 승인 대기 <span class="pending-dot"></span></span>
-          <button class="btn btn-outline btn-xs" onclick="navigateTo('admin-all')">전체보기</button>
+        <div class="form-group">
+          <label class="form-label">게임 선택</label>
+          <select class="form-control" id="rent-game">
+            <option value="">— 게임을 선택하세요 —</option>
+            <option>카탄</option>
+            <option>아줄</option>
+            <option>스플렌더</option>
+            <option>테라포밍마스</option>
+            <option>루미큐브</option>
+            <option>코드네임</option>
+            <option>판데믹</option>
+            <option>딕싯</option>
+          </select>
         </div>
-        <div id="admin-pending"></div>
+
+        <div class="form-group">
+          <label class="form-label">대여 기간</label>
+          <select class="form-control" id="rent-period">
+            <option>3일</option>
+            <option>5일</option>
+            <option selected>7일</option>
+            <option>10일</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">비고 (선택)</label>
+          <input class="form-control" type="text" placeholder="특이사항이 있으면 입력" id="rent-note">
+        </div>
+
+        <button class="submit-btn" onclick="submitRental()">📦 대여 신청하기</button>
+      </div>
+
+      <div class="rental-list-card">
+        <div class="card-title" style="margin-bottom:1.5rem;">📋 현재 대여 현황</div>
+        <table class="rental-table">
+          <thead>
+            <tr>
+              <th>게임명</th>
+              <th>대여자</th>
+              <th>반납일</th>
+              <th>상태</th>
+            </tr>
+          </thead>
+          <tbody id="rental-tbody">
+            <tr>
+              <td>카탄</td>
+              <td>김민준</td>
+              <td>3/15</td>
+              <td><span class="badge out">대여중</span></td>
+            </tr>
+            <tr>
+              <td>아줄</td>
+              <td>이서연</td>
+              <td>3/17</td>
+              <td><span class="badge out">대여중</span></td>
+            </tr>
+            <tr>
+              <td>스플렌더</td>
+              <td>박지호</td>
+              <td>3/19</td>
+              <td><span class="badge out">대여중</span></td>
+            </tr>
+            <tr>
+              <td>테라포밍마스</td>
+              <td>—</td>
+              <td>—</td>
+              <td><span class="badge in">가능</span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+  </div>
 
-    <!-- 관리자: 전체 신청 -->
-    <div class="page" id="page-admin-all">
-      <div class="page-header"><div class="page-title">📂 전체 신청 취합</div></div>
-      <div class="filter-row">
-        <input class="form-input" type="search" id="admin-search" placeholder="검색…" oninput="renderAdminAll()">
-        <select class="form-select" id="admin-sf" onchange="renderAdminAll()" style="min-width:110px;">
-          <option value="">전체</option>
-          <option value="pending">대기</option>
-          <option value="approved">승인</option>
-          <option value="mod-approved">수정승인</option>
-          <option value="rejected">반려</option>
-          <option value="cancelled">취소</option>
-        </select>
+  <!-- 공지사항 -->
+  <div class="page" id="page-notice">
+    <div class="section-title">📢 공지 <span>사항</span></div>
+    <div class="section-desc">동호회 관련 공지를 확인하세요.</div>
+
+    <div class="notice-list-full">
+      <div class="notice-card">
+        <span class="notice-card-badge important">📌 중요</span>
+        <div class="notice-card-content">
+          <div class="notice-card-title">3월 정기 모임 일정 안내</div>
+          <div class="notice-card-preview">3월 22일 토요일 오후 2시, 문화센터 3층 회의실에서 진행됩니다. 참석 여부를 3/18까지 알려주세요.</div>
+        </div>
+        <div class="notice-card-meta">2025.03.10</div>
       </div>
-      <div class="flex-between mb-2" style="gap:8px;">
-        <div id="admin-all-count" class="text-muted"></div>
-        <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV</button>
+
+      <div class="notice-card">
+        <span class="notice-card-badge event">🎉 이벤트</span>
+        <div class="notice-card-content">
+          <div class="notice-card-title">신규 게임 추가 — 테라포밍마스 입고!</div>
+          <div class="notice-card-preview">많은 분들이 원하시던 테라포밍마스가 입고되었습니다. 대여 신청 페이지에서 신청하세요.</div>
+        </div>
+        <div class="notice-card-meta">2025.03.08</div>
       </div>
-      <div id="admin-all-list"></div>
-    </div>
 
-    <!-- 관리자: 회원 -->
-    <div class="page" id="page-admin-members">
-      <div class="page-header flex-between">
-        <div class="page-title">👥 회원 관리</div>
-        <button class="btn btn-accent btn-sm" onclick="openCreateUserModal()">＋ 계정 생성</button>
+      <div class="notice-card">
+        <span class="notice-card-badge general">일반</span>
+        <div class="notice-card-content">
+          <div class="notice-card-title">대여 규정 업데이트 안내</div>
+          <div class="notice-card-preview">반납 기한이 기존 14일에서 7일로 변경되었습니다. 3월 1일부터 적용됩니다.</div>
+        </div>
+        <div class="notice-card-meta">2025.03.05</div>
       </div>
-      <div id="admin-members-list"></div>
-    </div>
 
-    <!-- 관리자: 로그 -->
-    <div class="page" id="page-admin-logs">
-      <div class="page-header flex-between">
-        <div class="page-title">📜 시스템 로그</div>
-        <button class="btn btn-ghost btn-sm" onclick="clearLogs()">초기화</button>
+      <div class="notice-card">
+        <span class="notice-card-badge general">일반</span>
+        <div class="notice-card-content">
+          <div class="notice-card-title">2월 정기 모임 후기 및 사진 공유</div>
+          <div class="notice-card-preview">2월 모임에서 즐겁게 보내주셔서 감사합니다. 단체 사진은 카카오톡 단체방을 확인해주세요!</div>
+        </div>
+        <div class="notice-card-meta">2025.02.25</div>
       </div>
-      <div class="card" id="logs-content"></div>
+
+      <div class="notice-card">
+        <span class="notice-card-badge event">🎉 이벤트</span>
+        <div class="notice-card-content">
+          <div class="notice-card-title">신입 회원 환영 이벤트 안내</div>
+          <div class="notice-card-preview">신규 가입 회원 대상으로 첫 달 대여 무제한 이벤트를 진행합니다.</div>
+        </div>
+        <div class="notice-card-meta">2025.02.18</div>
+      </div>
     </div>
   </div>
 
-  <nav class="bottom-nav" id="bottom-nav"></nav>
+  <!-- 멤버 -->
+  <div class="page" id="page-members">
+    <div class="section-title">👥 동호회 <span>멤버</span></div>
+    <div class="section-desc">함께하는 보드게임 동호회 멤버들입니다.</div>
 
-  <div class="floating-bar" id="floating-bar" style="display:none;">
-    <div class="floating-total">총 신청금액<strong id="float-total">₩0</strong></div>
-    <button class="btn btn-primary" onclick="submitApplication()" style="padding:11px 22px;">📨 신청 제출</button>
-  </div>
-</div>
-
-<!-- ══════════════════ MODALS ══════════════════ -->
-
-<!-- 신청 상세 -->
-<div class="modal-overlay" id="modal-detail">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="modal-detail-title">신청 상세</div>
-    <div id="modal-detail-body"></div>
-    <div class="modal-actions" id="modal-detail-actions"></div>
-  </div>
-</div>
-
-<!-- 관리자 수정 -->
-<div class="modal-overlay center" id="modal-edit">
-  <div class="modal center-modal">
-    <div class="modal-title">✏️ 신청 수정 (관리자)</div>
-    <div id="modal-edit-body"></div>
-    <div class="modal-actions" id="modal-edit-actions"></div>
-  </div>
-</div>
-
-<!-- 계정 생성 -->
-<div class="modal-overlay center" id="modal-create-user">
-  <div class="modal center-modal">
-    <div class="modal-title">➕ 계정 생성</div>
-    <div class="form-group"><label class="form-label">이름</label><input class="form-input" type="text" id="nu-name"></div>
-    <div class="form-group"><label class="form-label">이메일</label><input class="form-input" type="email" id="nu-email"></div>
-    <div class="form-group"><label class="form-label">비밀번호</label><input class="form-input" type="password" id="nu-pw" value="4321"></div>
-    <div class="form-group"><label class="form-label">초기 크레딧 (원)</label><input class="form-input" type="number" id="nu-credit" value="30000"></div>
-    <div class="form-group"><label class="form-label">역할</label>
-      <select class="form-select" id="nu-role"><option value="user">일반 회원</option><option value="admin">관리자</option></select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-create-user')">취소</button>
-      <button class="btn btn-primary" onclick="createUser()">생성</button>
-    </div>
-  </div>
-</div>
-
-<!-- 크레딧 수정 -->
-<div class="modal-overlay center" id="modal-credit">
-  <div class="modal center-modal">
-    <div class="modal-title">💰 크레딧 수정</div>
-    <div id="modal-credit-body"></div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-credit')">취소</button>
-      <button class="btn btn-primary" onclick="saveCreditEdit()">저장</button>
+    <div class="members-grid">
+      <div class="member-card">
+        <div class="member-avatar">🎲</div>
+        <div class="member-name">김민준</div>
+        <div class="member-games">즐겨하는 게임: 카탄, 스플렌더</div>
+        <span class="member-role">⭐ 운영진</span>
+      </div>
+      <div class="member-card">
+        <div class="member-avatar" style="background:linear-gradient(135deg,var(--accent3),#a78bfa)">♟️</div>
+        <div class="member-name">이서연</div>
+        <div class="member-games">즐겨하는 게임: 아줄, 딕싯</div>
+        <span class="member-role">⭐ 운영진</span>
+      </div>
+      <div class="member-card">
+        <div class="member-avatar" style="background:linear-gradient(135deg,var(--accent2),#ff6b35)">🃏</div>
+        <div class="member-name">박지호</div>
+        <div class="member-games">즐겨하는 게임: 판데믹, 카탄</div>
+        <span class="member-role">회원</span>
+      </div>
+      <div class="member-card">
+        <div class="member-avatar" style="background:linear-gradient(135deg,#a78bfa,#06d6a0)">🎯</div>
+        <div class="member-name">최유진</div>
+        <div class="member-games">즐겨하는 게임: 루미큐브, 코드네임</div>
+        <span class="member-role">회원</span>
+      </div>
+      <div class="member-card">
+        <div class="member-avatar" style="background:linear-gradient(135deg,#06d6a0,#ffd23f)">🎴</div>
+        <div class="member-name">정다은</div>
+        <div class="member-games">즐겨하는 게임: 딕싯, 아줄</div>
+        <span class="member-role">신입</span>
+      </div>
+      <div class="member-card">
+        <div class="member-avatar" style="background:linear-gradient(135deg,#ff4757,#ffd23f)">🏆</div>
+        <div class="member-name">한승우</div>
+        <div class="member-games">즐겨하는 게임: 테라포밍마스</div>
+        <span class="member-role">회원</span>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- 인쇄 미리보기 -->
-<div class="modal-overlay center" id="modal-print">
-  <div class="modal center-modal" style="max-width:520px;">
-    <div class="modal-title">🖨️ 인쇄 미리보기</div>
-    <div id="modal-print-preview" style="border:1px solid var(--border);border-radius:8px;padding:12px;background:#fafafa;max-height:60vh;overflow-y:auto;font-size:0.82rem;"></div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-print')">닫기</button>
-      <button class="btn btn-primary" onclick="doPrint()">🖨️ 인쇄</button>
-    </div>
-  </div>
-</div>
-
-<!-- ★ 확인 다이얼로그 -->
-<div class="modal-overlay center" id="modal-confirm">
-  <div class="modal confirm-modal">
-    <div class="confirm-icon" id="confirm-icon">⚠️</div>
-    <div class="confirm-title" id="confirm-title">확인</div>
-    <div class="confirm-msg" id="confirm-msg"></div>
-    <div class="confirm-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-confirm')">취소</button>
-      <button class="btn btn-danger" id="confirm-ok-btn" onclick="">확인</button>
-    </div>
-  </div>
-</div>
-
-<div id="print-area"></div>
-<div id="toast-container"></div>
+<div class="toast" id="toast">✅ 대여 신청이 완료되었습니다!</div>
 
 <script>
-/* ════════════════════════════════════════
-   CONFIG — Supabase
-════════════════════════════════════════ */
-const SUPABASE_URL  = 'https://vkznarlbevlyqnspmnlj.supabase.co';
-const SUPABASE_ANON = 'sb_publishable_J4nY_BYycnVPH7XXzPGPQg_M9An5myC';
+// ── 로그인 ──
+const CODE = 'bdbd';
 
-const MAX_FILE_BYTES = 2 * 1024 * 1024; // 2MB
-
-/* ════════════════════════════════════════
-   SUPABASE INIT
-   ★ redirectTo: Supabase가 카카오 인증 후 돌아올 URL
-     = 실제 배포 URL (Vercel)
-     카카오 개발자 콘솔 Redirect URI에도 동일하게 등록!
-════════════════════════════════════════ */
-const { createClient } = supabase;
-const APP_URL = 'https://bdbd-hp.vercel.app'; // ← 실제 배포 URL (끝에 / 없이)
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON, {
-  auth: {
-    redirectTo: APP_URL,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,  // URL hash에서 세션 자동 감지
-  }
+document.getElementById('code-input').addEventListener('keypress', e => {
+  if (e.key === 'Enter') tryLogin();
 });
 
-/* ════════════════════════════════════════
-   STATE
-════════════════════════════════════════ */
-let ME = null;          // current user profile (from profiles table)
-let entries = [];       // 신청 entry array
-let editId   = '';
-let printAppId = '';
-let editCreditUid = '';
-let currentPage = '';
-
-/* ════════════════════════════════════════
-   BOOT
-════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', async () => {
-  let initialSessionHandled = false;
-
-  // ★ onAuthStateChange를 먼저 등록 — INITIAL_SESSION 이벤트 포착
-  //    카카오 OAuth 리다이렉트 후 URL hash를 Supabase가 파싱해 세션 발급
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'INITIAL_SESSION') {
-      // 첫 번째 세션 체크 (페이지 로드 시)
-      if (session?.user) {
-        await loadProfile(session.user);
-      }
-      initialSessionHandled = true;
-      document.body.classList.add('ready');
-      await fadeOutLoading();
-      if (!ME) {
-        showLogin();
-      } else if (ME.status === 'approved') {
-        showApp();
-      } else if (ME.status === 'pending') {
-        showPendingScreen(ME.name);
-      } else {
-        showLogin();
-        await sb.auth.signOut(); ME = null;
-      }
-
-    } else if (event === 'SIGNED_IN') {
-      // 로그인 완료 (카카오 OAuth 콜백 포함)
-      const isEmailLogin = session?.user?.app_metadata?.provider === 'email';
-      // 이메일 로그인은 doEmailLogin()에서 직접 처리하므로 여기선 스킵
-      if (isEmailLogin) return;
-      // 카카오 로그인: 항상 최신 profile 로드 (승인 상태 변경 반영)
-      if (session?.user) {
-        await loadProfile(session.user);
-      }
-      document.body.classList.add('ready');
-      await fadeOutLoading();
-      if (ME && ME.status === 'approved') {
-        showApp();
-        toast(`어서오세요, ${ME.name}님! 🎲`, 'success');
-      } else if (ME && ME.status === 'pending') {
-        toast('가입 승인 대기 중입니다. 관리자 승인 후 이용 가능해요 🙏', 'warning');
-        showPendingScreen(ME.name);
-      } else if (ME && ME.status === 'rejected') {
-        showLogin();
-        toast('가입이 거절된 계정입니다', 'error');
-        await sb.auth.signOut(); ME = null;
-      } else {
-        showLogin();
-      }
-
-    } else if (event === 'SIGNED_OUT') {
-      ME = null;
-      document.body.classList.add('ready');
-      showLogin();
-    }
-  });
-
-  // INITIAL_SESSION이 오지 않는 경우 폴백 (구형 브라우저 등)
-  setTimeout(async () => {
-    if (!initialSessionHandled) {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session?.user) await loadProfile(session.user);
-      document.body.classList.add('ready');
-      await fadeOutLoading();
-      ME ? showApp() : showLogin();
-    }
-  }, 3000);
-
-  // URL에 카카오 콜백 파라미터가 있으면 Supabase가 자동 파싱함
-  // (detectSessionInUrl: true 설정으로 처리)
-  // URL 클린업은 Supabase 세션 파싱 후 처리
-  if (window.location.hash.includes('access_token') || window.location.search.includes('code=')) {
-    // Supabase가 URL을 파싱할 시간을 주고 클린업
-    setTimeout(() => {
-      window.history.replaceState({}, '', window.location.pathname);
-    }, 500);
-  }
-});
-
-async function fadeOutLoading() {
-  return new Promise(resolve => {
-    const ls = document.getElementById('loading-screen');
-    ls.classList.add('hidden');
-    setTimeout(() => { ls.style.display = 'none'; resolve(); }, 450);
-  });
-}
-
-/* ════════════════════════════════════════
-   PROFILE LOAD / CREATE
-════════════════════════════════════════ */
-async function loadProfile(authUser) {
-  const { data, error } = await sb
-    .from('profiles')
-    .select('*')
-    .eq('id', authUser.id)
-    .single();
-
-  if (error && error.code !== 'PGRST116') {
-    // PGRST116 = 행 없음(신규 가입) → 정상, 그 외 에러만 표시
-    console.error('[loadProfile] error:', error.code, error.message);
-    toast('프로필 오류: ' + error.code + ' ' + error.message, 'error');
-  }
-
-  if (error && error.code === 'PGRST116') {
-    // Profile 없음 → 신규 생성
-    // ★ let으로 선언해야 pendingName으로 재할당 가능
-    let name = authUser.user_metadata?.full_name
-             || authUser.user_metadata?.name
-             || authUser.user_metadata?.nickname
-             || authUser.email?.split('@')[0]
-             || '신규회원';
-    // 카카오 가입 시 사전 입력된 이름 우선 적용
-    const pendingName = sessionStorage.getItem('kakao_pending_name');
-    if (pendingName) { name = pendingName; sessionStorage.removeItem('kakao_pending_name'); }
-
-    const { data: newP, error: insertErr } = await sb.from('profiles').insert({
-      id: authUser.id,
-      email: authUser.email || '',
-      name,
-      role: 'user',
-      status: 'pending',
-      provider: authUser.app_metadata?.provider || 'email',
-      credit_total: 0,
-      credit_used: 0,
-      credit_pending: 0,
-    }).select().single();
-    if (!insertErr) {
-      ME = newP;
-      addLog(`신규 가입: ${name} (${authUser.email})`);
-    } else {
-      console.error('[loadProfile] insert error:', insertErr);
-    }
-  } else if (data) {
-    ME = data;
+function tryLogin() {
+  const val = document.getElementById('code-input').value;
+  if (val === CODE) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    setDate();
+  } else {
+    const err = document.getElementById('login-error');
+    err.textContent = '❌ 입장 코드가 올바르지 않습니다.';
+    document.getElementById('code-input').value = '';
+    setTimeout(() => err.textContent = '', 3000);
   }
 }
 
-/* ════════════════════════════════════════
-   AUTH — KAKAO (Supabase OAuth 방식)
-   ★ 카카오 개발자 콘솔 Redirect URI에 반드시 등록:
-     https://vkznarlbevlyqnspmnlj.supabase.co/auth/v1/callback
-   ★ Supabase Dashboard > Authentication > Providers > Kakao 활성화 필요
-════════════════════════════════════════ */
-/* ════════════════════════════════════════
-   AUTH — 카카오 로그인 (이름 입력 없이 바로)
-════════════════════════════════════════ */
-async function kakaoLoginDirect() {
-  toast('카카오 로그인 중...', '');
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: 'kakao',
-    options: {
-      redirectTo: APP_URL,
-      scopes: 'profile_nickname,account_email',
-      skipBrowserRedirect: false,
-      queryParams: { prompt: 'select_account' }
-    }
-  });
-  if (error) toast('카카오 로그인 오류: ' + error.message, 'error');
-}
-
-/* ════════════════════════════════════════
-   AUTH — 카카오 가입 (이름 필수 입력 후 진행)
-════════════════════════════════════════ */
-function kakaoSignup() {
-  // 이름 입력 모달 생성
-  let m = document.getElementById('modal-kakao-name');
-  if (m) m.remove();
-  m = document.createElement('div');
-  m.id = 'modal-kakao-name';
-  m.className = 'modal-overlay center open';
-  m.innerHTML = `
-    <div class="modal center-modal" style="max-width:340px;">
-      <div class="modal-title">🟡 카카오로 가입</div>
-      <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">
-        카카오 계정으로 가입합니다.<br>
-        가입 후 관리자 승인을 받으면 이용할 수 있어요.
-      </div>
-      <div class="form-group">
-        <label class="form-label">이름 <span style="color:var(--danger);">*</span></label>
-        <input class="form-input" type="text" id="kakao-name-input" placeholder="실명을 입력하세요"
-          oninput="this.value=this.value.replace(/[0-9]/g,'')"
-          onkeydown="if(event.key==='Enter')proceedKakaoSignup()">
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-outline" onclick="document.getElementById('modal-kakao-name').remove()">취소</button>
-        <button class="btn btn-primary" onclick="proceedKakaoSignup()">다음 →</button>
-      </div>
-    </div>`;
-  document.body.appendChild(m);
-  setTimeout(() => document.getElementById('kakao-name-input')?.focus(), 100);
-}
-
-async function proceedKakaoSignup() {
-  const name = document.getElementById('kakao-name-input')?.value.trim() || '';
-  if (!name) {
-    document.getElementById('kakao-name-input')?.focus();
-    const el = document.getElementById('kakao-name-input');
-    if (el) { el.style.borderColor = 'var(--danger)'; setTimeout(() => el.style.borderColor = '', 1500); }
-    toast('이름을 입력해 주세요', 'error'); return;
-  }
-  // 이름을 sessionStorage에 저장 → 리다이렉트 후 loadProfile에서 사용
-  sessionStorage.setItem('kakao_pending_name', name);
-  document.getElementById('modal-kakao-name')?.remove();
-  toast('카카오 로그인 페이지로 이동 중...', '');
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: 'kakao',
-    options: {
-      redirectTo: APP_URL,
-      scopes: 'profile_nickname,account_email',
-      skipBrowserRedirect: false,
-      queryParams: { prompt: 'select_account' }
-    }
-  });
-  if (error) { sessionStorage.removeItem('kakao_pending_name'); toast('카카오 오류: ' + error.message, 'error'); }
-}
-
-/* ════════════════════════════════════════
-   AUTH — EMAIL
-════════════════════════════════════════ */
-async function doEmailLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pw    = document.getElementById('login-pw').value;
-  if (!email || !pw) { toast('이메일과 비밀번호를 입력하세요', 'error'); return; }
-
-  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
-  if (error) {
-    // 에러 메시지 한국어화
-    const msg = error.message.includes('Invalid login') ? '이메일 또는 비밀번호가 틀렸습니다'
-              : error.message.includes('Email not confirmed') ? '이메일 인증이 필요합니다. 받은 편지함을 확인하세요'
-              : error.message;
-    toast(msg, 'error'); return;
-  }
-
-  await loadProfile(data.user);
-  if (!ME) { toast('프로필을 불러올 수 없습니다. 잠시 후 다시 시도해주세요', 'error'); return; }
-
-  if (ME.status === 'pending')  {
-    showPendingScreen(ME.name); return;
-  }
-  if (ME.status === 'rejected') {
-    toast('가입이 거절된 계정입니다', 'error');
-    await sb.auth.signOut(); ME = null; return;
-  }
-
-  addLog(`로그인: ${ME.name}`, ME.id);
-  showApp();
-  toast(`어서오세요, ${ME.name}님! 🎲`, 'success');
-}
-
-async function doEmailSignup() {
-  const name  = document.getElementById('signup-name').value.trim();
-  const email = document.getElementById('signup-email').value.trim();
-  const pw    = document.getElementById('signup-pw').value;
-  if (!name) { toast('이름을 입력해 주세요', 'error'); document.getElementById('signup-name').focus(); return; }
-  if (!email) { toast('이메일을 입력해 주세요', 'error'); return; }
-  if (!pw) { toast('비밀번호를 입력해 주세요', 'error'); return; }
-
-  const { data, error } = await sb.auth.signUp({
-    email, password: pw,
-    options: { data: { name } }
-  });
-  if (error) { toast('가입 실패: ' + error.message, 'error'); return; }
-
-  // onAuthStateChange → SIGNED_IN → loadProfile → showPendingScreen 으로 이어짐
-  // (Supabase 이메일 확인 설정에 따라 바로 SIGNED_IN이 발생할 수 있음)
-}
-
-async function doLogout() {
-  if (ME) addLog(`로그아웃: ${ME.name}`, ME.id);
-  await sb.auth.signOut();
-  ME = null; entries = [];
-  showLogin();
-}
-
-/* ════════════════════════════════════════
-   SHOW / HIDE
-════════════════════════════════════════ */
-function showLogin() {
-  document.getElementById('pending-screen')?.remove();
+function logout() {
+  document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
-  document.getElementById('login-page').style.display = 'block';
-}
-function showApp() {
-  document.getElementById('pending-screen')?.remove();
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  initApp();
+  document.getElementById('code-input').value = '';
 }
 
-function showPendingScreen(name) {
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('app').style.display = 'none';
-  // 기존 대기 화면 제거
-  document.getElementById('pending-screen')?.remove();
+// ── 날짜 ──
+function setDate() {
+  const d = new Date();
+  document.getElementById('current-date').textContent =
+    `${d.getMonth()+1}/${d.getDate()} (${['일','월','화','수','목','금','토'][d.getDay()]})`;
+}
 
-  const el = document.createElement('div');
-  el.id = 'pending-screen';
-  el.style.cssText = 'position:fixed;inset:0;background:linear-gradient(160deg,#172554 0%,#1e3a8a 60%,#1d4ed8 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:300;padding:32px 24px;';
-  el.innerHTML = `
-    <div style="text-align:center;max-width:360px;width:100%;">
-      <div style="font-size:4rem;margin-bottom:16px;">⏳</div>
-      <div style="font-family:'Gmarket Sans',sans-serif;font-size:1.5rem;color:#FCD34D;font-weight:700;margin-bottom:8px;">
-        가입 승인 대기 중
+// ── 페이지 전환 ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelector(`[data-page="${name}"]`).classList.add('active');
+  if (name === 'games') renderGames();
+}
+
+// ── 보드게임 데이터 ──
+const games = [
+  { name: '카탄', emoji: '🏝️', players: '3-4', time: '60-120분', tags: ['전략'], available: false },
+  { name: '아줄', emoji: '🔷', players: '2-4', time: '30-45분', tags: ['타일배치'], available: false },
+  { name: '스플렌더', emoji: '💎', players: '2-4', time: '30분', tags: ['엔진빌딩'], available: false },
+  { name: '테라포밍마스', emoji: '🌍', players: '1-5', time: '120분', tags: ['전략'], available: true },
+  { name: '루미큐브', emoji: '🔢', players: '2-4', time: '45분', tags: ['숫자타일'], available: true },
+  { name: '코드네임', emoji: '🕵️', players: '4-8', time: '15분', tags: ['파티'], available: true },
+  { name: '판데믹', emoji: '🦠', players: '2-4', time: '45분', tags: ['협력'], available: true },
+  { name: '딕싯', emoji: '🎨', players: '3-6', time: '30분', tags: ['파티'], available: true },
+  { name: '러브레터', emoji: '💌', players: '2-4', time: '15분', tags: ['카드'], available: true },
+  { name: '웰컴투', emoji: '🏠', players: '1-100', time: '25분', tags: ['퍼즐'], available: true },
+  { name: '7원더스', emoji: '🏛️', players: '2-7', time: '30-45분', tags: ['전략'], available: true },
+  { name: '티켓투라이드', emoji: '🚂', players: '2-5', time: '45-75분', tags: ['전략'], available: true },
+];
+
+let currentGames = [...games];
+
+function renderGames(list = currentGames) {
+  const grid = document.getElementById('games-grid');
+  grid.innerHTML = list.map(g => `
+    <div class="game-card">
+      <span class="game-owned">${g.available ? '대여가능' : '대여중'}</span>
+      <span class="game-emoji">${g.emoji}</span>
+      <div class="game-name">${g.name}</div>
+      <div style="font-size:0.78rem;color:var(--muted);">⏱ ${g.time}</div>
+      <div class="game-meta">
+        <span class="tag players">👥 ${g.players}명</span>
+        ${g.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+        <span class="tag ${g.available ? 'available' : 'unavailable'}">${g.available ? '✅ 가능' : '❌ 대여중'}</span>
       </div>
-      <div style="color:#93C5FD;font-size:0.95rem;margin-bottom:28px;line-height:1.6;">
-        <b style="color:#fff;">${name || '회원'}</b>님, 가입 신청이 완료되었습니다.<br>
-        관리자 승인 후 서비스를 이용할 수 있어요.
-      </div>
-      <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:20px 24px;margin-bottom:24px;text-align:left;">
-        <div style="color:#93C5FD;font-size:0.82rem;margin-bottom:10px;font-weight:600;">📋 가입 절차</div>
-        <div style="color:#E0F2FE;font-size:0.88rem;line-height:2;">
-          ✅ 카카오 가입 완료<br>
-          ⏳ 관리자 승인 대기 중<br>
-          <span style="opacity:0.5;">🔒 서비스 이용</span>
-        </div>
-      </div>
-      <button onclick="doLogoutFromPending()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:10px;padding:11px 24px;font-family:inherit;font-size:0.9rem;cursor:pointer;width:100%;">
-        ↩ 로그아웃
-      </button>
-    </div>`;
-  document.body.appendChild(el);
-}
-
-async function doLogoutFromPending() {
-  await sb.auth.signOut();
-  ME = null;
-  document.getElementById('pending-screen')?.remove();
-  showLogin();
-}
-function switchTab(tab) {
-  document.querySelectorAll('.login-tab').forEach((t,i)=>t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='signup')));
-  document.querySelectorAll('.login-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('panel-'+tab).classList.add('active');
-}
-
-/* ════════════════════════════════════════
-   APP INIT
-════════════════════════════════════════ */
-function initApp() {
-  refreshHeader();
-  buildNav();
-  goHome();
-}
-
-function refreshHeader() {
-  if (!ME) return;
-  document.getElementById('hdr-name').textContent = ME.name;
-  const avail = Math.max(0, ME.credit_total - ME.credit_used - ME.credit_pending);
-  document.getElementById('hdr-credit').textContent = '₩' + fmt(avail);
-}
-
-const USER_NAVS  = [{id:'dashboard',icon:'🏠',label:'홈'},{id:'apply',icon:'✍️',label:'신청'},{id:'myapps',icon:'📋',label:'내역'}];
-const ADMIN_NAVS = [{id:'admin',icon:'📊',label:'대시보드'},{id:'admin-all',icon:'📂',label:'신청목록'},{id:'admin-members',icon:'👥',label:'회원'},{id:'admin-logs',icon:'📜',label:'로그'}];
-
-function buildNav() {
-  const navs = ME.role === 'admin' ? ADMIN_NAVS : USER_NAVS;
-  document.getElementById('bottom-nav').innerHTML = navs.map(n=>
-    `<button class="bottom-nav-item" id="nav-${n.id}" onclick="navigateTo('${n.id}')">
-      <span class="nav-icon">${n.icon}</span><span>${n.label}</span>
-    </button>`).join('');
-}
-
-function goHome() { navigateTo(ME?.role === 'admin' ? 'admin' : 'dashboard'); }
-
-function navigateTo(page) {
-  currentPage = page;
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.bottom-nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+page)?.classList.add('active');
-  document.getElementById('nav-'+page)?.classList.add('active');
-  document.getElementById('floating-bar').style.display = page==='apply' ? 'flex' : 'none';
-  document.querySelector('.app-body').scrollTop = 0;
-  switch(page) {
-    case 'dashboard':      renderDashboard(); break;
-    case 'apply':          initApply(); break;
-    case 'myapps':         renderMyApps(); break;
-    case 'admin':          renderAdminDash(); break;
-    case 'admin-all':      renderAdminAll(); break;
-    case 'admin-members':  renderAdminMembers(); break;
-    case 'admin-logs':     renderLogs(); break;
-  }
-}
-
-/* ════════════════════════════════════════
-   DASHBOARD
-════════════════════════════════════════ */
-async function renderDashboard() {
-  // Refresh ME
-  const { data } = await sb.from('profiles').select('*').eq('id', ME.id).single();
-  if (data) { ME = data; refreshHeader(); }
-
-  const avail = Math.max(0, ME.credit_total - ME.credit_used - ME.credit_pending);
-  const pct   = ME.credit_total > 0 ? Math.min(100, (ME.credit_used + ME.credit_pending) / ME.credit_total * 100) : 0;
-  const hour  = new Date().getHours();
-  const gr    = hour < 12 ? '좋은 아침이에요' : hour < 17 ? '안녕하세요' : '수고하셨어요';
-  document.getElementById('dash-greeting').textContent = `${gr}, ${ME.name}님 👋`;
-  document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card"><div class="stat-label">총 지원 크레딧</div><div class="stat-value blue">₩${fmt(ME.credit_total)}</div></div>
-    <div class="stat-card">
-      <div class="stat-label">사용 가능</div>
-      <div class="stat-value accent">₩${fmt(avail)}</div>
-      <div class="credit-bar-bg"><div class="credit-bar-fill" style="width:${pct}%"></div></div>
     </div>
-    <div class="stat-card"><div class="stat-label">승인 완료</div><div class="stat-value green">₩${fmt(ME.credit_used)}</div></div>
-    <div class="stat-card"><div class="stat-label">대기 중</div><div class="stat-value warn">₩${fmt(ME.credit_pending)}</div></div>
-  `;
-
-  const { data: apps } = await sb.from('applications').select('*')
-    .eq('applicant_id', ME.id).order('created_at', { ascending: false }).limit(5);
-  const el = document.getElementById('dash-recent');
-  if (!apps || apps.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div>신청 내역이 없어요</div></div>`;
-  } else {
-    el.innerHTML = apps.map(a => appListItemHTML(a, false)).join('');
-  }
+  `).join('');
 }
 
-/* ════════════════════════════════════════
-   APPLY
-════════════════════════════════════════ */
-async function initApply() {
-  const { data } = await sb.from('profiles').select('*').eq('id', ME.id).single();
-  if (data) { ME = data; refreshHeader(); }
-  const avail = Math.max(0, ME.credit_total - ME.credit_used - ME.credit_pending);
-  document.getElementById('apply-credit-card').innerHTML = `
-    <div class="card-title">💰 내 크레딧 현황</div>
-    <div class="amount-display">
-      <div><div class="label">사용 가능 크레딧</div><div class="value">₩${fmt(avail)}</div></div>
-      <div style="font-size:0.8rem;opacity:0.8;">총 ₩${fmt(ME.credit_total)}<br>사용 ₩${fmt(ME.credit_used + ME.credit_pending)}</div>
-    </div>`;
-  if (entries.length === 0) addEntry();
-  else renderEntries();
-}
-
-function addEntry() {
-  entries.push({
-    id: Date.now(), date: todayStr(), category: '', description: '',
-    receiptDataUrl: null, receiptFile: null,
-    participants: [{ userId: ME.id, name: ME.name, amount: '' }]
-  });
-  renderEntries();
-}
-
-function removeEntry(idx) {
-  entries.splice(idx, 1);
-  if (entries.length === 0) addEntry(); else renderEntries();
-}
-
-function addParticipant(idx) {
-  entries[idx].participants.push({ userId:'', name:'', amount:'' });
-  renderEntries();
-}
-
-function removeParticipant(eIdx, pIdx) {
-  entries[eIdx].participants.splice(pIdx, 1);
-  renderEntries();
-}
-
-async function renderEntries() {
-  const { data: approvedUsers } = await sb.from('profiles')
-    .select('id,name,email')
-    .eq('role','user').eq('status','approved').neq('id', ME.id);
-  const users = approvedUsers || [];
-
-  const container = document.getElementById('app-entries');
-  container.innerHTML = '';
-  entries.forEach((e, ei) => {
-    const et = e.participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
-    const catBtns = ['boardgame','escape','etc'].map(c=>{
-      const lbl = {boardgame:'🎲 보드게임',escape:'🔐 방탈출',etc:'📦 기타'}[c];
-      return `<button class="pill-opt ${e.category===c?'selected':''}" onclick="setEntryField(${ei},'category','${c}')">${lbl}</button>`;
-    }).join('');
-
-    const pBlocks = e.participants.map((p,pi)=>{
-      const isSelf = pi===0;
-      const nameF = isSelf
-        ? `<div style="font-size:0.88rem;font-weight:600;padding:9px 0;">${p.name}</div>`
-        : `<select class="form-select" onchange="setParticipant(${ei},${pi},'userId',this.value)" style="font-size:0.85rem;">
-            <option value="">회원 선택</option>
-            ${users.map(u=>`<option value="${u.id}" ${p.userId===u.id?'selected':''}>${u.name}</option>`).join('')}
-           </select>`;
-      return `<div class="participant-block">
-        <div class="participant-header">
-          <span class="participant-label">${isSelf?'👤 본인':`👥 공동이용자 ${pi}`}</span>
-          ${!isSelf?`<button class="btn btn-ghost btn-xs" onclick="removeParticipant(${ei},${pi})">✕</button>`:''}
-        </div>
-        ${nameF}
-        <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label">신청금액 (원)</label>
-          <input class="form-input" type="number" placeholder="0" value="${p.amount}"
-            oninput="setParticipant(${ei},${pi},'amount',this.value)">
-        </div>
-      </div>`;
-    }).join('');
-
-    const recZone = e.receiptDataUrl
-      ? `<div class="receipt-zone has-file" onclick="triggerReceipt(${ei})">
-          <div style="font-size:0.82rem;color:var(--success);font-weight:600;">✅ 영수증 첨부 완료</div>
-          <img src="${e.receiptDataUrl}" alt="영수증">
-          <button class="receipt-remove" onclick="removeReceipt(event,${ei})">✕</button>
-         </div>`
-      : `<div class="receipt-zone" onclick="triggerReceipt(${ei})">
-          <div style="font-size:1.5rem;margin-bottom:6px;">📎</div>
-          <div style="font-size:0.88rem;font-weight:600;color:var(--primary);">영수증 사진 첨부 <span style="color:var(--danger);">*필수</span></div>
-          <div style="font-size:0.78rem;color:var(--text-muted);margin-top:4px;">최대 2MB · JPG, PNG</div>
-         </div>`;
-
-    const card = document.createElement('div');
-    card.className = 'entry-card';
-    card.innerHTML = `
-      <div class="entry-card-header">
-        <div class="entry-card-title"><span class="entry-num">${ei+1}</span> 신청 항목</div>
-        ${entries.length>1?`<button class="btn btn-ghost btn-xs" onclick="removeEntry(${ei})">🗑 삭제</button>`:''}
-      </div>
-      <div class="form-group">
-        <label class="form-label">일자<span class="req">*</span></label>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <input class="form-input" type="date" value="${e.date}" onchange="setEntryField(${ei},'date',this.value)" style="flex:1;">
-          <span style="font-size:0.88rem;color:var(--primary);font-weight:600;white-space:nowrap;min-width:28px;" id="dow-${ei}">${e.date ? ['일','월','화','수','목','금','토'][new Date(e.date).getDay()]+'요일' : ''}</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">신청구분<span class="req">*</span></label>
-        <div class="pill-select-row">${catBtns}</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">이용내용<span class="req">*</span></label>
-        <input class="form-input" type="text" placeholder="예: 보드게임카페 2인 입장" value="${e.description||''}"
-          onchange="setEntryField(${ei},'description',this.value)">
-      </div>
-      ${pBlocks}
-      <button class="btn btn-outline btn-sm btn-full mt-2" onclick="addParticipant(${ei})">＋ 공동이용자 추가</button>
-      <div class="entry-total"><span class="et-label">항목 합계</span><span class="et-value" id="et-${ei}">₩${fmt(et)}</span></div>
-      <div class="form-group mt-2">
-        <label class="form-label">영수증<span class="req">*</span></label>
-        ${recZone}
-        <input type="file" accept="image/*" id="file-${ei}" style="display:none" onchange="handleReceipt(${ei},this)">
-      </div>`;
-    container.appendChild(card);
-  });
-  updateFloatingTotal();
-}
-
-function setEntryField(idx, field, val) {
-  entries[idx][field] = val;
-  if (field==='category') renderEntries();
-  else if (field==='date') {
-    // 요일 즉시 업데이트
-    const dowEl = document.getElementById('dow-'+idx);
-    if (dowEl && val) {
-      const days = ['일','월','화','수','목','금','토'];
-      dowEl.textContent = days[new Date(val).getDay()] + '요일';
-    }
-    updateFloatingTotal();
-  } else updateFloatingTotal();
-}
-
-function setParticipant(eIdx, pIdx, field, val) {
-  if (field==='userId') {
-    // find user from supabase cache — just store id, fetch name later
-    entries[eIdx].participants[pIdx].userId = val;
-    // name will be set from select option text
-    const sel = document.querySelector(`#app-entries .entry-card:nth-child(${eIdx+1}) select`);
-    if (sel) entries[eIdx].participants[pIdx].name = sel.options[sel.selectedIndex]?.text || '';
-  } else {
-    entries[eIdx].participants[pIdx][field] = val;
-  }
-  const tot = entries[eIdx].participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
-  const el = document.getElementById('et-'+eIdx);
-  if (el) el.textContent = '₩'+fmt(tot);
-  updateFloatingTotal();
-}
-
-function updateFloatingTotal() {
-  const t = entries.reduce((s,e)=>s+e.participants.reduce((ss,p)=>ss+(parseFloat(p.amount)||0),0),0);
-  document.getElementById('float-total').textContent = '₩'+fmt(t);
-}
-
-function triggerReceipt(idx) { document.getElementById('file-'+idx).click(); }
-function removeReceipt(event, idx) {
-  event.stopPropagation();
-  entries[idx].receiptDataUrl = null; entries[idx].receiptFile = null;
-  renderEntries();
-}
-function handleReceipt(idx, input) {
-  const file = input.files[0]; if (!file) return;
-  // 2MB 제한
-  if (file.size > MAX_FILE_BYTES) {
-    toast(`파일 크기가 2MB를 초과합니다 (${(file.size/1024/1024).toFixed(1)}MB)`, 'error');
-    input.value = ''; return;
-  }
-  entries[idx].receiptFile = file;
-  const reader = new FileReader();
-  reader.onload = e => { entries[idx].receiptDataUrl = e.target.result; renderEntries(); toast('영수증 첨부 완료 ✅','success'); };
-  reader.readAsDataURL(file);
-}
-
-async function submitApplication() {
-  // Validate
-  for (let i=0; i<entries.length; i++) {
-    const e = entries[i];
-    if (!e.date) { toast(`항목 ${i+1}: 일자 선택`,'error'); return; }
-    if (!e.category) { toast(`항목 ${i+1}: 신청구분 선택`,'error'); return; }
-    if (!e.description?.trim()) { toast(`항목 ${i+1}: 이용내용 입력`,'error'); return; }
-    if (!e.receiptDataUrl) { toast(`항목 ${i+1}: 영수증 첨부 필수`,'error'); return; }
-    for (let j=1; j<e.participants.length; j++) if (!e.participants[j].userId) { toast(`항목 ${i+1}: 공동이용자 선택`,'error'); return; }
-    const tot = e.participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
-    if (tot<=0) { toast(`항목 ${i+1}: 신청금액 입력`,'error'); return; }
-  }
-
-  const acname = document.getElementById('apply-acname').value.trim();
-  const bank   = document.getElementById('apply-bank').value;
-  const acnum  = document.getElementById('apply-acnum').value.trim();
-  if (!acname||!bank||!acnum) { toast('환급 계좌 정보 입력','error'); return; }
-
-  // Credit check
-  const { data: profiles } = await sb.from('profiles').select('id,name,credit_total,credit_used,credit_pending').eq('status','approved');
-  const creditReq = {};
-  for (let e of entries) for (let p of e.participants) {
-    const a = parseFloat(p.amount)||0; if (!p.userId||a<=0) continue;
-    creditReq[p.userId] = (creditReq[p.userId]||0)+a;
-  }
-  for (let [uid, req] of Object.entries(creditReq)) {
-    const u = profiles?.find(u=>u.id===uid);
-    if (!u) continue;
-    const avail = Math.max(0, u.credit_total - u.credit_used - u.credit_pending);
-    if (req > avail) { toast(`${u.name}님 크레딧 부족 (가능: ₩${fmt(avail)})`, 'error'); return; }
-  }
-
-  // Upload receipts to Supabase Storage
-  toast('영수증 업로드 중...', '');
-  const entryData = [];
-  for (let i=0; i<entries.length; i++) {
-    const e = entries[i];
-    let receiptUrl = null;
-    if (e.receiptFile) {
-      const ext = e.receiptFile.name.split('.').pop();
-      const path = `receipts/${ME.id}/${Date.now()}_${i}.${ext}`;
-      const { data: uploadData, error: upErr } = await sb.storage
-        .from('receipts')
-        .upload(path, e.receiptFile, { contentType: e.receiptFile.type, upsert: false });
-      if (!upErr) {
-        const { data: { publicUrl } } = sb.storage.from('receipts').getPublicUrl(path);
-        receiptUrl = publicUrl;
-      } else {
-        console.error('Upload error:', upErr);
-        toast(`항목 ${i+1} 영수증 업로드 실패: ${upErr.message}`, 'error');
-        return;
-      }
-    }
-    entryData.push({
-      date: e.date, category: e.category, description: e.description,
-      receipt_url: receiptUrl,
-      total_amount: e.participants.reduce((s,p)=>s+(parseFloat(p.amount)||0),0),
-      participants: e.participants.map(p=>({ userId:p.userId, name:p.name, amount:parseFloat(p.amount)||0 }))
-    });
-  }
-
-  const totalAmt = entryData.reduce((s,e)=>s+e.total_amount,0);
-  const { data: app, error: appErr } = await sb.from('applications').insert({
-    applicant_id: ME.id,
-    applicant_name: ME.name,
-    status: 'pending',
-    bank_name: bank,
-    account_name: acname,
-    account_num: acnum,
-    note: document.getElementById('apply-note').value,
-    entries: entryData,
-    total_amount: totalAmt,
-  }).select().single();
-
-  if (appErr) { toast('신청 저장 실패: '+appErr.message,'error'); return; }
-
-  // Update pending credits
-  for (let [uid, amt] of Object.entries(creditReq)) {
-    const u = profiles?.find(u=>u.id===uid);
-    if (!u) continue;
-    await sb.from('profiles').update({ credit_pending: u.credit_pending + amt }).eq('id', uid);
-  }
-
-  addLog(`신청 제출: ${app.id} ₩${fmt(totalAmt)}`, ME.id);
-  toast('✅ 신청 완료!','success');
-  entries = []; clearApplyForm();
-  navigateTo('myapps');
-}
-
-function clearApplyForm() {
-  ['apply-acname','apply-bank','apply-acnum','apply-note'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-}
-
-/* ════════════════════════════════════════
-   MY APPS
-════════════════════════════════════════ */
-async function renderMyApps() {
-  document.getElementById('myapps-list').innerHTML = skeletonList(3);
-
-  // 1. 본인이 신청자인 것
-  const { data: myApps } = await sb.from('applications')
-    .select('*').eq('applicant_id', ME.id).order('created_at',{ascending:false});
-
-  // 2. 공동이용자로 포함된 것 (entries JSONB 안에 userId로 검색)
-  const { data: allApps } = await sb.from('applications')
-    .select('*').neq('applicant_id', ME.id).order('created_at',{ascending:false});
-
-  const participantApps = (allApps||[]).filter(a =>
-    (a.entries||[]).some(e =>
-      (e.participants||[]).some(p => p.userId === ME.id)
-    )
+function filterGames(q) {
+  const filtered = games.filter(g =>
+    g.name.includes(q) || g.tags.some(t => t.includes(q))
   );
+  renderGames(filtered);
+}
 
-  const el = document.getElementById('myapps-list');
-  const combined = [...(myApps||[]), ...participantApps];
-  combined.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+function filterByPlayers(mode, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (mode === 'all') renderGames(games);
+  else if (mode === 'available') renderGames(games.filter(g => g.available));
+  else renderGames(games.filter(g => g.players.includes(mode)));
+}
 
-  if (combined.length === 0) {
-    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📭</div><div>신청 내역 없음</div><button class="btn btn-accent mt-2" onclick="navigateTo('apply')">신청하기</button></div>`;
+// ── 대여 신청 ──
+function submitRental() {
+  const name = document.getElementById('rent-name').value.trim();
+  const game = document.getElementById('rent-game').value;
+  const period = document.getElementById('rent-period').value;
+
+  if (!name || !game) {
+    alert('이름과 게임을 선택해주세요.');
     return;
   }
 
-  // 본인 신청인지 공동이용자 신청인지 구분
-  const myIds = new Set((myApps||[]).map(a=>a.id));
-  el.innerHTML = combined.map(a => appListItemHTML(a, myIds.has(a.id))).join('');
+  const today = new Date();
+  const days = parseInt(period);
+  today.setDate(today.getDate() + days);
+  const due = `${today.getMonth()+1}/${today.getDate()}`;
+
+  const tbody = document.getElementById('rental-tbody');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td>${game}</td>
+    <td>${name}</td>
+    <td>${due}</td>
+    <td><span class="badge out">대여중</span></td>
+  `;
+  tbody.insertBefore(row, tbody.firstChild);
+
+  document.getElementById('rent-name').value = '';
+  document.getElementById('rent-game').value = '';
+  document.getElementById('rent-note').value = '';
+
+  showToast(`✅ "${game}" 대여 신청 완료! (반납: ${due})`);
 }
 
-function appListItemHTML(a, canCancel=false) {
-  const ents = a.entries || [];
-  const cats = ents.map(e=>catLabel(e.category)).join(', ');
-  const isParticipant = a.applicant_id !== ME.id;
-  // 이용내용 목록 (최대 2개 + 나머지 건수)
-  const descs = ents.map(e=>e.description).filter(Boolean);
-  const descText = descs.length <= 2
-    ? descs.join(', ')
-    : descs.slice(0,2).join(', ') + ` 외 ${descs.length-2}건`;
-  // 공동이용자 이름 (신청자 제외)
-  const coNames = coParticipants(a);
-  return `<div class="app-list-item" onclick="openDetail('${a.id}')">
-    <div style="font-size:0.92rem;font-weight:700;color:var(--primary-dark);margin-bottom:6px;">${descText||'(이용내용 없음)'}</div>
-    <div class="app-list-row">
-      <div class="app-list-name" style="font-size:0.82rem;font-weight:500;">
-        ${a.applicant_name}${coNames}
-        ${isParticipant ? '<span style="font-size:0.72rem;background:#DBEAFE;color:#1e40af;border-radius:8px;padding:1px 7px;margin-left:4px;">공동이용</span>' : ''}
-      </div>
-      <div>${statusBadge(a.status)}</div>
-    </div>
-    <div class="app-list-row">
-      <div class="app-list-amount">₩${fmt(a.total_amount)}</div>
-      <div class="app-list-date">${fmtDate(a.created_at)}</div>
-    </div>
-    <div class="app-list-meta">${cats}</div>
-    ${canCancel && a.status==='pending' ? `
-    <div class="app-list-actions" onclick="event.stopPropagation()">
-      <button class="btn btn-ghost btn-xs" onclick="confirmCancelApp('${a.id}')">🚫 신청 취소</button>
-    </div>` : ''}
-  </div>`;
-}
-
-/* ════════════════════════════════════════
-   DETAIL MODAL
-════════════════════════════════════════ */
-let detailAppId='';
-async function openDetail(id, isAdmin=false) {
-  detailAppId = id;
-  const { data: app } = await sb.from('applications').select('*').eq('id',id).single();
-  if (!app) return;
-  const isAdm = isAdmin || ME.role==='admin';
-
-  document.getElementById('modal-detail-title').textContent = `📄 신청 상세 — ${fmtDate(app.created_at)}`;
-
-  const entriesHtml = (app.entries||[]).map((e,i)=>`
-    <div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid var(--border);">
-      <div style="font-weight:700;color:var(--primary-dark);margin-bottom:6px;">
-        ${catLabel(e.category)} · ${e.date} · <span style="color:var(--primary);">₩${fmt(e.total_amount)}</span>
-      </div>
-      <div style="font-size:0.88rem;margin-bottom:8px;">${e.description}</div>
-      ${(e.participants||[]).map(p=>`
-        <div style="display:flex;justify-content:space-between;font-size:0.85rem;padding:4px 0;border-bottom:1px dashed var(--border);">
-          <span>${p.name||'?'}</span><span style="font-weight:700;">₩${fmt(p.amount)}</span>
-        </div>`).join('')}
-      ${e.receipt_url ? `<div style="margin-top:10px;"><a href="${e.receipt_url}" target="_blank" style="color:var(--primary);font-size:0.82rem;">🖼 영수증 보기</a><br><img src="${e.receipt_url}" style="max-width:100%;border-radius:8px;margin-top:6px;" loading="lazy"></div>` : ''}
-    </div>`).join('');
-
-  document.getElementById('modal-detail-body').innerHTML = `
-    <div style="margin-bottom:14px;">
-      <div class="detail-row"><span class="detail-key">신청자</span><span class="detail-val">${app.applicant_name}</span></div>
-      <div class="detail-row"><span class="detail-key">상태</span><span class="detail-val">${statusBadge(app.status)}</span></div>
-      <div class="detail-row"><span class="detail-key">신청일</span><span class="detail-val">${fmtDate(app.created_at,true)}</span></div>
-      ${app.approved_at?`<div class="detail-row"><span class="detail-key">처리일</span><span class="detail-val">${fmtDate(app.approved_at,true)}</span></div>`:''}
-      <div class="detail-row"><span class="detail-key">환급계좌</span><span class="detail-val">${app.bank_name} ${app.account_num}<br>(${app.account_name})</span></div>
-      ${app.note?`<div class="detail-row"><span class="detail-key">비고</span><span class="detail-val">${app.note}</span></div>`:''}
-      ${app.admin_note?`<div class="detail-row"><span class="detail-key">관리자메모</span><span class="detail-val" style="color:var(--primary);">${app.admin_note}</span></div>`:''}
-    </div>
-    <div class="amount-display" style="margin-bottom:14px;">
-      <div><div class="label">총 신청금액</div><div class="value">₩${fmt(app.total_amount)}</div></div>
-      <div style="font-size:0.8rem;opacity:0.8;">${(app.entries||[]).length}개 항목</div>
-    </div>
-    <div class="section-divider"></div>
-    <div class="card-title" style="margin-bottom:10px;">신청 항목</div>
-    ${entriesHtml}`;
-
-  let actions = `<button class="btn btn-outline" onclick="closeModal('modal-detail')">닫기</button>`;
-  if (isAdm) {
-    actions += `<button class="btn btn-warn btn-sm" onclick="openEdit('${id}')">✏️ 수정</button>`;
-    if (app.status==='pending') {
-      actions += `<button class="btn btn-success btn-sm" onclick="confirmApprove('${id}')">✅ 승인</button>
-                  <button class="btn btn-danger btn-sm" onclick="confirmReject('${id}')">❌ 반려</button>`;
-    }
-  } else if (app.status==='pending' && app.applicant_id === ME.id) {
-    actions += `<button class="btn btn-danger" onclick="confirmCancelApp('${id}')">신청 취소</button>`;
-  }
-  document.getElementById('modal-detail-actions').innerHTML = actions;
-  openModal('modal-detail');
-}
-
-/* ════════════════════════════════════════
-   CONFIRM DIALOG HELPER
-════════════════════════════════════════ */
-function showConfirm({ icon='⚠️', title, msg, okLabel='확인', okClass='btn-danger', onOk }) {
-  document.getElementById('confirm-icon').textContent = icon;
-  document.getElementById('confirm-title').textContent = title;
-  document.getElementById('confirm-msg').textContent = msg;
-  const btn = document.getElementById('confirm-ok-btn');
-  btn.textContent = okLabel;
-  btn.className = 'btn ' + okClass;
-  btn.onclick = () => { closeModal('modal-confirm'); onOk(); };
-  openModal('modal-confirm');
-}
-
-function confirmApprove(id) {
-  showConfirm({ icon:'✅', title:'신청을 승인하시겠습니까?', msg:'승인 시 해당 크레딧이 사용 처리됩니다.', okLabel:'승인', okClass:'btn-success', onOk:()=>approveApp(id) });
-}
-function confirmReject(id) {
-  showConfirm({ icon:'❌', title:'신청을 반려하시겠습니까?', msg:'반려 시 크레딧이 복구됩니다. 이 작업은 되돌릴 수 없습니다.', okLabel:'반려', okClass:'btn-danger', onOk:()=>rejectApp(id) });
-}
-function confirmCancelApp(id) {
-  showConfirm({ icon:'🚫', title:'신청을 취소하시겠습니까?', msg:'취소 시 크레딧이 복구됩니다.', okLabel:'취소하기', okClass:'btn-danger', onOk:()=>cancelApp(id) });
-}
-
-/* ════════════════════════════════════════
-   CANCEL (USER)
-════════════════════════════════════════ */
-async function cancelApp(id) {
-  const { data: app } = await sb.from('applications').select('*').eq('id',id).single();
-  if (!app || app.status!=='pending') { toast('대기 중인 신청만 취소 가능합니다','error'); return; }
-
-  await sb.from('applications').update({status:'cancelled', updated_at:nowISO()}).eq('id',id);
-  await restorePending(app);
-  addLog(`신청 취소: ${id}`, ME.id);
-  toast('취소되었습니다','success');
-  closeModal('modal-detail');
-  renderMyApps();
-}
-
-/* ════════════════════════════════════════
-   ADMIN DASHBOARD
-════════════════════════════════════════ */
-async function renderAdminDash() {
-  const [{ count: userCount }, { count: pendingCount }, { count: totalCount }, { data: approvedApps }] = await Promise.all([
-    sb.from('profiles').select('*',{count:'exact',head:true}).eq('role','user'),
-    sb.from('applications').select('*',{count:'exact',head:true}).eq('status','pending'),
-    sb.from('applications').select('*',{count:'exact',head:true}),
-    sb.from('applications').select('total_amount').in('status',['approved','mod-approved'])
-  ]);
-  const totalPaid = (approvedApps||[]).reduce((s,a)=>s+a.total_amount,0);
-
-  document.getElementById('admin-stats').innerHTML = `
-    <div class="stat-card"><div class="stat-label">전체 회원</div><div class="stat-value blue">${userCount||0}명</div></div>
-    <div class="stat-card"><div class="stat-label">승인 대기</div><div class="stat-value accent">${pendingCount||0}건 <span class="pending-dot"></span></div></div>
-    <div class="stat-card"><div class="stat-label">전체 신청</div><div class="stat-value">${totalCount||0}건</div></div>
-    <div class="stat-card"><div class="stat-label">총 지급액</div><div class="stat-value green">₩${fmt(totalPaid)}</div></div>`;
-
-  const { data: pending } = await sb.from('applications').select('*').eq('status','pending').order('created_at',{ascending:false}).limit(20);
-  const el = document.getElementById('admin-pending');
-  if (!pending||pending.length===0) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">✅</div><div>대기 중 없음</div></div>`; return; }
-  el.innerHTML = pending.map(a=>{
-    const descs = (a.entries||[]).map(e=>e.description).filter(Boolean);
-    const descText = descs.length <= 2 ? descs.join(', ') : descs.slice(0,2).join(', ') + ` 외 ${descs.length-2}건`;
-    return `
-    <div class="app-list-item" onclick="openDetail('${a.id}',true)">
-      <div style="font-size:0.92rem;font-weight:700;color:var(--primary-dark);margin-bottom:6px;">${descText||'(이용내용 없음)'}</div>
-      <div class="app-list-row">
-        <div class="app-list-name" style="font-size:0.82rem;font-weight:500;">${a.applicant_name}${coParticipants(a)}</div>
-        <div>${statusBadge(a.status)}</div>
-      </div>
-      <div class="app-list-row">
-        <div class="app-list-amount">₩${fmt(a.total_amount)}</div>
-        <div class="app-list-date">${fmtDate(a.created_at)}</div>
-      </div>
-      <div class="app-list-meta">${(a.entries||[]).map(e=>catLabel(e.category)).join(', ')}</div>
-      <div class="app-list-actions" onclick="event.stopPropagation()">
-        <button class="btn btn-success btn-xs" onclick="confirmApprove('${a.id}')">✅ 승인</button>
-        <button class="btn btn-danger btn-xs" onclick="confirmReject('${a.id}')">❌ 반려</button>
-        <button class="btn btn-warn btn-xs" onclick="openEdit('${a.id}')">✏️ 수정</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ════════════════════════════════════════
-   ADMIN ALL
-════════════════════════════════════════ */
-async function renderAdminAll() {
-  document.getElementById('admin-all-list').innerHTML = skeletonList(4);
-  const sf = document.getElementById('admin-sf')?.value||'';
-  const sq = (document.getElementById('admin-search')?.value||'').toLowerCase().trim();
-
-  let query = sb.from('applications').select('*').order('created_at',{ascending:false});
-  if (sf) query = query.eq('status', sf);
-
-  const { data: apps } = await query;
-  let filtered = apps || [];
-  if (sq) filtered = filtered.filter(a=> a.applicant_name?.toLowerCase().includes(sq) || a.id?.includes(sq) || (a.note||'').toLowerCase().includes(sq));
-
-  document.getElementById('admin-all-count').textContent = `총 ${filtered.length}건`;
-  const el = document.getElementById('admin-all-list');
-  if (!filtered.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div>결과 없음</div></div>`; return; }
-  el.innerHTML = filtered.map(a=>{
-    const descs = (a.entries||[]).map(e=>e.description).filter(Boolean);
-    const descText = descs.length <= 2 ? descs.join(', ') : descs.slice(0,2).join(', ') + ` 외 ${descs.length-2}건`;
-    return `
-    <div class="app-list-item" onclick="openDetail('${a.id}',true)">
-      <div style="font-size:0.92rem;font-weight:700;color:var(--primary-dark);margin-bottom:6px;">${descText||'(이용내용 없음)'}</div>
-      <div class="app-list-row">
-        <div class="app-list-name" style="font-size:0.82rem;font-weight:500;">${a.applicant_name}${coParticipants(a)}</div>
-        <div>${statusBadge(a.status)}</div>
-      </div>
-      <div class="app-list-row">
-        <div class="app-list-amount">₩${fmt(a.total_amount)}</div>
-        <div class="app-list-date">${fmtDate(a.created_at)}</div>
-      </div>
-      <div class="app-list-meta">${(a.entries||[]).map(e=>catLabel(e.category)).join(', ')}</div>
-      ${a.status==='pending'?`
-      <div class="app-list-actions" onclick="event.stopPropagation()">
-        <button class="btn btn-success btn-xs" onclick="confirmApprove('${a.id}')">✅ 승인</button>
-        <button class="btn btn-danger btn-xs" onclick="confirmReject('${a.id}')">❌ 반려</button>
-        <button class="btn btn-warn btn-xs" onclick="openEdit('${a.id}')">✏️ 수정</button>
-      </div>`:''}
-    </div>`;
-  }).join('');
-}
-
-/* ════════════════════════════════════════
-   APPROVE / REJECT
-════════════════════════════════════════ */
-async function approveApp(id) {
-  const { data: app } = await sb.from('applications').select('*').eq('id',id).single();
-  if (!app) return;
-
-  const newStatus = app.status==='pending' ? 'approved' : 'mod-approved';
-  await sb.from('applications').update({status:newStatus, approved_at:nowISO(), approved_by:ME.id, updated_at:nowISO()}).eq('id',id);
-
-  // pending → used
-  const { data: profiles } = await sb.from('profiles').select('*').in('id', app.entries.flatMap(e=>e.participants.map(p=>p.userId)).filter(Boolean));
-  for (let e of (app.entries||[])) for (let p of e.participants) {
-    const amt = parseFloat(p.amount)||0; if (!p.userId||amt<=0) continue;
-    const u = profiles?.find(u=>u.id===p.userId); if (!u) continue;
-    await sb.from('profiles').update({ credit_pending: Math.max(0,u.credit_pending-amt), credit_used: u.credit_used+amt }).eq('id',p.userId);
-  }
-  addLog(`승인: ${id} ₩${fmt(app.total_amount)}`, ME.id);
-  toast('✅ 승인 완료!','success');
-  closeModal('modal-detail');
-  if (currentPage==='admin') renderAdminDash();
-  else if (currentPage==='admin-all') renderAdminAll();
-}
-
-async function rejectApp(id) {
-  const { data: app } = await sb.from('applications').select('*').eq('id',id).single();
-  if (!app) return;
-  await sb.from('applications').update({status:'rejected', updated_at:nowISO()}).eq('id',id);
-  await restorePending(app);
-  addLog(`반려: ${id}`, ME.id);
-  toast('반려 처리','warning');
-  closeModal('modal-detail');
-  if (currentPage==='admin') renderAdminDash();
-  else if (currentPage==='admin-all') renderAdminAll();
-}
-
-async function restorePending(app) {
-  const { data: profiles } = await sb.from('profiles').select('*').in('id', (app.entries||[]).flatMap(e=>e.participants.map(p=>p.userId)).filter(Boolean));
-  for (let e of (app.entries||[])) for (let p of e.participants) {
-    const amt = parseFloat(p.amount)||0; if (!p.userId||amt<=0) continue;
-    const u = profiles?.find(u=>u.id===p.userId); if (!u) continue;
-    await sb.from('profiles').update({ credit_pending: Math.max(0,u.credit_pending-amt) }).eq('id',p.userId);
-  }
-}
-
-/* ════════════════════════════════════════
-   ADMIN EDIT
-════════════════════════════════════════ */
-async function openEdit(id) {
-  editId = id;
-  const { data: app } = await sb.from('applications').select('*').eq('id',id).single();
-  if (!app) return;
-
-  const entriesHtml = (app.entries||[]).map((e,i)=>`
-    <div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid var(--border);">
-      <div style="font-weight:700;font-size:0.9rem;margin-bottom:8px;">항목 ${i+1}</div>
-      <div class="form-row-2">
-        <div class="form-group"><label class="form-label">일자</label><input class="form-input" type="date" id="ed-date-${i}" value="${e.date}"></div>
-        <div class="form-group"><label class="form-label">구분</label>
-          <select class="form-select" id="ed-cat-${i}">
-            <option value="boardgame" ${e.category==='boardgame'?'selected':''}>보드게임</option>
-            <option value="escape" ${e.category==='escape'?'selected':''}>방탈출</option>
-            <option value="etc" ${e.category==='etc'?'selected':''}>기타</option>
-          </select></div>
-      </div>
-      <div class="form-group"><label class="form-label">이용내용</label><input class="form-input" type="text" id="ed-desc-${i}" value="${e.description}"></div>
-      ${(e.participants||[]).map((p,pi)=>`
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-          <span style="flex:1;font-size:0.83rem;color:var(--text-muted);">${p.name||'?'}</span>
-          <input class="form-input" type="number" id="ed-amt-${i}-${pi}" value="${p.amount}" style="flex:1;font-size:0.88rem;">
-        </div>`).join('')}
-    </div>`).join('');
-
-  document.getElementById('modal-edit-body').innerHTML = `
-    <div class="form-row-2">
-      <div class="form-group"><label class="form-label">은행</label><input class="form-input" id="ed-bank" value="${app.bank_name}"></div>
-      <div class="form-group"><label class="form-label">예금주</label><input class="form-input" id="ed-acname" value="${app.account_name}"></div>
-    </div>
-    <div class="form-group"><label class="form-label">계좌번호</label>
-      <input class="form-input" id="ed-acnum" value="${app.account_num}" inputmode="numeric" oninput="this.value=this.value.replace(/\\D/g,'')">
-    </div>
-    <div class="form-group"><label class="form-label">관리자 메모</label><textarea class="form-textarea" id="ed-note">${app.admin_note||''}</textarea></div>
-    <div class="section-divider"></div>
-    ${entriesHtml}`;
-
-  document.getElementById('modal-edit-actions').innerHTML = `
-    <button class="btn btn-outline" onclick="closeModal('modal-edit')">취소</button>
-    <button class="btn btn-warn btn-sm" onclick="saveEdit(false)">수정 저장</button>
-    <button class="btn btn-success btn-sm" onclick="saveEdit(true)">수정+승인</button>`;
-  closeModal('modal-detail');
-  openModal('modal-edit');
-}
-
-async function saveEdit(andApprove) {
-  const { data: app } = await sb.from('applications').select('*').eq('id',editId).single();
-  if (!app) return;
-
-  const updEntries = app.entries.map((e,i)=>{
-    const newPs = e.participants.map((p,pi)=>({ ...p, amount: parseFloat(document.getElementById(`ed-amt-${i}-${pi}`)?.value)||0 }));
-    return { ...e,
-      date: document.getElementById(`ed-date-${i}`)?.value||e.date,
-      category: document.getElementById(`ed-cat-${i}`)?.value||e.category,
-      description: document.getElementById(`ed-desc-${i}`)?.value||e.description,
-      participants: newPs,
-      total_amount: newPs.reduce((s,p)=>s+(p.amount||0),0)
-    };
-  });
-  const newTotal = updEntries.reduce((s,e)=>s+e.total_amount,0);
-
-  const upd = {
-    bank_name: document.getElementById('ed-bank').value,
-    account_name: document.getElementById('ed-acname').value,
-    account_num: document.getElementById('ed-acnum').value,
-    admin_note: document.getElementById('ed-note').value,
-    entries: updEntries, total_amount: newTotal, updated_at: nowISO()
-  };
-  if (andApprove) { upd.status='mod-approved'; upd.approved_at=nowISO(); upd.approved_by=ME.id; }
-
-  await sb.from('applications').update(upd).eq('id',editId);
-
-  if (andApprove) {
-    const { data: profiles } = await sb.from('profiles').select('*');
-    for (let e of updEntries) for (let p of e.participants) {
-      const amt = p.amount||0; if (!p.userId||amt<=0) continue;
-      const u = profiles?.find(u=>u.id===p.userId); if (!u) continue;
-      await sb.from('profiles').update({ credit_pending:Math.max(0,u.credit_pending-amt), credit_used:u.credit_used+amt }).eq('id',p.userId);
-    }
-  }
-
-  addLog(`수정${andApprove?'+승인':''}: ${editId}`, ME.id);
-  toast(andApprove?'✅ 수정 후 승인 완료':'✏️ 수정 완료','success');
-  closeModal('modal-edit');
-  if (currentPage==='admin') renderAdminDash();
-  else if (currentPage==='admin-all') renderAdminAll();
-}
-
-/* ════════════════════════════════════════
-   ADMIN MEMBERS
-════════════════════════════════════════ */
-async function renderAdminMembers() {
-  document.getElementById('admin-members-list').innerHTML = skeletonList(3);
-  const { data: users } = await sb.from('profiles').select('*').order('created_at',{ascending:false});
-  const el = document.getElementById('admin-members-list');
-  el.innerHTML = (users||[]).map(u=>{
-    const avail = Math.max(0,u.credit_total-u.credit_used-u.credit_pending);
-    const si = u.status==='approved'?'✅':u.status==='pending'?'⏳':'❌';
-    return `<div class="card" style="margin-bottom:10px;">
-      <div class="flex-between mb-2">
-        <div>
-          <div style="font-weight:700;font-size:0.95rem;">${u.name} ${u.role==='admin'?'<span class="admin-tag">ADMIN</span>':''}</div>
-          <div style="font-size:0.78rem;color:var(--text-muted);">${u.email} · ${u.provider||'email'}</div>
-        </div>
-        <div>${si}</div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;">
-        <div style="background:var(--surface2);border-radius:8px;padding:8px;text-align:center;">
-          <div style="font-size:0.68rem;color:var(--text-muted);">총크레딧</div>
-          <div style="font-size:0.88rem;font-weight:700;color:var(--primary);">₩${fmt(u.credit_total)}</div>
-        </div>
-        <div style="background:var(--surface2);border-radius:8px;padding:8px;text-align:center;">
-          <div style="font-size:0.68rem;color:var(--text-muted);">사용</div>
-          <div style="font-size:0.88rem;font-weight:700;color:var(--success);">₩${fmt(u.credit_used)}</div>
-        </div>
-        <div style="background:var(--surface2);border-radius:8px;padding:8px;text-align:center;">
-          <div style="font-size:0.68rem;color:var(--text-muted);">가용</div>
-          <div style="font-size:0.88rem;font-weight:700;color:var(--accent);">₩${fmt(avail)}</div>
-        </div>
-      </div>
-      <div class="btn-row">
-        ${u.status==='pending'?`<button class="btn btn-success btn-sm" onclick="approveUser('${u.id}')">✅ 승인</button>`:''}
-        <button class="btn btn-outline btn-sm" onclick="openCreditEdit('${u.id}')">💰 크레딧</button>
-        ${u.status!=='rejected'&&u.id!=='${ME?.id}'?`<button class="btn btn-danger btn-sm" onclick="confirmRejectUser('${u.id}','${u.name}')">🚫 강퇴</button>`:''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-async function approveUser(uid) {
-  const { data: u } = await sb.from('profiles').select('*').eq('id',uid).single();
-  if (!u) return;
-  await sb.from('profiles').update({ status:'approved', credit_total: u.credit_total||30000 }).eq('id',uid);
-  addLog(`회원 승인: ${u.email}`, ME.id);
-  toast(`${u.name} 승인 완료 + 크레딧 ₩${fmt(u.credit_total||30000)} 지급`,'success');
-  renderAdminMembers();
-}
-
-async function setAdminRole(uid, newRole, name) {
-  // newRole='admin' → 일반회원에게 관리자 권한 부여
-  // newRole='user'  → 관리자에게 일반회원 권한으로 변경
-  const isGrant = newRole === 'admin';
-  showConfirm({
-    icon: isGrant ? '🛡️' : '👤',
-    title: isGrant
-      ? `${name}에게 관리자 권한을 부여하시겠습니까?`
-      : `${name}의 관리자 권한을 해제하시겠습니까?`,
-    msg: isGrant
-      ? '관리자로 변경되며 모든 관리 기능을 사용할 수 있게 됩니다.'
-      : '일반 회원으로 변경되며 관리 기능 접근이 제한됩니다.',
-    okLabel: isGrant ? '권한 부여' : '권한 해제',
-    okClass: isGrant ? 'btn-info' : 'btn-warn',
-    onOk: async () => {
-      await sb.from('profiles').update({ role: newRole }).eq('id', uid);
-      addLog(`권한 변경: ${uid} → ${newRole}`, ME.id);
-      toast(`✅ ${name} → ${isGrant ? '관리자' : '일반회원'} 변경 완료`, 'success');
-      renderAdminMembers();
-    }
-  });
-}
-
-function confirmRejectUser(uid, name) {
-  showConfirm({ icon:'🚫', title:`${name}을(를) 강퇴하시겠습니까?`, msg:'강퇴된 회원은 서비스를 이용할 수 없게 됩니다.', okLabel:'강퇴', okClass:'btn-danger', onOk:()=>rejectUser(uid,name) });
-}
-async function rejectUser(uid, name) {
-  await sb.from('profiles').update({status:'rejected'}).eq('id',uid);
-  addLog(`회원 거절: ${uid}`, ME.id);
-  toast('거절 처리','warning');
-  renderAdminMembers();
-}
-
-async function openCreditEdit(uid) {
-  editCreditUid = uid;
-  const { data: u } = await sb.from('profiles').select('*').eq('id',uid).single();
-  if (!u) return;
-  document.getElementById('modal-credit-body').innerHTML = `
-    <div style="margin-bottom:12px;font-weight:700;">${u.name} (${u.email})</div>
-    <div class="form-group"><label class="form-label">총 크레딧</label><input class="form-input" type="number" id="cr-total" value="${u.credit_total}"></div>
-    <div class="form-group"><label class="form-label">사용 크레딧 (조정)</label><input class="form-input" type="number" id="cr-used" value="${u.credit_used}"></div>
-    <div class="text-muted">대기: ₩${fmt(u.credit_pending)}</div>`;
-  openModal('modal-credit');
-}
-async function saveCreditEdit() {
-  const total = parseFloat(document.getElementById('cr-total').value)||0;
-  const used  = parseFloat(document.getElementById('cr-used').value)||0;
-  await sb.from('profiles').update({credit_total:total,credit_used:used}).eq('id',editCreditUid);
-  addLog(`크레딧 수정: ${editCreditUid}`, ME.id);
-  toast('크레딧 수정 완료','success');
-  closeModal('modal-credit');
-  renderAdminMembers();
-}
-
-function openCreateUserModal() {
-  ['nu-name','nu-email'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('nu-pw').value='4321';
-  document.getElementById('nu-credit').value='30000';
-  document.getElementById('nu-role').value='user';
-  openModal('modal-create-user');
-}
-async function createUser() {
-  const name   = document.getElementById('nu-name').value.trim();
-  const email  = document.getElementById('nu-email').value.trim();
-  const pw     = document.getElementById('nu-pw').value;
-  const credit = parseFloat(document.getElementById('nu-credit').value)||0;
-  const role   = document.getElementById('nu-role').value;
-  if (!name || !email) { toast('이름과 이메일을 입력하세요','error'); return; }
-  if (!pw || pw.length < 4) { toast('비밀번호는 4자 이상이어야 합니다','error'); return; }
-
-  // ★ signUp 대신 Supabase SQL로 직접 생성 (현재 세션 유지)
-  // profiles에 바로 insert (auth.users는 관리자가 Supabase UI에서 따로 생성)
-  // → 여기서는 profiles만 미리 생성해두고, 실제 Auth 계정은 초대 방식 사용
-  // 실제로는 Supabase Admin API가 필요하므로 signUp 후 즉시 세션 복구
-  const savedSession = await sb.auth.getSession();
-
-  const { data: authData, error: authErr } = await sb.auth.signUp({
-    email, password: pw,
-    options: { data: { name }, emailRedirectTo: APP_URL }
-  });
-
-  // ★ 관리자 세션 즉시 복구 (signUp이 세션을 덮어쓰므로)
-  if (savedSession.data.session) {
-    await sb.auth.setSession({
-      access_token:  savedSession.data.session.access_token,
-      refresh_token: savedSession.data.session.refresh_token,
-    });
-  }
-
-  if (authErr) { toast('계정 생성 실패: ' + authErr.message, 'error'); return; }
-
-  const uid = authData?.user?.id;
-  if (!uid) { toast('계정 생성 실패: ID를 받지 못했습니다','error'); return; }
-
-  // profiles upsert
-  const { error: profErr } = await sb.from('profiles').upsert({
-    id: uid, email, name, role: 'user', status: 'approved',
-    provider: 'email', credit_total: credit, credit_used: 0, credit_pending: 0
-  });
-  if (profErr) { toast('프로필 저장 실패: ' + profErr.message, 'error'); return; }
-
-  addLog(`계정 생성: ${email}`, ME.id);
-  toast(`✅ ${name} 계정 생성 완료`, 'success');
-  closeModal('modal-create-user');
-  renderAdminMembers();
-}
-
-/* ════════════════════════════════════════
-   LOGS
-════════════════════════════════════════ */
-async function renderLogs() {
-  document.getElementById('logs-content').innerHTML = `<div class="skeleton sk-card"></div>`.repeat(5);
-  const { data: logs } = await sb.from('logs').select('*').order('created_at',{ascending:false}).limit(200);
-  const el = document.getElementById('logs-content');
-  if (!logs||!logs.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📋</div><div>로그 없음</div></div>`; return; }
-  el.innerHTML = logs.map(l=>`
-    <div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.8rem;">
-      <div style="color:var(--text-muted);white-space:nowrap;min-width:100px;">${fmtDate(l.created_at,true)}</div>
-      <div style="flex:1;">${l.message}</div>
-    </div>`).join('');
-}
-async function clearLogs() {
-  showConfirm({ icon:'🗑️', title:'로그를 초기화하시겠습니까?', msg:'모든 시스템 로그가 삭제됩니다.', okLabel:'초기화', okClass:'btn-danger', onOk:async()=>{
-    await sb.from('logs').delete().not('id','is',null);
-    addLog('로그 초기화', ME.id);
-    renderLogs();
-  }});
-}
-
-async function addLog(message, userId) {
-  await sb.from('logs').insert({ message, user_id: userId||null });
-}
-
-/* ════════════════════════════════════════
-   PRINT
-════════════════════════════════════════ */
-async function openPrintPreview(id) {
-  printAppId = id;
-  const { data: app } = await sb.from('applications').select('*').eq('id',id).single();
-  if (!app) return;
-
-  const topRows = (app.entries||[]).map(e=>{
-    const ps = (e.participants||[]).map(p=>`${p.name} ₩${fmt(p.amount)}`).join(' / ');
-    return `<tr>
-      <td>${e.date}</td><td>${catLabel(e.category)}</td>
-      <td>${e.description}</td><td>${ps}</td>
-      <td style="text-align:right;font-weight:700;">₩${fmt(e.total_amount)}</td></tr>`;
-  }).join('');
-
-  document.getElementById('modal-print-preview').innerHTML = `
-    <div style="font-size:10pt;color:#000;">
-      <div style="background:#1e3a8a;color:#fff;padding:8px 12px;border-radius:4px;margin-bottom:8px;">
-        <div style="font-size:12pt;font-weight:900;">2026 보동보동 갓생지원금 신청서</div>
-        <div style="font-size:8pt;opacity:0.85;">보드게임 지원금 환급 신청 | 신청일: ${fmtDate(app.created_at)} | ID: ${app.id}</div>
-      </div>
-      <table style="width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:10px;">
-        <thead><tr style="background:#1e3a8a;color:#fff;">
-          <th style="padding:5px 8px;">이용일자</th><th style="padding:5px 8px;">구분</th>
-          <th style="padding:5px 8px;">이용내용</th><th style="padding:5px 8px;">이용자(금액)</th>
-          <th style="padding:5px 8px;text-align:right;">신청금액</th>
-        </tr></thead>
-        <tbody>${topRows}</tbody>
-      </table>
-      <div style="border:2px solid #1e3a8a;border-radius:4px;padding:8px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-weight:700;color:#1e3a8a;">총 신청금액 (입금 필요 금액)</span>
-        <span style="font-size:13pt;font-weight:900;color:#1e3a8a;">₩${fmt(app.total_amount)}</span>
-      </div>
-      <div style="border:1.5px solid #93C5FD;border-radius:4px;padding:10px 12px;background:#EFF6FF;">
-        <div style="font-weight:700;color:#1e40af;margin-bottom:4px;">💳 입금 계좌</div>
-        <div style="font-size:9.5pt;"><b>은행:</b> ${app.bank_name} &nbsp;|&nbsp; <b>계좌번호:</b> ${app.account_num} &nbsp;|&nbsp; <b>예금주:</b> ${app.account_name}</div>
-      </div>
-    </div>`;
-  openModal('modal-print');
-}
-
-async function doPrint() {
-  const { data: app } = await sb.from('applications').select('*').eq('id',printAppId).single();
-  if (!app) return;
-  const topRows = (app.entries||[]).map(e=>{
-    const ps=(e.participants||[]).map(p=>`${p.name} ₩${fmt(p.amount)}`).join(' / ');
-    return `<tr><td>${e.date}</td><td>${catLabel(e.category)}</td><td>${e.description}</td><td>${ps}</td><td style="text-align:right;font-weight:700;">₩${fmt(e.total_amount)}</td></tr>`;
-  }).join('');
-
-  document.getElementById('print-area').innerHTML = `
-    <div class="print-page">
-      <div class="print-header-bar"><div class="print-main-title">🎲 2026 보동보동 갓생지원금 신청서</div><div class="print-sub">보드게임 지원금 환급 신청</div></div>
-      <div class="print-stamp-row"><div class="print-stamp"><div style="font-size:8pt;color:#888;">신청일</div><div class="stamp-label">${fmtDate(app.created_at)}</div><div style="font-size:7pt;color:#888;">${app.id}</div></div></div>
-      <div class="print-section">
-        <div class="print-section-title">▶ 이용 내역</div>
-        <table class="print-table">
-          <thead><tr><th>이용일자</th><th>구분</th><th>이용내용</th><th>이용자명 (신청금액)</th><th>신청금액</th></tr></thead>
-          <tbody>${topRows}</tbody>
-          <tfoot><tr style="background:#EFF6FF;"><td colspan="4" style="text-align:right;font-weight:700;padding:8px 10px;border:1px solid #93C5FD;">합 계</td><td style="text-align:right;font-weight:900;font-size:12pt;padding:8px 10px;border:1px solid #93C5FD;">₩${fmt(app.total_amount)}</td></tr></tfoot>
-        </table>
-      </div>
-      <div class="print-total-box"><span class="print-total-label">총 신청금액</span><span class="print-total-amount">₩${fmt(app.total_amount)}</span></div>
-      <div class="print-section">
-        <div class="print-section-title">▶ 입금 정보</div>
-        <div class="print-bank-box">
-          <div class="print-bank-row"><span class="print-bank-key">은행명</span><span>${app.bank_name}</span></div>
-          <div class="print-bank-row"><span class="print-bank-key">계좌번호</span><span style="font-size:12pt;font-weight:700;">${app.account_num}</span></div>
-          <div class="print-bank-row"><span class="print-bank-key">예금주</span><span>${app.account_name}</span></div>
-          <div class="print-bank-row" style="margin-top:6px;padding-top:6px;border-top:1px solid #93C5FD;">
-            <span class="print-bank-key">입금 필요액</span>
-            <span style="font-size:14pt;font-weight:900;color:#1e3a8a;">₩${fmt(app.total_amount)}</span>
-          </div>
-        </div>
-      </div>
-      ${app.note?`<div style="font-size:9pt;color:#555;margin-top:8px;">📝 비고: ${app.note}</div>`:''}
-      ${app.admin_note?`<div style="font-size:9pt;color:#1e40af;margin-top:4px;">💬 관리자메모: ${app.admin_note}</div>`:''}
-      <div class="print-footer">
-        <span>2026 보동보동 갓생지원금 지원사업</span>
-        <div class="print-sig"><div>승인자 서명</div><div class="print-sig-line"></div><div>(인)</div></div>
-      </div>
-    </div>`;
-  closeModal('modal-print');
-  addLog(`인쇄: ${printAppId}`, ME.id);
-  setTimeout(()=>window.print(), 200);
-}
-
-/* ════════════════════════════════════════
-   CSV EXPORT
-════════════════════════════════════════ */
-async function exportCSV() {
-  const { data: apps } = await sb.from('applications').select('*').order('created_at',{ascending:false});
-  // 헤더: 연번, 이용일자, 구분, 이용내용, 이용자, 신청금액(합계)
-  const rows = [['연번','이용일자','구분','이용내용','이용자','신청금액(합계)']];
-  let seq = 1;
-  (apps||[]).forEach(a => {
-    (a.entries||[]).forEach(e => {
-      const users = (e.participants||[]).map(p => p.name||'').filter(Boolean).join(', ');
-      const catName = {boardgame:'보드게임', escape:'방탈출', etc:'기타'}[e.category] || e.category || '';
-      rows.push([seq++, e.date, catName, e.description, users, e.total_amount]);
-    });
-  });
-  const csv = rows.map(r=>r.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download=`신청취합_${new Date().toLocaleDateString()}.csv`; a.click();
-  URL.revokeObjectURL(url);
-}
-
-/* ════════════════════════════════════════
-   MODAL HELPERS
-════════════════════════════════════════ */
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-// 계정 생성 모달은 배경 클릭으로 닫히지 않음
-document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => {
-    if (e.target === m && m.id !== 'modal-create-user') {
-      m.classList.remove('open');
-    }
-  });
-});
-
-/* ════════════════════════════════════════
-   UTILS
-════════════════════════════════════════ */
-function toast(msg, type='') {
-  const c = document.getElementById('toast-container');
-  const t = document.createElement('div');
-  t.className = 'toast '+(type||'');
+function showToast(msg) {
+  const t = document.getElementById('toast');
   t.textContent = msg;
-  c.appendChild(t);
-  setTimeout(()=>{ t.style.transition='0.3s'; t.style.opacity='0'; setTimeout(()=>t.remove(),300); },3000);
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
 }
-function fmt(n) { return Number(n||0).toLocaleString('ko-KR'); }
-function nowISO() { return new Date().toISOString(); }
-function todayStr() { return new Date().toISOString().split('T')[0]; }
-function fmtDate(iso, withTime=false) {
-  if (!iso) return '-';
-  const d = new Date(iso);
-  const date = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
-  if (!withTime) return date;
-  return date+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-}
-function statusBadge(s) {
-  const m = {pending:['대기','badge-pending'],approved:['승인','badge-approved'],rejected:['반려','badge-rejected'],cancelled:['취소','badge-cancelled'],'mod-approved':['수정승인','badge-mod-approved']};
-  const [l,c]=m[s]||[s,''];
-  return `<span class="badge ${c}">${l}</span>`;
-}
-function catLabel(c) { return {boardgame:'🎲 보드게임',escape:'🔐 방탈출',etc:'📦 기타'}[c]||c||'-'; }
-
-// 신청의 공동이용자 이름 목록 반환 (신청자 본인 제외)
-function coParticipants(a) {
-  const seen = new Set();
-  const names = [];
-  for (const e of (a.entries||[])) {
-    for (const p of (e.participants||[])) {
-      if (p.name && p.name !== a.applicant_name && !seen.has(p.name)) {
-        seen.add(p.name);
-        names.push(p.name);
-      }
-    }
-  }
-  if (!names.length) return '';
-  return ` <span style="font-size:0.78rem;color:#64748B;font-weight:400;">${names.join(' ')}</span>`;
-}
-function skeletonList(n) { return `<div class="skeleton sk-card mb-2"></div>`.repeat(n); }
 </script>
 </body>
 </html>
