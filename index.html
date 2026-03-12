@@ -4,227 +4,260 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>🏸 주사 대전 — 팀 배치도</title>
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --blue:#1E88E5;
-  --blue-dark:#1565C0;
-  --blue-dim:rgba(30,136,229,.12);
-  --blue-border:rgba(30,136,229,.35);
-  --green:#43A047;
-  --green-dark:#2E7D32;
-  --green-dim:rgba(67,160,71,.12);
-  --green-border:rgba(67,160,71,.35);
-  --gold:#FFD700;
-  --bg:#0a0a0a;
-  --surface:#141414;
-  --surface2:#1c1c1c;
-  --surface3:#232323;
-  --text:#f0f0f0;
-  --muted:#666;
-  --border:rgba(255,255,255,.07);
-  --radius:14px;
+  --blue:#1565C0;
+  --blue-light:#E3F2FD;
+  --blue-mid:#1E88E5;
+  --blue-border:#90CAF9;
+  --green:#2E7D32;
+  --green-light:#E8F5E9;
+  --green-mid:#43A047;
+  --green-border:#A5D6A7;
+  --gold:#E65100;
+  --bg:#F4F6F8;
+  --white:#FFFFFF;
+  --surface:#FAFAFA;
+  --text:#1A1A2E;
+  --text2:#37474F;
+  --muted:#78909C;
+  --border:#E0E0E0;
+  --radius:16px;
+  --shadow:0 2px 12px rgba(0,0,0,.08);
+  --shadow-lg:0 4px 24px rgba(0,0,0,.12);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans-serif;min-height:100%;}
 
 /* ── HERO ── */
-.hero{width:100%;position:relative;overflow:hidden;background:#0a1a0a;flex-shrink:0;}
+.hero{width:100%;position:relative;overflow:hidden;background:#e8f5e9;}
 .hero-img{width:100%;height:auto;display:block;}
 .hero-tag-l,.hero-tag-r{
   position:absolute;bottom:18%;
   font-family:"Black Han Sans",sans-serif;
-  font-size:clamp(.72rem,3.2vw,1rem);
-  letter-spacing:1px;padding:5px 12px;
-  border-radius:6px;border:2px solid rgba(255,255,255,.45);
-  backdrop-filter:blur(4px);z-index:10;white-space:nowrap;
+  font-size:clamp(.8rem,3.5vw,1.1rem);
+  letter-spacing:1px;padding:6px 14px;
+  border-radius:8px;z-index:10;white-space:nowrap;
+  box-shadow:0 2px 10px rgba(0,0,0,.25);
 }
-.hero-tag-l{left:3%;background:rgba(21,101,192,.88);color:#fff;box-shadow:0 0 14px rgba(30,136,229,.5);}
-.hero-tag-r{right:3%;background:rgba(46,125,50,.88);color:#fff;box-shadow:0 0 14px rgba(67,160,71,.5);}
+.hero-tag-l{left:3%;background:#1565C0;color:#fff;}
+.hero-tag-r{right:3%;background:#2E7D32;color:#fff;}
 
 /* ── PAGE ── */
-.page{max-width:520px;margin:0 auto;padding:0 0 60px;}
+.page{max-width:560px;margin:0 auto;padding:0 0 60px;}
 
-/* section title */
+/* ── SECTION TITLE ── */
 .sec-title{
   font-family:"Black Han Sans",sans-serif;
-  font-size:.72rem;letter-spacing:3px;color:var(--muted);
-  text-transform:uppercase;padding:18px 16px 8px;
-  display:flex;align-items:center;gap:8px;
+  font-size:1.3rem;letter-spacing:3px;color:var(--text);
+  padding:22px 16px 12px;
+  display:flex;align-items:center;gap:0;
 }
-.sec-title::after{content:"";flex:1;height:1px;background:var(--border);}
+.sec-title::before,.sec-title::after{content:"";flex:1;height:2px;background:var(--border);border-radius:1px;}
+.sec-title::before{margin-right:12px;}
+.sec-title::after{margin-left:12px;}
 
-/* ── TEAM SPLIT HEADER ── */
-.teams-header{
-  display:grid;grid-template-columns:1fr 1fr;gap:8px;
-  padding:0 12px 2px;
+/* ── VS DIVIDER ── */
+.vs-bar{
+  display:flex;align-items:center;justify-content:center;gap:0;
+  margin:0 12px 10px;
 }
-.th-card{
-  border-radius:12px;padding:12px 12px 10px;
-  display:flex;flex-direction:column;gap:4px;
+.vs-half{flex:1;height:4px;border-radius:2px;}
+.vs-half.b{background:linear-gradient(90deg,transparent,var(--blue-mid));}
+.vs-half.g{background:linear-gradient(90deg,var(--green-mid),transparent);}
+.vs-chip{
+  font-family:"Black Han Sans",sans-serif;font-size:.85rem;
+  padding:4px 14px;border-radius:20px;
+  background:var(--white);border:2px solid var(--border);
+  color:var(--muted);letter-spacing:2px;
+  box-shadow:var(--shadow);
+  flex-shrink:0;margin:0 8px;
 }
-.th-card.b{background:linear-gradient(135deg,rgba(21,101,192,.7),rgba(30,136,229,.3));border:1px solid var(--blue-border);}
-.th-card.g{background:linear-gradient(135deg,rgba(46,125,50,.7),rgba(67,160,71,.3));border:1px solid var(--green-border);}
-.th-emoji{font-size:1.3rem;margin-bottom:2px;}
-.th-name{font-family:"Black Han Sans",sans-serif;font-size:1rem;letter-spacing:1px;}
-.th-name.b{color:var(--blue);}
-.th-name.g{color:var(--green);}
-.th-sub{font-size:.65rem;color:rgba(255,255,255,.5);}
 
-/* ── ROSTER CARDS ── */
+/* ── ROSTER SPLIT ── */
 .roster-wrap{
   padding:0 12px;
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:8px;
+  gap:10px;
   align-items:start;
 }
 
-.team-card{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
-
-.tc-head{
-  padding:9px 10px;
-  display:flex;align-items:center;gap:7px;
+/* ── TEAM CARD ── */
+.team-card{
+  border-radius:var(--radius);overflow:hidden;
+  border:2px solid var(--border);
+  background:var(--white);
+  box-shadow:var(--shadow);
 }
-.tc-head.b{background:linear-gradient(135deg,rgba(21,101,192,.75) 0%,rgba(30,136,229,.3) 100%);}
-.tc-head.g{background:linear-gradient(135deg,rgba(46,125,50,.75) 0%,rgba(67,160,71,.3) 100%);}
-.tc-icon{font-size:1.2rem;}
+.team-card.b{border-color:var(--blue-border);}
+.team-card.g{border-color:var(--green-border);}
+
+.tc-head{padding:10px 12px;display:flex;align-items:center;gap:8px;}
+.tc-head.b{background:var(--blue-light);}
+.tc-head.g{background:var(--green-light);}
+.tc-icon{font-size:1.4rem;}
 .tc-info{flex:1;min-width:0;}
-.tc-teamname{font-family:"Black Han Sans",sans-serif;font-size:.85rem;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.tc-meta{font-size:.58rem;color:rgba(255,255,255,.5);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-
-/* role badges */
-.badge{display:inline-block;font-size:.52rem;font-weight:700;padding:1px 5px;border-radius:4px;letter-spacing:.3px;vertical-align:middle;margin-left:2px;}
-.badge-leader{background:rgba(255,215,0,.2);color:var(--gold);border:1px solid rgba(255,215,0,.35);}
-.badge-sub{background:rgba(255,255,255,.08);color:rgba(255,255,255,.55);border:1px solid var(--border);}
-
-/* player list — 좌우 나눴으니 1열로 */
-.player-grid{
-  background:var(--surface);
-  display:flex;flex-direction:column;
+.tc-teamname{
+  font-family:"Black Han Sans",sans-serif;
+  font-size:.95rem;letter-spacing:.5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.player-cell{
-  padding:8px 10px;
-  display:flex;align-items:center;gap:6px;
+.tc-teamname.b{color:var(--blue);}
+.tc-teamname.g{color:var(--green);}
+.tc-meta{font-size:.6rem;color:var(--muted);margin-top:2px;}
+
+/* ── PLAYER LIST ── */
+.player-list{display:flex;flex-direction:column;}
+
+.gender-divider{
+  padding:5px 10px;
+  font-size:.65rem;font-weight:700;letter-spacing:2px;
+  color:var(--muted);
+  background:#F5F5F5;
+  border-top:1px solid var(--border);
   border-bottom:1px solid var(--border);
 }
+
+.player-cell{
+  padding:9px 10px;
+  display:flex;align-items:center;gap:7px;
+  border-bottom:1px solid #F0F0F0;
+}
 .player-cell:last-child{border-bottom:none;}
+
 .pc-idx{
-  width:18px;height:18px;border-radius:50%;flex-shrink:0;
-  font-size:.58rem;font-weight:700;
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  font-size:.65rem;font-weight:700;
   display:flex;align-items:center;justify-content:center;
 }
-.pc-idx.b{background:rgba(30,136,229,.2);color:var(--blue);}
-.pc-idx.g{background:rgba(67,160,71,.2);color:var(--green);}
-.pc-name{font-size:.78rem;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pc-badges{display:flex;flex-direction:column;gap:1px;align-items:flex-end;flex-shrink:0;}
+.pc-idx.b{background:var(--blue-light);color:var(--blue);}
+.pc-idx.g{background:var(--green-light);color:var(--green);}
 
-/* gender divider */
-.gender-divider{
-  padding:4px 10px;
-  font-size:.58rem;color:var(--muted);letter-spacing:1px;
-  background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:4px;
+.pc-name{font-size:.88rem;font-weight:700;flex:1;color:var(--text);}
+
+/* badges */
+.badge{
+  display:inline-flex;align-items:center;
+  font-size:.55rem;font-weight:700;padding:2px 5px;
+  border-radius:4px;letter-spacing:.3px;flex-shrink:0;
 }
-.gender-divider::after{content:"";flex:1;height:1px;background:var(--border);}
+.badge-leader{background:#FFF8E1;color:#E65100;border:1px solid #FFCC02;}
+.badge-sub{background:#EEF2FF;color:#3949AB;border:1px solid #C5CAE9;}
 
 /* ── RULE SECTION ── */
 .rule-card{
   margin:0 12px;
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);overflow:hidden;
+  background:var(--white);
+  border:2px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow);
 }
 .rule-head{
-  padding:12px 14px;
-  background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,165,0,.05));
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:8px;
+  padding:14px 16px;
+  background:linear-gradient(135deg,#FFF8E1,#FFF3E0);
+  border-bottom:2px solid #FFE082;
+  display:flex;align-items:center;gap:10px;
 }
-.rule-head-icon{font-size:1.2rem;}
-.rule-head-title{font-family:"Black Han Sans",sans-serif;font-size:.95rem;letter-spacing:1px;color:var(--gold);}
-.rule-head-sub{font-size:.65rem;color:var(--muted);margin-top:1px;}
+.rule-head-icon{font-size:1.4rem;}
+.rule-head-title{
+  font-family:"Black Han Sans",sans-serif;
+  font-size:1rem;letter-spacing:1px;color:var(--gold);
+}
+.rule-head-sub{font-size:.68rem;color:#BF360C;margin-top:2px;}
 
-.rule-body{padding:14px;}
+.rule-body{padding:16px;}
 
 /* round pills */
-.round-pills{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.round-pills{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
 .rpill{
-  padding:4px 12px;border-radius:18px;font-size:.72rem;font-weight:700;
-  background:var(--surface2);border:1px solid var(--border);color:var(--muted);
+  padding:5px 14px;border-radius:20px;font-size:.78rem;font-weight:700;
+  background:#F5F5F5;border:1.5px solid var(--border);color:var(--muted);
 }
-.rpill.active{background:rgba(255,215,0,.12);border-color:rgba(255,215,0,.35);color:var(--gold);}
+.rpill.active{background:#FFF8E1;border-color:#FFD54F;color:var(--gold);}
+.rpill.final{background:var(--gold);color:#fff;border-color:var(--gold);}
 
 /* rule items */
 .rule-item{
-  display:flex;gap:10px;padding:9px 0;
-  border-bottom:1px solid rgba(255,255,255,.04);
+  display:flex;gap:12px;padding:13px 0;
+  border-bottom:1px solid #F0F0F0;
 }
 .rule-item:last-child{border-bottom:none;}
 .ri-num{
-  width:22px;height:22px;border-radius:50%;flex-shrink:0;
-  background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.25);
-  color:var(--gold);font-size:.68rem;font-weight:700;
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  background:#FFF8E1;border:2px solid #FFD54F;
+  color:var(--gold);font-size:.82rem;font-weight:900;
   display:flex;align-items:center;justify-content:center;
 }
-.ri-text{font-size:.78rem;line-height:1.65;color:rgba(255,255,255,.8);flex:1;}
-.ri-text b{color:var(--text);}
-.ri-text .hi-b{color:#90CAF9;}
-.ri-text .hi-g{color:#A5D6A7;}
-.ri-text .hi-gold{color:var(--gold);}
+.ri-text{font-size:.96rem;line-height:1.75;color:var(--text2);flex:1;}
+.ri-text b{color:var(--text);font-weight:900;}
+.hi-b{color:var(--blue);font-weight:700;}
+.hi-g{color:var(--green);font-weight:700;}
+.hi-gold{color:var(--gold);font-weight:700;}
 
 /* flow diagram */
 .flow-wrap{
-  display:flex;align-items:center;gap:0;
-  margin:12px 0 4px;overflow-x:auto;padding-bottom:4px;
+  display:flex;align-items:center;
+  margin:12px 0 6px;overflow-x:auto;padding-bottom:4px;gap:0;
 }
 .flow-step{
-  flex-shrink:0;text-align:center;padding:8px 10px;
-  background:var(--surface2);border:1px solid var(--border);
-  border-radius:10px;font-size:.68rem;line-height:1.5;
-  min-width:72px;
+  flex-shrink:0;text-align:center;padding:10px 8px;
+  background:#F8F9FA;border:1.5px solid var(--border);
+  border-radius:12px;font-size:.72rem;line-height:1.5;
+  min-width:70px;color:var(--text2);
 }
-.flow-step .fs-icon{font-size:1rem;display:block;margin-bottom:2px;}
-.flow-step .fs-label{color:var(--muted);}
-.flow-arrow{color:var(--muted);font-size:.9rem;padding:0 4px;flex-shrink:0;}
+.flow-step .fs-icon{font-size:1.1rem;display:block;margin-bottom:3px;}
+.flow-step.gold{background:#FFF8E1;border-color:#FFD54F;}
+.flow-arrow{color:var(--muted);font-size:1rem;padding:0 5px;flex-shrink:0;}
 
-/* win condition box */
+/* score example table */
+.score-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.9rem;}
+.score-table th{background:#F5F5F5;padding:8px;font-size:.8rem;font-weight:700;color:var(--muted);border-bottom:2px solid var(--border);}
+.score-table td{padding:9px 8px;text-align:center;border-bottom:1px solid #F0F0F0;}
+.score-table tr:last-child td{border-bottom:none;}
+.td-b{color:var(--blue);font-weight:700;}
+.td-g{color:var(--green);font-weight:700;}
+.td-win-b{background:var(--blue-light);color:var(--blue);font-weight:900;border-radius:6px;padding:3px 8px;font-size:.8rem;}
+.td-win-g{background:var(--green-light);color:var(--green);font-weight:900;border-radius:6px;padding:3px 8px;font-size:.8rem;}
+
+/* tie box */
+.tie-box{
+  padding:13px 14px;
+  background:#FFF8E1;border:2px solid #FFD54F;
+  border-radius:12px;margin-top:8px;
+}
+.tie-title{font-size:.9rem;font-weight:900;color:var(--gold);margin-bottom:8px;}
+.tie-row{font-size:.88rem;color:var(--text2);line-height:1.85;}
+.tie-row b{color:var(--text);}
+.tie-result{font-size:.92rem;font-weight:900;color:var(--green);margin-top:8px;}
+
+/* win box */
 .win-box{
-  margin-top:12px;padding:11px 13px;
-  background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.2);
-  border-radius:10px;
+  margin-top:14px;padding:14px;
+  background:#E8F5E9;border:2px solid var(--green-border);
+  border-radius:12px;
 }
-.wb-title{font-size:.7rem;font-weight:700;color:var(--gold);margin-bottom:6px;display:flex;align-items:center;gap:5px;}
-.wb-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.75rem;border-bottom:1px solid rgba(255,255,255,.04);}
+.wb-title{font-size:.95rem;font-weight:900;color:var(--green);margin-bottom:10px;}
+.wb-row{padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);}
 .wb-row:last-child{border-bottom:none;}
-.wb-icon{font-size:.9rem;flex-shrink:0;width:20px;text-align:center;}
-.wb-text{color:rgba(255,255,255,.8);line-height:1.5;}
+.wb-text{font-size:.92rem;color:var(--text2);line-height:1.7;}
 .wb-text b{color:var(--text);}
-
-/* score example */
-.score-eg{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  margin:10px 0 2px;
-}
-.seg-block{text-align:center;}
-.seg-val{font-family:"Black Han Sans",sans-serif;font-size:1.6rem;}
-.seg-val.b{color:var(--blue);}
-.seg-val.g{color:var(--green);}
-.seg-label{font-size:.6rem;color:var(--muted);margin-top:1px;}
-.seg-div{font-size:1rem;color:var(--muted);}
 
 /* footer */
 .footer{
-  text-align:center;padding:20px 16px;
-  font-size:.65rem;color:var(--muted);line-height:1.8;
+  text-align:center;padding:24px 16px;
+  font-size:.75rem;color:var(--muted);line-height:1.9;
 }
-.footer .shuttle{font-size:1.4rem;display:block;margin-bottom:6px;animation:spin 4s linear infinite;}
+.footer .shuttle{font-size:1.6rem;display:block;margin-bottom:6px;animation:spin 4s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
 /* animations */
-.team-card,.rule-card{animation:fadeUp .4s ease both;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-.team-card:nth-child(2){animation-delay:.08s;}
-.rule-card{animation-delay:.16s;}
+.team-card,.rule-card{animation:fadeUp .35s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.team-card.g{animation-delay:.07s;}
+.rule-card{animation-delay:.14s;}
 </style>
 </head>
 <body>
@@ -240,138 +273,125 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
   <!-- TEAM ROSTER -->
   <div class="sec-title">팀 배치도</div>
 
+  <!-- VS 구분선 -->
+  <div class="vs-bar">
+    <div class="vs-half b"></div>
+    <div class="vs-chip">VS</div>
+    <div class="vs-half g"></div>
+  </div>
+
   <div class="roster-wrap">
 
     <!-- 정선민팀 -->
-    <div class="team-card">
+    <div class="team-card b">
       <div class="tc-head b">
         <div class="tc-icon">🔵</div>
         <div class="tc-info">
-          <div class="tc-teamname">정선민팀</div>
-          <div class="tc-meta">팀장 정선민 · 부팀장 김철봉 · 총 10명</div>
+          <div class="tc-teamname b">정선민팀</div>
+          <div class="tc-meta">팀장·부팀장 포함 10명</div>
         </div>
       </div>
-      <div class="player-grid">
-        <!-- 남자 -->
+      <div class="player-list">
         <div class="gender-divider">👨 남자</div>
         <div class="player-cell">
           <div class="pc-idx b">1</div>
           <div class="pc-name">정선민</div>
-          <div class="pc-badges"><span class="badge badge-leader">팀장</span></div>
+          <span class="badge badge-leader">팀장</span>
         </div>
         <div class="player-cell">
           <div class="pc-idx b">2</div>
           <div class="pc-name">김철봉</div>
-          <div class="pc-badges"><span class="badge badge-sub">부팀장</span></div>
+          <span class="badge badge-sub">부팀장</span>
         </div>
         <div class="player-cell">
           <div class="pc-idx b">3</div>
           <div class="pc-name">김종호</div>
-          <div class="pc-badges"></div>
         </div>
         <div class="player-cell">
           <div class="pc-idx b">4</div>
           <div class="pc-name">박준혁</div>
-          <div class="pc-badges"></div>
         </div>
         <div class="player-cell">
           <div class="pc-idx b">5</div>
           <div class="pc-name">오민석</div>
-          <div class="pc-badges"></div>
         </div>
         <div class="player-cell">
           <div class="pc-idx b">6</div>
           <div class="pc-name">한승우</div>
-          <div class="pc-badges"></div>
         </div>
-        <!-- 여자 -->
         <div class="gender-divider">👩 여자</div>
         <div class="player-cell">
           <div class="pc-idx b">7</div>
           <div class="pc-name">차진숙</div>
-          <div class="pc-badges"></div>
         </div>
         <div class="player-cell">
           <div class="pc-idx b">8</div>
           <div class="pc-name">김세희</div>
-          <div class="pc-badges"></div>
         </div>
         <div class="player-cell">
           <div class="pc-idx b">9</div>
           <div class="pc-name">류수아</div>
-          <div class="pc-badges"></div>
         </div>
         <div class="player-cell">
           <div class="pc-idx b">10</div>
           <div class="pc-name">윤하린</div>
-          <div class="pc-badges"></div>
         </div>
       </div>
     </div>
 
     <!-- 박동숙팀 -->
-    <div class="team-card">
+    <div class="team-card g">
       <div class="tc-head g">
         <div class="tc-icon">🟢</div>
         <div class="tc-info">
-          <div class="tc-teamname">박동숙팀</div>
-          <div class="tc-meta">팀장 박동숙 · 부팀장 이영배 · 총 10명</div>
+          <div class="tc-teamname g">박동숙팀</div>
+          <div class="tc-meta">팀장·부팀장 포함 10명</div>
         </div>
       </div>
-      <div class="player-grid">
-        <!-- 남자 -->
+      <div class="player-list">
         <div class="gender-divider">👨 남자</div>
         <div class="player-cell">
           <div class="pc-idx g">1</div>
           <div class="pc-name">박동숙</div>
-          <div class="pc-badges"><span class="badge badge-leader">팀장</span></div>
+          <span class="badge badge-leader">팀장</span>
         </div>
         <div class="player-cell">
           <div class="pc-idx g">2</div>
           <div class="pc-name">이영배</div>
-          <div class="pc-badges"><span class="badge badge-sub">부팀장</span></div>
+          <span class="badge badge-sub">부팀장</span>
         </div>
         <div class="player-cell">
           <div class="pc-idx g">3</div>
           <div class="pc-name">강야성</div>
-          <div class="pc-badges"></div>
         </div>
         <div class="player-cell">
           <div class="pc-idx g">4</div>
           <div class="pc-name">신동현</div>
-          <div class="pc-badges"></div>
         </div>
         <div class="player-cell">
           <div class="pc-idx g">5</div>
           <div class="pc-name">조태민</div>
-          <div class="pc-badges"></div>
         </div>
         <div class="player-cell">
           <div class="pc-idx g">6</div>
           <div class="pc-name">황인준</div>
-          <div class="pc-badges"></div>
         </div>
-        <!-- 여자 -->
         <div class="gender-divider">👩 여자</div>
         <div class="player-cell">
           <div class="pc-idx g">7</div>
           <div class="pc-name">이윤지</div>
-          <div class="pc-badges"></div>
         </div>
         <div class="player-cell">
           <div class="pc-idx g">8</div>
           <div class="pc-name">김민정</div>
-          <div class="pc-badges"></div>
         </div>
         <div class="player-cell">
           <div class="pc-idx g">9</div>
           <div class="pc-name">서지은</div>
-          <div class="pc-badges"></div>
         </div>
         <div class="player-cell">
           <div class="pc-idx g">10</div>
           <div class="pc-name">나혜원</div>
-          <div class="pc-badges"></div>
         </div>
       </div>
     </div>
@@ -379,11 +399,11 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
   </div><!-- /roster-wrap -->
 
   <!-- RULES -->
-  <div class="sec-title" style="margin-top:8px;">경기 방식</div>
+  <div class="sec-title" style="margin-top:10px;">경기 방식</div>
 
   <div class="rule-card">
     <div class="rule-head">
-      <div class="rule-head-icon">📋</div>
+      <div class="rule-head-icon">🏆</div>
       <div>
         <div class="rule-head-title">6급 주사 배드민턴 팀전</div>
         <div class="rule-head-sub">총 3라운드 · 라운드당 복식 4경기</div>
@@ -391,153 +411,103 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
     </div>
     <div class="rule-body">
 
-      <!-- 라운드 pills -->
       <div class="round-pills">
         <div class="rpill active">ROUND 1</div>
         <div class="rpill active">ROUND 2</div>
         <div class="rpill active">ROUND 3</div>
-        <div class="rpill" style="margin-left:auto;background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.2);color:var(--gold);">FINAL 🏆</div>
-      </div>
-
-      <!-- 진행 흐름 -->
-      <div style="font-size:.68rem;color:var(--muted);margin-bottom:8px;letter-spacing:1px;">진행 흐름</div>
-      <div class="flow-wrap">
-        <div class="flow-step">
-          <span class="fs-icon">📝</span>
-          <div>복식 4팀</div>
-          <div class="fs-label">순서 제출</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <span class="fs-icon">⚔️</span>
-          <div>1번팀 vs 1번팀</div>
-          <div class="fs-label">순서대로 대결</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <span class="fs-icon">🏅</span>
-          <div>4경기 합산</div>
-          <div class="fs-label">라운드 승자</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step" style="border-color:rgba(255,215,0,.3);">
-          <span class="fs-icon">🏆</span>
-          <div>3라운드</div>
-          <div class="fs-label" style="color:var(--gold);">최종 결과</div>
-        </div>
+        <div class="rpill final">🏆 FINAL</div>
       </div>
 
       <!-- 상세 규칙 -->
-      <div style="font-size:.68rem;color:var(--muted);margin:14px 0 8px;letter-spacing:1px;">상세 규칙</div>
-
       <div class="rule-item">
         <div class="ri-num">1</div>
-        <div class="ri-text">
-          각 팀은 <b>2명씩 복식 페어 4팀</b>을 구성해 <b>순서와 함께</b> 제출합니다.
-          (1번 페어 ~ 4번 페어)
-        </div>
+        <div class="ri-text">각 라운드별로 각 팀은 <b>2인 복식 페어 4팀</b>을 구성하고, <b>출전 순서(1~4번)</b>와 함께 제출합니다.</div>
       </div>
       <div class="rule-item">
         <div class="ri-num">2</div>
-        <div class="ri-text">
-          제출 순서에 따라 <span class="hi-b">정선민팀 1번</span> vs <span class="hi-g">박동숙팀 1번</span>, …, 총 <b>4경기</b>를 동시 또는 순차 진행합니다.
-        </div>
+        <div class="ri-text">제출 순서대로 <span class="hi-b">정선민팀 1번</span> vs <span class="hi-g">박동숙팀 1번</span> … 총 <b>4경기</b>를 진행합니다.</div>
       </div>
       <div class="rule-item">
         <div class="ri-num">3</div>
-        <div class="ri-text">
-          <b>라운드 승리 조건 :</b> 4경기 중 <b>더 많은 경기를 이긴 팀</b>이 해당 라운드를 가져갑니다.
-        </div>
+        <div class="ri-text"><b>라운드 승리 조건:</b> 4경기 중 <b>더 많이 이긴 팀</b>이 해당 라운드를 가져갑니다.</div>
       </div>
       <div class="rule-item">
         <div class="ri-num">4</div>
-        <div class="ri-text">
-          <b>이긴 경기 수가 동일할 경우</b> (예: 2–2) <span class="hi-gold">전체 득실(점수 차)</span>을 합산해 라운드 승패를 결정합니다.
-        </div>
+        <div class="ri-text"><b>경기 수 동률(2–2)일 경우</b> <span class="hi-gold">전체 득실(점수 합산)</span>으로 라운드 승패를 결정합니다.</div>
       </div>
       <div class="rule-item">
         <div class="ri-num">5</div>
-        <div class="ri-text">
-          <b>최종 우승 :</b> 3라운드를 모두 마친 후 <b>라운드 승리 수가 많은 팀</b>이 최종 우승합니다.
-        </div>
+        <div class="ri-text"><b>최종 우승:</b> 3라운드 중 <b>라운드 승리를 더 많이 한 팀</b>이 우승합니다.</div>
       </div>
 
       <!-- 득실 예시 -->
-      <div style="font-size:.68rem;color:var(--muted);margin:14px 0 6px;letter-spacing:1px;">라운드 스코어 예시</div>
-      <div style="background:var(--surface2);border-radius:10px;padding:10px 12px;border:1px solid var(--border);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <span style="font-size:.68rem;color:var(--muted);">경기</span>
-          <span style="font-size:.68rem;color:var(--blue);">정선민팀</span>
-          <span style="font-size:.68rem;color:var(--muted);">vs</span>
-          <span style="font-size:.68rem;color:var(--green);">박동숙팀</span>
-          <span style="font-size:.68rem;color:var(--muted);">결과</span>
+      <div style="font-size:.82rem;font-weight:700;color:var(--muted);margin:16px 0 8px;letter-spacing:1px;">스코어 예시 (2–2 동률 시)</div>
+      <table class="score-table">
+        <thead>
+          <tr>
+            <th>경기</th>
+            <th style="color:var(--blue);">정선민팀</th>
+            <th style="color:var(--muted);">vs</th>
+            <th style="color:var(--green);">박동숙팀</th>
+            <th>결과</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--muted);">1경기</td>
+            <td class="td-b">21</td><td style="color:var(--muted);">:</td><td class="td-g">15</td>
+            <td><span class="td-win-b">승</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--muted);">2경기</td>
+            <td class="td-b">18</td><td style="color:var(--muted);">:</td><td class="td-g">21</td>
+            <td><span class="td-win-g">승</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--muted);">3경기</td>
+            <td class="td-b">21</td><td style="color:var(--muted);">:</td><td class="td-g">19</td>
+            <td><span class="td-win-b">승</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--muted);">4경기</td>
+            <td class="td-b">14</td><td style="color:var(--muted);">:</td><td class="td-g">21</td>
+            <td><span class="td-win-g">승</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tie-box">
+        <div class="tie-title">2–2 동률 → 득실 계산</div>
+        <div class="tie-row">
+          <span style="color:var(--blue);font-weight:700;">정선민팀</span> 득실합: (21-15)+(21-19)+(14-21) = <b>+1</b>
         </div>
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;font-size:.75rem;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);">
-            <span style="color:var(--muted)">1경기</span>
-            <span style="color:var(--blue);font-weight:700">21</span>
-            <span style="color:var(--muted)">:</span>
-            <span style="color:var(--green);font-weight:700">15</span>
-            <span style="color:var(--blue);font-size:.65rem;">🔵 승</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;font-size:.75rem;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);">
-            <span style="color:var(--muted)">2경기</span>
-            <span style="color:var(--blue);font-weight:700">18</span>
-            <span style="color:var(--muted)">:</span>
-            <span style="color:var(--green);font-weight:700">21</span>
-            <span style="color:var(--green);font-size:.65rem;">🟢 승</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;font-size:.75rem;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);">
-            <span style="color:var(--muted)">3경기</span>
-            <span style="color:var(--blue);font-weight:700">21</span>
-            <span style="color:var(--muted)">:</span>
-            <span style="color:var(--green);font-weight:700">19</span>
-            <span style="color:var(--blue);font-size:.65rem;">🔵 승</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;font-size:.75rem;padding:3px 0;">
-            <span style="color:var(--muted)">4경기</span>
-            <span style="color:var(--blue);font-weight:700">14</span>
-            <span style="color:var(--muted)">:</span>
-            <span style="color:var(--green);font-weight:700">21</span>
-            <span style="color:var(--green);font-size:.65rem;">🟢 승</span>
-          </div>
+        <div class="tie-row">
+          <span style="color:var(--green);font-weight:700;">박동숙팀</span> 득실합: (15-21)+(21-18)+(19-21)+(21-14) = <b>+2</b>
         </div>
-        <div style="margin-top:10px;padding:8px 10px;background:rgba(255,215,0,.07);border-radius:8px;border:1px solid rgba(255,215,0,.18);">
-          <div style="font-size:.7rem;color:var(--gold);font-weight:700;margin-bottom:4px;">🏅 라운드 결과: 2–2 동률 → 득실 합산</div>
-          <div style="display:flex;justify-content:space-between;font-size:.72rem;">
-            <span style="color:var(--blue);">🔵 득실: (21-15)+(21-19)+(14-21) = <b>+1</b></span>
-            <span style="color:var(--green);">🟢 득실: (15-21)+(21-18)+(19-21)+(21-14) = <b>+2</b></span>
-          </div>
-          <div style="font-size:.7rem;color:var(--green);font-weight:700;margin-top:4px;">→ 박동숙팀 라운드 승리 🟢</div>
-        </div>
+        <div class="tie-result">→ 박동숙팀 라운드 승리</div>
       </div>
 
-      <!-- 승리 조건 요약 -->
+      <!-- 최종 우승 조건 -->
       <div class="win-box">
-        <div class="wb-title">🏆 최종 우승 조건</div>
+        <div class="wb-title">최종 우승 조건</div>
         <div class="wb-row">
-          <div class="wb-icon">🥇</div>
-          <div class="wb-text"><b>3라운드 중 2라운드 이상 승리</b> → 최종 우승</div>
+          <div class="wb-text"><b>3라운드 중 2라운드 이상 승리</b>한 팀이 최종 우승</div>
         </div>
         <div class="wb-row">
-          <div class="wb-icon">⚖️</div>
-          <div class="wb-text">라운드 동점 시 → <b>경기 수 → 득실 순</b>으로 우열 결정</div>
+          <div class="wb-text">라운드 승수 동률 시 → <b>경기 수 → 득실</b> 순으로 우열 결정</div>
         </div>
         <div class="wb-row">
-          <div class="wb-icon">🏸</div>
-          <div class="wb-text">각 라운드 복식 페어 선택은 <b>팀장 결정</b>, 상대팀 제출 후 공개</div>
+          <div class="wb-text">복식 페어 선택은 <b>팀장 결정</b>, 상대팀 제출 후 동시 공개</div>
         </div>
       </div>
 
-    </div><!-- /rule-body -->
-  </div><!-- /rule-card -->
+    </div>
+  </div>
 
   <div class="footer">
-    <span class="shuttle">🏸</span>
-    6급 주사 배드민턴 팀전<br>
+    🏸 6급 주사 배드민턴 팀전<br>
     정선민팀 vs 박동숙팀
   </div>
 
-</div><!-- /page -->
+</div>
 </body>
 </html>
