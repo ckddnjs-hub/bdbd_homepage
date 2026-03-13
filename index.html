@@ -66,28 +66,22 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
 /* ── SCHEDULE CARD ── */
 .schedule-card{
   margin:0 12px;background:var(--white);
-  border:2px solid #90CAF9;border-radius:var(--radius);
+  border:1.5px solid #BBDEFB;border-radius:var(--radius);
   overflow:hidden;box-shadow:var(--shadow);
 }
 .schedule-head{
   padding:12px 16px;
-  background:linear-gradient(135deg,#E3F2FD,#BBDEFB);
-  border-bottom:2px solid #90CAF9;
+  background:linear-gradient(135deg,#EEF6FE,#DDEEFB);
+  border-bottom:1.5px solid #BBDEFB;
 }
 .schedule-head-title{
   font-family:"Black Han Sans",sans-serif;
-  font-size:1rem;letter-spacing:1px;color:var(--blue);
+  font-size:1rem;letter-spacing:1px;color:#3A7BD5;
 }
 .schedule-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
 .schedule-row{display:flex;align-items:center;gap:12px;}
 .schedule-label{font-size:.82rem;font-weight:700;color:var(--muted);min-width:36px;}
 .schedule-value{font-size:1.05rem;font-weight:900;color:var(--text);letter-spacing:.5px;}
-.schedule-badge{
-  display:inline-block;padding:3px 10px;border-radius:20px;
-  font-size:.75rem;font-weight:700;
-  background:#E8F5E9;color:var(--green);border:1px solid var(--green-border);
-  margin-left:8px;
-}
 
 /* ── VS BAR ── */
 .vs-bar{display:flex;align-items:center;margin:0 12px 10px;}
@@ -147,9 +141,10 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
 .pc-idx.g{background:var(--green-light);color:var(--green);}
 .pc-name{font-size:.9rem;font-weight:700;flex:1;color:var(--text);}
 .badge{
-  display:inline-flex;align-items:center;
-  font-size:.56rem;font-weight:700;padding:2px 6px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:.68rem;font-weight:700;padding:3px 8px;
   border-radius:4px;letter-spacing:.3px;flex-shrink:0;
+  min-width:42px;
 }
 .badge-leader{background:#FFF8E1;color:#E65100;border:1px solid #FFCC02;}
 .badge-sub{background:#EEF2FF;color:#3949AB;border:1px solid #C5CAE9;}
@@ -253,7 +248,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
       </div>
       <div class="schedule-row">
         <div class="schedule-label">시간</div>
-        <div class="schedule-value">18:20~<span class="schedule-badge">진행중</span></div>
+        <div class="schedule-value">18:20~</div>
       </div>
       <div class="schedule-row">
         <div class="schedule-label">형식</div>
@@ -282,14 +277,12 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
         <!-- 팀장·부팀장 별도 영역 -->
         <div class="leader-section">
           <div class="player-cell">
-            <div class="pc-idx b">—</div>
-            <div class="pc-name">정선민</div>
             <span class="badge badge-leader">팀장</span>
+            <div class="pc-name">정선민</div>
           </div>
           <div class="player-cell">
-            <div class="pc-idx b">—</div>
-            <div class="pc-name">강야성</div>
             <span class="badge badge-sub">부팀장</span>
+            <div class="pc-name">강야성</div>
           </div>
         </div>
         <!-- 남자 -->
@@ -345,14 +338,12 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
         <!-- 팀장·부팀장 별도 영역 -->
         <div class="leader-section">
           <div class="player-cell">
-            <div class="pc-idx g">—</div>
-            <div class="pc-name">박동숙</div>
             <span class="badge badge-leader">팀장</span>
+            <div class="pc-name">박동숙</div>
           </div>
           <div class="player-cell">
-            <div class="pc-idx g">—</div>
-            <div class="pc-name">강창원</div>
             <span class="badge badge-sub">부팀장</span>
+            <div class="pc-name">강창원</div>
           </div>
         </div>
         <!-- 남자 -->
@@ -425,17 +416,17 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
       </div>
       <div class="rule-item">
         <div class="ri-num">4</div>
-        <div class="ri-text"><b>라운드 승리 조건:</b> 5경기 중 <b>더 많이 이긴 팀</b>이 해당 라운드를 가져갑니다.</div>
+        <div class="ri-text"><b>(라운드 승리 조건)</b> 5경기 중 더 많이 이긴 팀이 해당 라운드를 가져갑니다.</div>
       </div>
       <div class="rule-item">
         <div class="ri-num">5</div>
-        <div class="ri-text"><b>최종 우승:</b> 3라운드 중 <b>라운드 승리를 더 많이 한 팀</b>이 최종 우승합니다.</div>
+        <div class="ri-text"><b>(최종 우승)</b> 3라운드 중 라운드 승리를 더 많이 한 팀이 최종 우승합니다.</div>
       </div>
 
       <div class="win-box">
-        <div class="wb-title">최종 우승 조건</div>
+        <div class="wb-title">🏆 최종 우승 조건 🥇</div>
         <div class="wb-row">
-          <div class="wb-text"><b>3라운드 중 2라운드 이상 승리</b>한 팀이 최종 우승</div>
+          <div class="wb-text">🎯 <b>3라운드 중 2라운드 이상 승리</b>한 팀이 최종 우승</div>
         </div>
       </div>
     </div>
@@ -444,8 +435,8 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
   <!-- ── 우승 상품 ── -->
   <div class="sec-title" style="margin-top:10px;">우승 상품</div>
   <div class="prize-box">
-    <div class="prize-title">우승팀 전원 증정</div>
-    <div class="prize-text">인당 셔틀콕 <b>2개</b> (5천원 상당)</div>
+    <div class="prize-title">🏆 우승팀 전원 증정</div>
+    <div class="prize-text">🏸 인당 셔틀콕 <b>2개</b> (5천원 상당)</div>
   </div>
 
 </div>
