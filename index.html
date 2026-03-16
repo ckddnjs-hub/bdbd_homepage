@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>🏸 주사 대전 — 팀 배치도</title>
 
-<!-- 카카오톡 링크 공유 미리보기 -->
 <meta property="og:title" content="🏸 주사 대전">
 <meta property="og:description" content="정주사 vs 박주사">
 <meta property="og:image" content="https://github.com/ckddnjs-hub/bdbd_homepage/blob/main/%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C.png?raw=true">
@@ -35,7 +34,6 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans-serif;min-height:100%;}
 
-/* ── HERO ── */
 .hero{width:100%;position:relative;overflow:hidden;background:#e8f5e9;}
 .hero-img{width:100%;height:auto;display:block;}
 .hero-tag-l,.hero-tag-r{
@@ -49,21 +47,18 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
 .hero-tag-l{left:3%;background:#1565C0;color:#fff;}
 .hero-tag-r{right:3%;background:#2E7D32;color:#fff;}
 
-/* ── PAGE ── */
 .page{max-width:560px;margin:0 auto;padding:0 0 40px;}
 
-/* ── SECTION TITLE ── */
 .sec-title{
   font-family:"Black Han Sans",sans-serif;
   font-size:1.25rem;letter-spacing:3px;color:var(--text);
   padding:20px 16px 12px;
-  display:flex;align-items:center;gap:0;
+  display:flex;align-items:center;
 }
 .sec-title::before,.sec-title::after{content:"";flex:1;height:2px;background:var(--border);border-radius:1px;}
 .sec-title::before{margin-right:12px;}
 .sec-title::after{margin-left:12px;}
 
-/* ── SCHEDULE CARD ── */
 .schedule-card{
   margin:0 12px;background:var(--white);
   border:1.5px solid #BBDEFB;border-radius:var(--radius);
@@ -83,7 +78,6 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
 .schedule-label{font-size:.82rem;font-weight:700;color:var(--muted);min-width:36px;}
 .schedule-value{font-size:1.05rem;font-weight:900;color:var(--text);letter-spacing:.5px;}
 
-/* ── VS BAR ── */
 .vs-bar{display:flex;align-items:center;margin:0 12px 10px;}
 .vs-half{flex:1;height:4px;border-radius:2px;}
 .vs-half.b{background:linear-gradient(90deg,transparent,var(--blue-mid));}
@@ -96,18 +90,28 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
   box-shadow:var(--shadow);flex-shrink:0;margin:0 8px;
 }
 
-/* ── ROSTER ── */
+/* SEARCH */
+.search-wrap{margin:0 12px 6px;position:relative;}
+.search-input{
+  width:100%;padding:12px 16px 12px 44px;
+  border:2px solid var(--border);border-radius:12px;
+  font-size:.95rem;font-family:"Noto Sans KR",sans-serif;
+  background:var(--white);color:var(--text);
+  outline:none;transition:border-color .2s,box-shadow .2s;
+  box-shadow:var(--shadow);
+}
+.search-input:focus{border-color:#90CAF9;box-shadow:0 0 0 3px rgba(144,202,249,.2);}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1.1rem;pointer-events:none;}
+.search-hint{font-size:.75rem;color:var(--muted);margin-top:5px;padding:0 4px;}
+
+/* ROSTER */
 .roster-wrap{
   padding:0 12px;
   display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;
 }
-.team-card{
-  border-radius:var(--radius);overflow:hidden;
-  background:var(--white);box-shadow:var(--shadow);
-}
+.team-card{border-radius:var(--radius);overflow:hidden;background:var(--white);box-shadow:var(--shadow);}
 .team-card.b{border:2px solid var(--blue-border);}
 .team-card.g{border:2px solid var(--green-border);}
-
 .tc-head{padding:10px 12px;}
 .tc-head.b{background:var(--blue-light);}
 .tc-head.g{background:var(--green-light);}
@@ -115,12 +119,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
 .tc-teamname.b{color:var(--blue);}
 .tc-teamname.g{color:var(--green);}
 .tc-meta{font-size:.62rem;color:var(--muted);margin-top:3px;}
-
-/* 팀장·부팀장 영역 — 성별 구분과 분리 */
-.leader-section{
-  border-bottom:2px solid var(--border);
-  background:#FAFAFA;
-}
+.leader-section{border-bottom:2px solid var(--border);background:#FAFAFA;}
 .player-list{display:flex;flex-direction:column;}
 .gender-divider{
   padding:5px 10px;font-size:.65rem;font-weight:700;letter-spacing:2px;
@@ -129,7 +128,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
 }
 .player-cell{
   padding:9px 10px;display:flex;align-items:center;gap:7px;
-  border-bottom:1px solid #F0F0F0;
+  border-bottom:1px solid #F0F0F0;transition:background .2s;
 }
 .player-cell:last-child{border-bottom:none;}
 .pc-idx{
@@ -143,13 +142,18 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
 .badge{
   display:inline-flex;align-items:center;justify-content:center;
   font-size:.68rem;font-weight:700;padding:3px 8px;
-  border-radius:4px;letter-spacing:.3px;flex-shrink:0;
-  min-width:42px;
+  border-radius:4px;letter-spacing:.3px;flex-shrink:0;min-width:42px;
 }
 .badge-leader{background:#FFF8E1;color:#E65100;border:1px solid #FFCC02;}
 .badge-sub{background:#EEF2FF;color:#3949AB;border:1px solid #C5CAE9;}
 
-/* ── RULE CARD ── */
+/* HIGHLIGHT */
+.player-cell.hl-b{background:#BBDEFB !important;}
+.player-cell.hl-g{background:#C8E6C9 !important;}
+.match-cell.hl-b{background:#BBDEFB !important;}
+.match-cell.hl-g{background:#C8E6C9 !important;}
+
+/* RULE */
 .rule-card{
   margin:0 12px;background:var(--white);
   border:2px solid var(--border);border-radius:var(--radius);
@@ -160,17 +164,10 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
   background:linear-gradient(135deg,#FFF8E1,#FFF3E0);
   border-bottom:2px solid #FFE082;
 }
-.rule-head-title{
-  font-family:"Black Han Sans",sans-serif;
-  font-size:1rem;letter-spacing:1px;color:var(--gold);
-}
+.rule-head-title{font-family:"Black Han Sans",sans-serif;font-size:1rem;letter-spacing:1px;color:var(--gold);}
 .rule-head-sub{font-size:.72rem;color:#BF360C;margin-top:2px;}
 .rule-body{padding:16px;}
-
-.rule-item{
-  display:flex;gap:12px;padding:13px 0;
-  border-bottom:1px solid #F0F0F0;
-}
+.rule-item{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid #F0F0F0;}
 .rule-item:last-child{border-bottom:none;}
 .ri-num{
   width:28px;height:28px;border-radius:50%;flex-shrink:0;
@@ -191,11 +188,9 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
 .hi-b{color:var(--blue);font-weight:700;}
 .hi-g{color:var(--green);font-weight:700;}
 
-/* ── WIN BOX ── */
 .win-box{
   margin-top:14px;padding:14px;
-  background:#E8F5E9;border:2px solid var(--green-border);
-  border-radius:12px;
+  background:#E8F5E9;border:2px solid var(--green-border);border-radius:12px;
 }
 .wb-title{font-size:.95rem;font-weight:900;color:var(--green);margin-bottom:10px;}
 .wb-row{padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);}
@@ -203,22 +198,95 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
 .wb-text{font-size:.92rem;color:var(--text2);line-height:1.7;}
 .wb-text b{color:var(--text);}
 
-/* ── PRIZE BOX ── */
+/* BRACKET */
+.bracket-wrap{
+  margin:0 12px;
+  border-radius:var(--radius);overflow:hidden;
+  box-shadow:var(--shadow);border:2px solid var(--border);
+  background:var(--white);
+}
+.round-head{
+  padding:12px 16px;
+  font-family:"Black Han Sans",sans-serif;
+  font-size:1rem;letter-spacing:2px;
+  display:flex;align-items:center;gap:10px;
+}
+.round-head.r1{background:linear-gradient(135deg,#E3F2FD,#BBDEFB);color:var(--blue);border-bottom:2px solid #90CAF9;}
+.round-head.r2{background:linear-gradient(135deg,#E8F5E9,#C8E6C9);color:var(--green);border-bottom:2px solid #A5D6A7;}
+.round-head.r3{background:linear-gradient(135deg,#FFF8E1,#FFE082);color:#E65100;border-bottom:2px solid #FFD54F;}
+.round-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:50%;font-size:.8rem;font-weight:900;
+}
+.round-badge.r1{background:var(--blue);color:#fff;}
+.round-badge.r2{background:var(--green);color:#fff;}
+.round-badge.r3{background:#E65100;color:#fff;}
+.match-table{width:100%;border-collapse:collapse;}
+.match-table thead tr{background:#F8F9FA;}
+.match-table thead th{
+  padding:8px 10px;font-size:.72rem;font-weight:700;
+  color:var(--muted);letter-spacing:1px;text-align:left;
+  border-bottom:1.5px solid var(--border);
+}
+.match-table thead th:first-child{width:44px;text-align:center;}
+.match-cell{
+  padding:10px 10px;font-size:.88rem;font-weight:700;
+  border-bottom:1px solid #F0F0F0;vertical-align:middle;
+  transition:background .2s;
+}
+.match-num{text-align:center;font-size:.75rem;font-weight:700;color:var(--muted);}
+.match-team-b{color:var(--blue);}
+.match-team-g{color:var(--green);}
+.match-pair{display:flex;flex-direction:column;gap:2px;}
+.pair-name{font-size:.88rem;font-weight:700;line-height:1.4;}
+.rest-row td{
+  padding:8px 12px;font-size:.78rem;color:var(--muted);
+  background:#FAFAFA;border-top:1.5px dashed var(--border);
+}
+.rest-label{font-weight:700;color:var(--muted);}
+
+/* PRIZE */
 .prize-box{
   margin:0 12px;
   background:linear-gradient(135deg,#FFFDE7,#FFF9C4);
   border:2px solid #FFD54F;border-radius:var(--radius);
   padding:16px;box-shadow:var(--shadow);
 }
-.prize-title{
-  font-family:"Black Han Sans",sans-serif;
-  font-size:1.05rem;letter-spacing:1px;color:var(--gold);margin-bottom:8px;
-}
+.prize-title{font-family:"Black Han Sans",sans-serif;font-size:1.05rem;letter-spacing:1px;color:var(--gold);margin-bottom:8px;}
 .prize-text{font-size:1rem;line-height:1.8;color:var(--text2);font-weight:700;}
 .prize-text b{color:var(--text);font-weight:900;}
 
-/* animations */
-.team-card,.rule-card,.schedule-card,.prize-box{animation:fadeUp .35s ease both;}
+/* PROMO */
+.promo-box{
+  margin:0 12px;
+  background:linear-gradient(135deg,#1A237E,#283593);
+  border-radius:var(--radius);
+  padding:20px;
+  box-shadow:0 4px 20px rgba(26,35,126,.3);
+  position:relative;overflow:hidden;
+}
+.promo-box::before{
+  content:"🏸";position:absolute;right:-10px;top:-10px;
+  font-size:5rem;opacity:.08;transform:rotate(20deg);
+}
+.promo-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:3px;color:#90CAF9;margin-bottom:8px;}
+.promo-title{
+  font-family:"Black Han Sans",sans-serif;
+  font-size:1.05rem;letter-spacing:.5px;color:#fff;
+  line-height:1.7;margin-bottom:10px;
+}
+.promo-desc{font-size:.85rem;color:#C5CAE9;line-height:1.7;margin-bottom:16px;}
+.promo-link{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,#42A5F5,#1E88E5);
+  color:#fff;text-decoration:none;
+  font-size:.88rem;font-weight:700;
+  padding:10px 18px;border-radius:10px;
+  box-shadow:0 2px 10px rgba(66,165,245,.4);
+}
+.promo-path{font-size:.75rem;color:#90CAF9;margin-top:10px;letter-spacing:.3px;}
+
+.team-card,.rule-card,.schedule-card,.prize-box,.bracket-wrap,.promo-box{animation:fadeUp .35s ease both;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 .team-card.g{animation-delay:.07s;}
 .rule-card{animation-delay:.12s;}
@@ -235,7 +303,7 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
     <div class="hero-tag-r">박동숙 주사</div>
   </div>
 
-  <!-- ── 경기 일정 ── -->
+  <!-- 경기 일정 -->
   <div class="sec-title">경기 일정</div>
   <div class="schedule-card">
     <div class="schedule-head">
@@ -252,12 +320,12 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
       </div>
       <div class="schedule-row">
         <div class="schedule-label">형식</div>
-        <div class="schedule-value" style="font-size:.92rem;">총 3라운드 · 라운드당 복식 5경기</div>
+        <div class="schedule-value" style="font-size:.92rem;">총 3라운드 · 라운드당 복식 6경기</div>
       </div>
     </div>
   </div>
 
-  <!-- ── 팀 배치도 ── -->
+  <!-- 팀 배치도 -->
   <div class="sec-title" style="margin-top:8px;">팀 배치도</div>
   <div class="vs-bar">
     <div class="vs-half b"></div>
@@ -265,66 +333,41 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
     <div class="vs-half g"></div>
   </div>
 
-  <div class="roster-wrap">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="text" id="searchInput" placeholder="이름 검색 시 해당 셀이 강조됩니다" autocomplete="off">
+    <div class="search-hint">예) 정선민, 박동숙, 강야성…</div>
+  </div>
 
+  <div class="roster-wrap">
     <!-- 정선민팀 -->
     <div class="team-card b">
       <div class="tc-head b">
         <div class="tc-teamname b">정선민팀</div>
-        <div class="tc-meta">총 11명</div>
+        <div class="tc-meta">총 13명</div>
       </div>
       <div class="player-list">
-        <!-- 팀장·부팀장 별도 영역 -->
         <div class="leader-section">
-          <div class="player-cell">
-            <span class="badge badge-leader">팀장</span>
-            <div class="pc-name">정선민</div>
+          <div class="player-cell" data-name="정선민" data-team="b">
+            <span class="badge badge-leader">팀장</span><div class="pc-name">정선민</div>
           </div>
-          <div class="player-cell">
-            <span class="badge badge-sub">부팀장</span>
-            <div class="pc-name">강야성</div>
+          <div class="player-cell" data-name="강야성" data-team="b">
+            <span class="badge badge-sub">부팀장</span><div class="pc-name">강야성</div>
           </div>
         </div>
-        <!-- 남자 -->
         <div class="gender-divider">남자</div>
-        <div class="player-cell">
-          <div class="pc-idx b">1</div>
-          <div class="pc-name">김건휘</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx b">2</div>
-          <div class="pc-name">김철봉</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx b">3</div>
-          <div class="pc-name">오승철</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx b">4</div>
-          <div class="pc-name">전민엽</div>
-        </div>
-        <!-- 여자 -->
+        <div class="player-cell" data-name="김건휘" data-team="b"><div class="pc-idx b">1</div><div class="pc-name">김건휘</div></div>
+        <div class="player-cell" data-name="김철봉" data-team="b"><div class="pc-idx b">2</div><div class="pc-name">김철봉</div></div>
+        <div class="player-cell" data-name="오승철" data-team="b"><div class="pc-idx b">3</div><div class="pc-name">오승철</div></div>
+        <div class="player-cell" data-name="전민엽" data-team="b"><div class="pc-idx b">4</div><div class="pc-name">전민엽</div></div>
         <div class="gender-divider">여자</div>
-        <div class="player-cell">
-          <div class="pc-idx b">1</div>
-          <div class="pc-name">김민정</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx b">2</div>
-          <div class="pc-name">김세희</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx b">3</div>
-          <div class="pc-name">김수영</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx b">4</div>
-          <div class="pc-name">이은정</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx b">5</div>
-          <div class="pc-name">이윤지</div>
-        </div>
+        <div class="player-cell" data-name="김민정" data-team="b"><div class="pc-idx b">1</div><div class="pc-name">김민정</div></div>
+        <div class="player-cell" data-name="김세희" data-team="b"><div class="pc-idx b">2</div><div class="pc-name">김세희</div></div>
+        <div class="player-cell" data-name="김수영" data-team="b"><div class="pc-idx b">3</div><div class="pc-name">김수영</div></div>
+        <div class="player-cell" data-name="이은정" data-team="b"><div class="pc-idx b">4</div><div class="pc-name">이은정</div></div>
+        <div class="player-cell" data-name="이윤지" data-team="b"><div class="pc-idx b">5</div><div class="pc-name">이윤지</div></div>
+        <div class="player-cell" data-name="조혜린" data-team="b"><div class="pc-idx b">6</div><div class="pc-name">조혜린</div></div>
+        <div class="player-cell" data-name="차진숙" data-team="b"><div class="pc-idx b">7</div><div class="pc-name">차진숙</div></div>
       </div>
     </div>
 
@@ -335,84 +378,51 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
         <div class="tc-meta">총 11명</div>
       </div>
       <div class="player-list">
-        <!-- 팀장·부팀장 별도 영역 -->
         <div class="leader-section">
-          <div class="player-cell">
-            <span class="badge badge-leader">팀장</span>
-            <div class="pc-name">박동숙</div>
+          <div class="player-cell" data-name="박동숙" data-team="g">
+            <span class="badge badge-leader">팀장</span><div class="pc-name">박동숙</div>
           </div>
-          <div class="player-cell">
-            <span class="badge badge-sub">부팀장</span>
-            <div class="pc-name">강창원</div>
+          <div class="player-cell" data-name="강창원" data-team="g">
+            <span class="badge badge-sub">부팀장</span><div class="pc-name">강창원</div>
           </div>
         </div>
-        <!-- 남자 -->
         <div class="gender-divider">남자</div>
-        <div class="player-cell">
-          <div class="pc-idx g">1</div>
-          <div class="pc-name">김종호</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx g">2</div>
-          <div class="pc-name">서덕호</div>
-        </div>     
-        <div class="player-cell">
-          <div class="pc-idx g">3</div>
-          <div class="pc-name">엄정오</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx g">4</div>
-          <div class="pc-name">이민제</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx g">5</div>
-          <div class="pc-name">이영배</div>
-        </div>
-        <!-- 여자 -->
+        <div class="player-cell" data-name="김종호" data-team="g"><div class="pc-idx g">1</div><div class="pc-name">김종호</div></div>
+        <div class="player-cell" data-name="서덕호" data-team="g"><div class="pc-idx g">2</div><div class="pc-name">서덕호</div></div>
+        <div class="player-cell" data-name="엄정오" data-team="g"><div class="pc-idx g">3</div><div class="pc-name">엄정오</div></div>
+        <div class="player-cell" data-name="이민제" data-team="g"><div class="pc-idx g">4</div><div class="pc-name">이민제</div></div>
+        <div class="player-cell" data-name="이영배" data-team="g"><div class="pc-idx g">5</div><div class="pc-name">이영배</div></div>
         <div class="gender-divider">여자</div>
-        <div class="player-cell">
-          <div class="pc-idx g">1</div>
-          <div class="pc-name">김승아</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx g">2</div>
-          <div class="pc-name">류현미</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx g">3</div>
-          <div class="pc-name">이윤희</div>
-        </div>
-        <div class="player-cell">
-          <div class="pc-idx g">4</div>
-          <div class="pc-name">조나래</div>
-        </div>
+        <div class="player-cell" data-name="김승아" data-team="g"><div class="pc-idx g">1</div><div class="pc-name">김승아</div></div>
+        <div class="player-cell" data-name="류현미" data-team="g"><div class="pc-idx g">2</div><div class="pc-name">류현미</div></div>
+        <div class="player-cell" data-name="류영주" data-team="g"><div class="pc-idx g">3</div><div class="pc-name">류영주</div></div>
+        <div class="player-cell" data-name="이윤희" data-team="g"><div class="pc-idx g">4</div><div class="pc-name">이윤희</div></div>
+        <div class="player-cell" data-name="조나래" data-team="g"><div class="pc-idx g">5</div><div class="pc-name">조나래</div></div>
+        <div class="player-cell" data-name="김윤정" data-team="g"><div class="pc-idx g">6</div><div class="pc-name">김윤정</div></div>
       </div>
     </div>
-
   </div>
 
-  <!-- ── 경기 방식 ── -->
+  <!-- 경기 방식 -->
   <div class="sec-title" style="margin-top:10px;">경기 방식</div>
-
   <div class="rule-card">
     <div class="rule-head">
       <div class="rule-head-title">6급 주사 배드민턴 팀전</div>
-      <div class="rule-head-sub">총 3라운드 · 라운드당 복식 5경기 · 21점 단판</div>
+      <div class="rule-head-sub">총 3라운드 · 라운드당 복식 6경기 · 21점 단판</div>
     </div>
     <div class="rule-body">
       <div class="rule-item">
         <div class="ri-num">1</div>
         <div class="ri-text">
-          각 라운드별로 각 팀은 <b>2인 복식 페어 5팀</b>을 구성하고, <b>출전 순서(1~5번)</b>와 함께 제출합니다.
+          각 라운드별로 각 팀은 <b>2인 복식 페어 6팀</b>을 구성하여 출전합니다.
           <div class="ri-sub">
-            <li>순서는 <b>팀 전력이 높은 순 → 낮은 순</b>으로 배치</li>
             <li>한 번 구성된 조합은 <b>다른 라운드에서 재사용 불가</b></li>
           </div>
         </div>
       </div>
       <div class="rule-item">
         <div class="ri-num">2</div>
-        <div class="ri-text">제출 순서대로 <span class="hi-b">정선민팀 1번</span> vs <span class="hi-g">박동숙팀 1번</span> … 총 <b>5경기</b>를 진행합니다.</div>
+        <div class="ri-text">각 라운드 <span class="hi-b">정선민팀</span> vs <span class="hi-g">박동숙팀</span> 총 <b>6경기</b>를 진행합니다.</div>
       </div>
       <div class="rule-item">
         <div class="ri-num">3</div>
@@ -420,25 +430,211 @@ html,body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR",sans
       </div>
       <div class="rule-item">
         <div class="ri-num">4</div>
-        <div class="ri-text"><b>(라운드 승리 조건)</b> 5경기 중 더 많이 이긴 팀이 해당 라운드를 승리를 가져갑니다.</div>
+        <div class="ri-text"><b>3라운드 총 18경기</b> 중 <b>더 많은 경기를 이긴 팀</b>이 최종 우승합니다.</div>
       </div>
-
       <div class="win-box">
         <div class="wb-title">🏆 최종 우승 조건</div>
         <div class="wb-row">
-          <div class="wb-text">🎯 <b>3라운드 중 2라운드 승리</b>한 팀이 최종 우승</div>
+          <div class="wb-text">🎯 총 <b>18경기 중 더 많이 이긴 팀</b>이 최종 우승<br><span style="font-size:.8rem;color:var(--muted);">(동점 시 추가 경기로 결정)</span></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ── 우승 상품 ── -->
-  <div class="sec-title" style="margin-top:10px;">우승 상품</div>
+  <!-- 대진표 -->
+  <div class="sec-title" style="margin-top:10px;">대진표</div>
+
+  <!-- ROUND 1 -->
+  <div class="bracket-wrap" style="margin-bottom:10px;">
+    <div class="round-head r1"><span class="round-badge r1">1</span>ROUND 1</div>
+    <table class="match-table">
+      <thead><tr>
+        <th>경기</th>
+        <th style="color:var(--blue);">멋진 선민팀</th>
+        <th style="color:var(--green);">예쁜 동숙팀</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="match-cell match-num">1</td>
+          <td class="match-cell match-team-b" data-names="김철봉,이윤지"><div class="match-pair"><span class="pair-name">김철봉</span><span class="pair-name">이윤지</span></div></td>
+          <td class="match-cell match-team-g" data-names="김종호,김승아"><div class="match-pair"><span class="pair-name">김종호</span><span class="pair-name">김승아</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">2</td>
+          <td class="match-cell match-team-b" data-names="오승철,김민정"><div class="match-pair"><span class="pair-name">오승철</span><span class="pair-name">김민정</span></div></td>
+          <td class="match-cell match-team-g" data-names="강창원,조나래"><div class="match-pair"><span class="pair-name">강창원</span><span class="pair-name">조나래</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">3</td>
+          <td class="match-cell match-team-b" data-names="강야성,김세희"><div class="match-pair"><span class="pair-name">강야성</span><span class="pair-name">김세희</span></div></td>
+          <td class="match-cell match-team-g" data-names="이영배,박동숙"><div class="match-pair"><span class="pair-name">이영배</span><span class="pair-name">박동숙</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">4</td>
+          <td class="match-cell match-team-b" data-names="정선민,김수영"><div class="match-pair"><span class="pair-name">정선민</span><span class="pair-name">김수영</span></div></td>
+          <td class="match-cell match-team-g" data-names="엄정오,이민제"><div class="match-pair"><span class="pair-name">엄정오</span><span class="pair-name">이민제</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">5</td>
+          <td class="match-cell match-team-b" data-names="전민엽,이은정"><div class="match-pair"><span class="pair-name">전민엽</span><span class="pair-name">이은정</span></div></td>
+          <td class="match-cell match-team-g" data-names="서덕호,이윤희"><div class="match-pair"><span class="pair-name">서덕호</span><span class="pair-name">이윤희</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">6</td>
+          <td class="match-cell match-team-b" data-names="차진숙,조혜린"><div class="match-pair"><span class="pair-name">차진숙</span><span class="pair-name">조혜린</span></div></td>
+          <td class="match-cell match-team-g" data-names="류영주,김윤정"><div class="match-pair"><span class="pair-name">류영주</span><span class="pair-name">김윤정</span></div></td>
+        </tr>
+        <tr class="rest-row">
+          <td colspan="3"><span class="rest-label">예비 ·</span> <span style="color:var(--blue);font-weight:700;">김건휘</span> <span style="color:var(--muted);margin:0 6px;">/</span> <span style="color:var(--green);font-weight:700;">류현미</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ROUND 2 -->
+  <div class="bracket-wrap" style="margin-bottom:10px;">
+    <div class="round-head r2"><span class="round-badge r2">2</span>ROUND 2</div>
+    <table class="match-table">
+      <thead><tr>
+        <th>경기</th>
+        <th style="color:var(--blue);">멋진 선민팀</th>
+        <th style="color:var(--green);">예쁜 동숙팀</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="match-cell match-num">1</td>
+          <td class="match-cell match-team-b" data-names="김철봉,김건휘"><div class="match-pair"><span class="pair-name">김철봉</span><span class="pair-name">김건휘</span></div></td>
+          <td class="match-cell match-team-g" data-names="서덕호,강창원"><div class="match-pair"><span class="pair-name">서덕호</span><span class="pair-name">강창원</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">2</td>
+          <td class="match-cell match-team-b" data-names="이은정,김세희"><div class="match-pair"><span class="pair-name">이은정</span><span class="pair-name">김세희</span></div></td>
+          <td class="match-cell match-team-g" data-names="이윤희,류현미"><div class="match-pair"><span class="pair-name">이윤희</span><span class="pair-name">류현미</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">3</td>
+          <td class="match-cell match-team-b" data-names="전민엽,이윤지"><div class="match-pair"><span class="pair-name">전민엽</span><span class="pair-name">이윤지</span></div></td>
+          <td class="match-cell match-team-g" data-names="엄정오,조나래"><div class="match-pair"><span class="pair-name">엄정오</span><span class="pair-name">조나래</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">4</td>
+          <td class="match-cell match-team-b" data-names="김민정,김수영"><div class="match-pair"><span class="pair-name">김민정</span><span class="pair-name">김수영</span></div></td>
+          <td class="match-cell match-team-g" data-names="이민제,박동숙"><div class="match-pair"><span class="pair-name">이민제</span><span class="pair-name">박동숙</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">5</td>
+          <td class="match-cell match-team-b" data-names="정선민,강야성"><div class="match-pair"><span class="pair-name">정선민</span><span class="pair-name">강야성</span></div></td>
+          <td class="match-cell match-team-g" data-names="이영배,김승아"><div class="match-pair"><span class="pair-name">이영배</span><span class="pair-name">김승아</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">6</td>
+          <td class="match-cell match-team-b" data-names="오승철,차진숙"><div class="match-pair"><span class="pair-name">오승철</span><span class="pair-name">차진숙</span></div></td>
+          <td class="match-cell match-team-g" data-names="김종호,류영주"><div class="match-pair"><span class="pair-name">김종호</span><span class="pair-name">류영주</span></div></td>
+        </tr>
+        <tr class="rest-row">
+          <td colspan="3"><span class="rest-label">예비 ·</span> <span style="color:var(--blue);font-weight:700;">조혜린</span> <span style="color:var(--muted);margin:0 6px;">/</span> <span style="color:var(--green);font-weight:700;">김윤정</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ROUND 3 -->
+  <div class="bracket-wrap" style="margin-bottom:10px;">
+    <div class="round-head r3"><span class="round-badge r3">3</span>ROUND 3</div>
+    <table class="match-table">
+      <thead><tr>
+        <th>경기</th>
+        <th style="color:var(--blue);">멋진 선민팀</th>
+        <th style="color:var(--green);">예쁜 동숙팀</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="match-cell match-num">1</td>
+          <td class="match-cell match-team-b" data-names="김철봉,조혜린"><div class="match-pair"><span class="pair-name">김철봉</span><span class="pair-name">조혜린</span></div></td>
+          <td class="match-cell match-team-g" data-names="이영배,김윤정"><div class="match-pair"><span class="pair-name">이영배</span><span class="pair-name">김윤정</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">2</td>
+          <td class="match-cell match-team-b" data-names="오승철,이은정"><div class="match-pair"><span class="pair-name">오승철</span><span class="pair-name">이은정</span></div></td>
+          <td class="match-cell match-team-g" data-names="김종호,이윤희"><div class="match-pair"><span class="pair-name">김종호</span><span class="pair-name">이윤희</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">3</td>
+          <td class="match-cell match-team-b" data-names="김건휘,정선민"><div class="match-pair"><span class="pair-name">김건휘</span><span class="pair-name">정선민</span></div></td>
+          <td class="match-cell match-team-g" data-names="엄정오,서덕호"><div class="match-pair"><span class="pair-name">엄정오</span><span class="pair-name">서덕호</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">4</td>
+          <td class="match-cell match-team-b" data-names="이윤지,김민정"><div class="match-pair"><span class="pair-name">이윤지</span><span class="pair-name">김민정</span></div></td>
+          <td class="match-cell match-team-g" data-names="조나래,김승아"><div class="match-pair"><span class="pair-name">조나래</span><span class="pair-name">김승아</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">5</td>
+          <td class="match-cell match-team-b" data-names="김수영,김세희"><div class="match-pair"><span class="pair-name">김수영</span><span class="pair-name">김세희</span></div></td>
+          <td class="match-cell match-team-g" data-names="류현미,박동숙"><div class="match-pair"><span class="pair-name">류현미</span><span class="pair-name">박동숙</span></div></td>
+        </tr>
+        <tr>
+          <td class="match-cell match-num">6</td>
+          <td class="match-cell match-team-b" data-names="전민엽,강야성"><div class="match-pair"><span class="pair-name">전민엽</span><span class="pair-name">강야성</span></div></td>
+          <td class="match-cell match-team-g" data-names="강창원,이민제"><div class="match-pair"><span class="pair-name">강창원</span><span class="pair-name">이민제</span></div></td>
+        </tr>
+        <tr class="rest-row">
+          <td colspan="3"><span class="rest-label">예비 ·</span> <span style="color:var(--blue);font-weight:700;">차진숙</span> <span style="color:var(--muted);margin:0 6px;">/</span> <span style="color:var(--green);font-weight:700;">류영주</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 우승 상품 -->
+  <div class="sec-title" style="margin-top:0;">우승 상품</div>
   <div class="prize-box">
     <div class="prize-title">🏆 우승팀 전원 증정</div>
     <div class="prize-text">🏸 인당 셔틀콕 <b>2개</b> (5천원 상당)</div>
   </div>
 
+  <!-- 홍보 배너 -->
+  <div class="sec-title" style="margin-top:10px;">후생동TV</div>
+  <div class="promo-box">
+    <div class="promo-eyebrow">HSDTV · 놀이터 · 콕초이스</div>
+    <div class="promo-title">혹시 후생동TV 회원이신가요? 🎯<br>지금 당장 어느 팀이 이길지 예측하고<br>포인트를 모아보세요!</div>
+    <div class="promo-desc">후생동TV &gt; 놀이터 &gt; 콕초이스에서<br>경기 결과를 예측하고 포인트를 획득하세요.</div>
+    <a class="promo-link" href="https://hsdtv.vercel.app" target="_blank">🏆 바로 예측하러 가기</a>
+    <div class="promo-path">hsdtv.vercel.app</div>
+  </div>
+
 </div>
+
+<script>
+const searchInput = document.getElementById('searchInput');
+
+function normalize(str) {
+  return str.trim().replace(/\s/g, '');
+}
+
+function highlight(query) {
+  document.querySelectorAll('.player-cell').forEach(c => c.classList.remove('hl-b','hl-g'));
+  document.querySelectorAll('.match-cell[data-names]').forEach(c => c.classList.remove('hl-b','hl-g'));
+
+  const q = normalize(query);
+  if (!q) return;
+
+  // 선수 명단 하이라이트
+  document.querySelectorAll('.player-cell[data-name]').forEach(cell => {
+    if (normalize(cell.dataset.name).includes(q)) {
+      cell.classList.add(cell.dataset.team === 'b' ? 'hl-b' : 'hl-g');
+    }
+  });
+
+  // 대진표 하이라이트
+  document.querySelectorAll('.match-cell[data-names]').forEach(cell => {
+    const matched = cell.dataset.names.split(',').some(n => normalize(n).includes(q));
+    if (matched) {
+      cell.classList.add(cell.classList.contains('match-team-b') ? 'hl-b' : 'hl-g');
+    }
+  });
+}
+
+searchInput.addEventListener('input', e => highlight(e.target.value));
+</script>
 </body>
 </html>
